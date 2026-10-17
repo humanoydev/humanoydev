@@ -1,13 +1,36 @@
 "use client";
 
 import { useState } from "react";
-import { categories, contentItems, type Category } from "@/content/site";
+import type { Locale } from "@/content/i18n";
+import type { Category, ContentItem } from "@/content/site";
 import { ContentRow } from "./ContentRow";
 
 type Filter = Category | "todo";
 
-export function ExploreList() {
+const copy: Record<Locale, { filterLabel: string; emptyTitle: string; emptyText: string; emptyAction: string }> = {
+  es: {
+    filterLabel: "Filtrar por tipo",
+    emptyTitle: "Todavía no hay artículos publicados",
+    emptyText: "El primero está en camino. Mientras tanto, revisa los experimentos: ahí está lo que ya funciona.",
+    emptyAction: "Ver experimentos",
+  },
+  en: {
+    filterLabel: "Filter by type",
+    emptyTitle: "No articles published yet",
+    emptyText: "The first one is on its way. In the meantime, check out the experiments: that’s where the working stuff is.",
+    emptyAction: "See experiments",
+  },
+};
+
+type Props = {
+  locale: Locale;
+  items: ContentItem[];
+  categories: { id: Filter; label: string }[];
+};
+
+export function ExploreList({ locale, items: contentItems, categories }: Props) {
   const [filter, setFilter] = useState<Filter>("todo");
+  const t = copy[locale];
 
   const items = filter === "todo" ? contentItems : contentItems.filter((i) => i.category === filter);
   const countFor = (id: Filter) =>
@@ -15,7 +38,7 @@ export function ExploreList() {
 
   return (
     <>
-      <div role="group" aria-label="Filtrar por tipo" className="filters">
+      <div role="group" aria-label={t.filterLabel} className="filters">
         {categories.map((c) => (
           <button
             key={c.id}
@@ -38,10 +61,10 @@ export function ExploreList() {
           </ul>
         ) : (
           <div className="empty">
-            <h2 className="row__title">Todavía no hay artículos publicados</h2>
-            <p>El primero está en camino. Mientras tanto, revisa los experimentos: ahí está lo que ya funciona.</p>
+            <h2 className="row__title">{t.emptyTitle}</h2>
+            <p>{t.emptyText}</p>
             <button type="button" className="btn btn--dark" onClick={() => setFilter("experimentos")}>
-              Ver experimentos
+              {t.emptyAction}
             </button>
           </div>
         )}

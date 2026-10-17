@@ -6,8 +6,10 @@
  *
  *   humanoydev.com/            → sitio principal
  *   jean.humanoydev.com/       → contenido de /jean
+ *   jean.humanoydev.com/en     → contenido de /en/jean (versión en inglés)
  *   jean.humanoydev.com/x/     → archivos estáticos de public/jean/x/ (p. ej. diapositivas)
  *   humanoydev.com/jean/x      → redirección 301 a jean.humanoydev.com/x
+ *   humanoydev.com/en/jean     → redirección 301 a jean.humanoydev.com/en
  *   www.humanoydev.com/*       → redirección 301 a humanoydev.com
  *   jean.humanoydev.com/otra   → redirección 301 a humanoydev.com/otra
  *
@@ -53,6 +55,11 @@ export default {
         rewritten.pathname = "/jean";
         return env.ASSETS.fetch(new Request(rewritten, request));
       }
+      if (url.pathname === "/en" || url.pathname === "/en/") {
+        const rewritten = new URL(url);
+        rewritten.pathname = "/en/jean";
+        return env.ASSETS.fetch(new Request(rewritten, request));
+      }
       // Archivos de public/jean/ (p. ej. diapositivas) se sirven sin el prefijo /jean.
       if (!url.pathname.startsWith("/_next/")) {
         const rewritten = new URL(url);
@@ -66,6 +73,14 @@ export default {
       // Cualquier otra página pertenece al sitio principal.
       const target = new URL(url);
       target.hostname = host.slice(JEAN_PREFIX.length);
+      return Response.redirect(target.toString(), 301);
+    }
+
+    // URL canónica de la versión en inglés de la página de Jean en producción
+    if (isProduction && (url.pathname === "/en/jean" || url.pathname === "/en/jean/")) {
+      const target = new URL(url);
+      target.hostname = `${JEAN_PREFIX}${APEX}`;
+      target.pathname = "/en";
       return Response.redirect(target.toString(), 301);
     }
 

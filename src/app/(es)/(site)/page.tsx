@@ -1,6 +1,12 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { ContentRow } from "@/components/ContentRow";
+import { pageAlternates } from "@/content/i18n";
 import { JEAN_URL, type ContentItem } from "@/content/site";
+
+export const metadata: Metadata = {
+  alternates: pageAlternates("/", "es"),
+};
 
 const featured: ContentItem[] = [
   {

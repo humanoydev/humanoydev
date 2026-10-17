@@ -4,9 +4,9 @@ import { SiteHeader } from "@/components/SiteHeader";
 export default function SiteLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <>
-      <SiteHeader />
+      <SiteHeader locale="es" />
       <main>{children}</main>
-      <SiteFooter />
+      <SiteFooter locale="es" />
     </>
   );
 }

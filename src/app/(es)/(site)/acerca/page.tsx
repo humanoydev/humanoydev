@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { openGraphBase } from "@/app/shared-metadata";
+import { pageAlternates } from "@/content/i18n";
 import { CONTACT_EMAIL, JEAN_URL } from "@/content/site";
 
 const description = "La visión de humanoydev, quién está detrás y cómo participar.";
@@ -8,6 +9,7 @@ export const metadata: Metadata = {
   title: "Acerca de",
   description,
   openGraph: { ...openGraphBase, title: "Acerca de · humanoydev", description, url: "/acerca" },
+  alternates: pageAlternates("/acerca", "es"),
 };
 
 export default function AboutPage() {

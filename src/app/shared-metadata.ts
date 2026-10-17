@@ -6,6 +6,7 @@ export const openGraphBase = {
   type: "website",
   siteName: "humanoydev",
   locale: "es_PE",
+  alternateLocale: "en_US",
   images: [
     {
       url: "/og.png",
@@ -14,4 +15,12 @@ export const openGraphBase = {
       alt: "humanoydev: construir software con IA sin dejar de pensar como humano.",
     },
   ],
+} satisfies Metadata["openGraph"];
+
+// Igual, para las páginas en inglés.
+export const openGraphEn = {
+  ...openGraphBase,
+  locale: "en_US",
+  alternateLocale: "es_PE",
+  images: [{ ...openGraphBase.images[0], alt: "humanoydev: building software with AI while still thinking like a human." }],
 } satisfies Metadata["openGraph"];

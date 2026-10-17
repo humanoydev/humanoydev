@@ -1,6 +1,7 @@
 // URLs públicas. En local puedes sobrescribirlas con variables de entorno.
 export const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://humanoydev.com";
 export const JEAN_URL = process.env.NEXT_PUBLIC_JEAN_URL ?? "https://jean.humanoydev.com";
+export const INSTAGRAM_URL = "https://www.instagram.com/humanoydev/";
 
 // TODO: reemplazar por tu correo real.
 export const CONTACT_EMAIL = "humanoydev@gmail.com";

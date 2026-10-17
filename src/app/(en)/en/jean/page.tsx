@@ -1,31 +1,32 @@
 import type { Metadata } from "next";
 import Image from "next/image";
-import { openGraphBase } from "@/app/shared-metadata";
-import { CONTACT_EMAIL, JEAN_URL, SITE_URL, projects, talks, type Talk } from "@/content/site";
+import { openGraphEn } from "@/app/shared-metadata";
+import { CONTACT_EMAIL, JEAN_URL, SITE_URL, type Talk } from "@/content/site";
+import { projects, talks } from "@/content/site.en";
 
 const title = "Jean Paul Diaz · web dev";
-const description = "Charlas, diapositivas y proyectos de Jean Paul Diaz, web dev.";
+const description = "Talks, slides and projects by Jean Paul Diaz, web dev.";
 
-// Esta ruta se sirve en jean.humanoydev.com: el Worker reescribe "/" a "/jean".
-// La imagen vive en public/jean/og.png, que el subdominio sirve como /og.png.
+// Versión en inglés de (es)/jean/page.tsx. Se sirve en jean.humanoydev.com/en:
+// el Worker reescribe "/en" a "/en/jean".
 export const metadata: Metadata = {
   title: { absolute: title },
   description,
-  alternates: { canonical: JEAN_URL },
+  alternates: { canonical: `${JEAN_URL}/en`, languages: { es: JEAN_URL, en: `${JEAN_URL}/en`, "x-default": JEAN_URL } },
   openGraph: {
-    ...openGraphBase,
+    ...openGraphEn,
     type: "profile",
     title,
     description,
-    url: JEAN_URL,
+    url: `${JEAN_URL}/en`,
     images: [{ url: `${JEAN_URL}/og.png`, width: 1200, height: 630, alt: "Jean Paul Diaz, web dev" }],
   },
 };
 
 const sections = [
-  { href: "#charlas", label: "Charlas" },
-  { href: "#proyectos", label: "Proyectos" },
-  { href: "#contacto", label: "Contacto" },
+  { href: "#talks", label: "Talks" },
+  { href: "#projects", label: "Projects" },
+  { href: "#contact", label: "Contact" },
 ];
 
 const VISIBLE_TALKS = 3;
@@ -42,7 +43,7 @@ function renderTalk(talk: Talk) {
         <p className="row__desc">{talk.description}</p>
       </div>
       <a href={talk.slidesHref} className="text-link">
-        Ver diapositivas
+        See slides
       </a>
     </li>
   );
@@ -52,10 +53,10 @@ export default function JeanPage() {
   return (
     <>
       <header className="container site-header">
-        <a href="#inicio" className="serif nav-link" style={{ fontSize: 26, padding: 0 }}>
+        <a href="#home" className="serif nav-link" style={{ fontSize: 26, padding: 0 }}>
           Jean Paul Diaz
         </a>
-        <nav aria-label="Secciones">
+        <nav aria-label="Sections">
           <ul className="nav-list">
             {sections.map((s) => (
               <li key={s.href}>
@@ -65,15 +66,20 @@ export default function JeanPage() {
               </li>
             ))}
             <li>
-              <a href={SITE_URL} className="nav-link nav-link--quiet">
+              <a href={`${SITE_URL}/en`} className="nav-link nav-link--quiet">
                 humanoydev.com
+              </a>
+            </li>
+            <li>
+              <a href={JEAN_URL} hrefLang="es" lang="es" aria-label="Versión en español" className="nav-link nav-link--quiet">
+                ES
               </a>
             </li>
           </ul>
         </nav>
       </header>
 
-      <main id="inicio">
+      <main id="home">
         <section aria-labelledby="bio-title" className="container bio">
           <div className="bio__text">
             <h1 id="bio-title" className="serif bio__name">
@@ -81,15 +87,15 @@ export default function JeanPage() {
             </h1>
             <p className="mono bio__role">web dev</p>
             <p className="bio__desc">
-              Frontend developer en Brikl. Trabajo con Next.js, React, GraphQL y Apollo Client, y me interesa cómo cambia
-              nuestro oficio cuando la IA entra al flujo de trabajo. Lo que aprendo lo comparto en humanoydev.
+              Frontend developer at Brikl. I work with Next.js, React, GraphQL and Apollo Client, and I’m interested in how
+              our craft changes when AI enters the workflow. What I learn, I share on humanoydev.
             </p>
             <div className="actions">
-              <a href="#contacto" className="btn btn--primary">
-                Invitarme a una charla
+              <a href="#contact" className="btn btn--primary">
+                Invite me to speak
               </a>
-              <a href="#charlas" className="btn btn--outline">
-                Ver diapositivas
+              <a href="#talks" className="btn btn--outline">
+                See slides
               </a>
             </div>
           </div>
@@ -98,22 +104,22 @@ export default function JeanPage() {
             src="/jean/images/foto-saco-680.jpg"
             width={680}
             height={850}
-            alt="Jean Paul Diaz con saco gris y los brazos cruzados"
+            alt="Jean Paul Diaz in a gray blazer with arms crossed"
             className="photo"
             priority
           />
         </section>
 
-        <section id="charlas" aria-labelledby="charlas-title" className="container section">
-          <h2 id="charlas-title" className="section-title section-head">
-            Charlas y presentaciones
+        <section id="talks" aria-labelledby="talks-title" className="container section">
+          <h2 id="talks-title" className="section-title section-head">
+            Talks and presentations
           </h2>
           <ol className="rows">{talks.slice(0, VISIBLE_TALKS).map(renderTalk)}</ol>
           {talks.length > VISIBLE_TALKS && (
             <details className="more">
               <summary className="text-link">
-                <span className="more__open">Ver más charlas</span>
-                <span className="more__close">Ver menos</span>
+                <span className="more__open">See more talks</span>
+                <span className="more__close">See less</span>
               </summary>
               <ol className="rows" start={VISIBLE_TALKS + 1}>
                 {talks.slice(VISIBLE_TALKS).map(renderTalk)}
@@ -122,9 +128,9 @@ export default function JeanPage() {
           )}
         </section>
 
-        <section id="proyectos" aria-labelledby="proyectos-title" className="container section">
-          <h2 id="proyectos-title" className="section-title">
-            Proyectos destacados
+        <section id="projects" aria-labelledby="projects-title" className="container section">
+          <h2 id="projects-title" className="section-title">
+            Featured projects
           </h2>
           <div className="projects">
             {projects.map((project) => (
@@ -140,19 +146,19 @@ export default function JeanPage() {
           </div>
         </section>
 
-        <section id="contacto" aria-labelledby="contacto-title" className="container section" style={{ paddingBottom: 112 }}>
+        <section id="contact" aria-labelledby="contact-title" className="container section" style={{ paddingBottom: 112 }}>
           <div className="contact">
             <div style={{ flex: "1 1 460px", minWidth: 0 }}>
-              <h2 id="contacto-title" className="contact__title">
-                ¿Organizas un evento?
+              <h2 id="contact-title" className="contact__title">
+                Organizing an event?
               </h2>
               <p className="contact__desc">
-                Doy charlas sobre AI Fluency, Claude Code y flujos de diseño a código. Cuéntame la fecha, el público y el
-                formato, y vemos si encaja.
+                I give talks on AI Fluency, Claude Code and design-to-code workflows. Tell me the date, the audience and the
+                format, and we’ll see if it’s a fit.
               </p>
             </div>
             <a href={`mailto:${CONTACT_EMAIL}`} className="btn btn--light">
-              Escribir a Jean
+              Write to Jean
             </a>
           </div>
         </section>
@@ -160,7 +166,7 @@ export default function JeanPage() {
 
       <footer className="container site-footer">
         <p>© 2026 Jean Paul Diaz</p>
-        <a href={SITE_URL}>Parte de humanoydev.com</a>
+        <a href={`${SITE_URL}/en`}>Part of humanoydev.com</a>
       </footer>
     </>
   );

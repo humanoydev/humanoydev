@@ -22,5 +22,11 @@ export const openGraphEn = {
   ...openGraphBase,
   locale: "en_US",
   alternateLocale: "es_PE",
-  images: [{ ...openGraphBase.images[0], alt: "humanoydev: building software with AI while still thinking like a human." }],
+  images: [
+    {
+      ...openGraphBase.images[0],
+      url: "/og-en.png",
+      alt: "humanoydev: building software with AI while still thinking like a human.",
+    },
+  ],
 } satisfies Metadata["openGraph"];

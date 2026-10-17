@@ -7,7 +7,7 @@ const description =
   "Un espacio para construir software con IA sin dejar de pensar como humano. Experimentos, artículos y recursos.";
 
 // Layout raíz en español. El de inglés está en (en)/layout.tsx; cada uno pone su <html lang>.
-// Iconos: src/app/{favicon.ico,icon.svg,apple-icon.png}. Imagen para redes: public/og.png.
+// Iconos: src/app/{favicon.ico,icon.svg,apple-icon.png}. Imagen para redes: public/og.png (y og-en.png en inglés).
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {

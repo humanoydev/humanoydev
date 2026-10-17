@@ -19,7 +19,7 @@ export const metadata: Metadata = {
     title,
     description,
     url: `${JEAN_URL}/en`,
-    images: [{ url: `${JEAN_URL}/og.png`, width: 1200, height: 630, alt: "Jean Paul Diaz, web dev" }],
+    images: [{ url: `${JEAN_URL}/og-en.png`, width: 1200, height: 630, alt: "Jean Paul Diaz, web dev" }],
   },
 };
 

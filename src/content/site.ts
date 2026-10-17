@@ -3,7 +3,7 @@ export const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://humanoydev.
 export const JEAN_URL = process.env.NEXT_PUBLIC_JEAN_URL ?? "https://jean.humanoydev.com";
 
 // TODO: reemplazar por tu correo real.
-export const CONTACT_EMAIL = "[correo]";
+export const CONTACT_EMAIL = "humanoydev@gmail.com";
 
 export type Category = "articulos" | "experimentos" | "recursos";
 

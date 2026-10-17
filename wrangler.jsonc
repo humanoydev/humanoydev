@@ -9,11 +9,10 @@
     // El Worker corre antes que los assets para poder enrutar por subdominio.
     "run_worker_first": true,
     "not_found_handling": "404-page"
-  }
-  // Activa esto cuando humanoydev.com esté en tu cuenta de Cloudflare:
-  // "routes": [
-  //   { "pattern": "humanoydev.com", "custom_domain": true },
-  //   { "pattern": "www.humanoydev.com", "custom_domain": true },
-  //   { "pattern": "jean.humanoydev.com", "custom_domain": true }
-  // ]
+  },
+  "routes": [
+    { "pattern": "humanoydev.com", "custom_domain": true },
+    { "pattern": "www.humanoydev.com", "custom_domain": true },
+    { "pattern": "jean.humanoydev.com", "custom_domain": true }
+  ]
 }

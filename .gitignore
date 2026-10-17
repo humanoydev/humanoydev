@@ -43,3 +43,6 @@ next-env.d.ts
 # cloudflare
 .wrangler/
 .dev.vars*
+
+# claude code (configuración personal)
+.claude/settings.local.json

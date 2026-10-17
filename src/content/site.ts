@@ -70,6 +70,7 @@ export const talks: Talk[] = [
     date: "17 oct 2026",
     title: "La IA me escribe el código. Entonces, ¿para qué me pagan?",
     event: "CodeOn 2026",
+    eventHref: "https://codeon-2026.lovable.app/",
     description: "Del código generado a la entrega de valor con agentes.",
     slidesHref: `${JEAN_URL}/get-on-code-2026/`,
   },

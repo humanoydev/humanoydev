@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CLAUDE.md · andrej-karpathy-skills</title>
+<!-- Copia de https://github.com/multica-ai/andrej-karpathy-skills/blob/main/CLAUDE.md
+     (GitHub no permite mostrarse en iframes). -->
+<style>
+  body { margin: 0; background: #0d1117; color: #e6edf3; font: 16px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; }
+  .bar { position: sticky; top: 0; padding: 14px 24px; background: #161b22; border-bottom: 1px solid #30363d; color: #8b949e; font-size: 14px; }
+  .bar b { color: #e6edf3; font-weight: 600; }
+  article { max-width: 860px; margin: 24px auto 80px; padding: 32px 40px; border: 1px solid #30363d; border-radius: 6px; }
+  h1, h2 { padding-bottom: .3em; border-bottom: 1px solid #30363d; }
+  h1 { font-size: 2em; margin-top: 0; } h2 { font-size: 1.5em; margin-top: 1.6em; }
+  code { padding: .2em .4em; border-radius: 6px; background: rgba(110, 118, 129, .4); font: 85% ui-monospace, SFMono-Regular, Menlo, monospace; }
+  ul { padding-left: 2em; } li + li { margin-top: .25em; }
+  hr { border: 0; height: 1px; background: #30363d; }
+</style>
+</head>
+<body>
+<div class="bar">multica-ai / <b>andrej-karpathy-skills</b> · CLAUDE.md</div>
+<article>
+<h1>CLAUDE.md</h1>
+<p>Behavioral guidelines to reduce common LLM coding mistakes. Merge with project-specific instructions as needed.</p>
+<p><strong>Tradeoff:</strong> These guidelines bias toward caution over speed. For trivial tasks, use judgment.</p>
+<h2>1. Think Before Coding</h2>
+<p><strong>Don&#x27;t assume. Don&#x27;t hide confusion. Surface tradeoffs.</strong></p>
+<p>Before implementing:</p>
+<ul>
+<li>State your assumptions explicitly. If uncertain, ask.</li>
+<li>If multiple interpretations exist, present them - don&#x27;t pick silently.</li>
+<li>If a simpler approach exists, say so. Push back when warranted.</li>
+<li>If something is unclear, stop. Name what&#x27;s confusing. Ask.</li>
+</ul>
+<h2>2. Simplicity First</h2>
+<p><strong>Minimum code that solves the problem. Nothing speculative.</strong></p>
+<ul>
+<li>No features beyond what was asked.</li>
+<li>No abstractions for single-use code.</li>
+<li>No &quot;flexibility&quot; or &quot;configurability&quot; that wasn&#x27;t requested.</li>
+<li>No error handling for impossible scenarios.</li>
+<li>If you write 200 lines and it could be 50, rewrite it.</li>
+</ul>
+<p>Ask yourself: &quot;Would a senior engineer say this is overcomplicated?&quot; If yes, simplify.</p>
+<h2>3. Surgical Changes</h2>
+<p><strong>Touch only what you must. Clean up only your own mess.</strong></p>
+<p>When editing existing code:</p>
+<ul>
+<li>Don&#x27;t &quot;improve&quot; adjacent code, comments, or formatting.</li>
+<li>Don&#x27;t refactor things that aren&#x27;t broken.</li>
+<li>Match existing style, even if you&#x27;d do it differently.</li>
+<li>If you notice unrelated dead code, mention it - don&#x27;t delete it.</li>
+</ul>
+<p>When your changes create orphans:</p>
+<ul>
+<li>Remove imports/variables/functions that YOUR changes made unused.</li>
+<li>Don&#x27;t remove pre-existing dead code unless asked.</li>
+</ul>
+<p>The test: Every changed line should trace directly to the user&#x27;s request.</p>
+<h2>4. Goal-Driven Execution</h2>
+<p><strong>Define success criteria. Loop until verified.</strong></p>
+<p>Transform tasks into verifiable goals:</p>
+<ul>
+<li>&quot;Add validation&quot; → &quot;Write tests for invalid inputs, then make them pass&quot;</li>
+<li>&quot;Fix the bug&quot; → &quot;Write a test that reproduces it, then make it pass&quot;</li>
+<li>&quot;Refactor X&quot; → &quot;Ensure tests pass before and after&quot;</li>
+</ul>
+<p>For multi-step tasks, state a brief plan: ``<code> 1. [Step] → verify: [check] 2. [Step] → verify: [check] 3. [Step] → verify: [check] </code>``</p>
+<p>Strong success criteria let you loop independently. Weak criteria (&quot;make it work&quot;) require constant clarification.</p>
+<hr>
+<p><strong>These guidelines are working if:</strong> fewer unnecessary changes in diffs, fewer rewrites due to overcomplication, and clarifying questions come before implementation rather than after mistakes.</p>
+</article>
+</body>
+</html>

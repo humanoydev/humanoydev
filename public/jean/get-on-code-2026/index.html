@@ -56,6 +56,8 @@
         .pill { background: var(--bg-muted); border: 1px solid var(--accent-orange); padding: 8px 20px; border-radius: 50px; font-size: 0.6em; display: inline-block; margin: 5px; font-weight: 600; color: var(--text-light); }
         .code-block { font-family: 'Fira Code', monospace; background: #0f172a; color: var(--accent-orange); padding: 20px; border-radius: 8px; font-size: 0.7em; text-align: left; border: 1px solid var(--bg-muted); box-shadow: 0 10px 30px rgba(0,0,0,0.5); margin: 20px auto; display: inline-block; }
         .meme-container img { max-height: 35vh; border-radius: 12px; border: 2px solid var(--bg-muted); box-shadow: 0 10px 20px rgba(0,0,0,0.3); }
+        /* En una grilla, el meme se alinea arriba con la caja vecina (reveal.js le pone margen a las imágenes) */
+        .reveal .grid-2 .meme-container img { margin-top: 0; }
         
         /* Cajas de impacto */
         .box { background: var(--bg-muted); padding: 25px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.05); font-size: 0.75em; text-align: left; box-shadow: 0 4px 15px rgba(0,0,0,0.2);}
@@ -78,16 +80,203 @@
         .poll:not(:has(.fragment:not(.visible))) .box:hover { border-color: var(--accent-orange); }
 
         /* Hitos "POR ESTO ME PAGAN" */
-        .milestone-num { font-size: 5em !important; line-height: 1; margin: 0 0 20px; }
         .milestone-track { display: flex; justify-content: center; align-items: center; margin-top: 40px; }
         .milestone-track span { position: relative; width: 14px; height: 14px; border-radius: 50%; background: var(--bg-muted); }
         .milestone-track span + span { margin-left: 70px; }
         .milestone-track span + span::before { content: ''; position: absolute; right: 14px; top: 6px; width: 70px; height: 2px; background: var(--bg-muted); }
         .milestone-track .done { background: var(--accent-orange); }
         .milestone-track .current { background: var(--accent-pink); box-shadow: 0 0 0 6px rgba(251, 113, 133, 0.25); }
+        /* Hito en formato detalle: encabezado, título y comparación en dos cajas */
+        .ms { text-align: left; }
+        .ms-header { display: flex; justify-content: space-between; align-items: center; padding-bottom: 18px; border-bottom: 1px solid rgba(248, 250, 252, 0.25); }
+        .reveal .ms-header h2 { margin: 0; font-size: 1.3em; font-weight: 700; }
+        .ms-tag { font-family: 'Fira Code', monospace; font-size: 0.42em; font-weight: 600; color: var(--accent-orange); padding: 6px 16px; border: 1px solid rgba(249, 115, 22, 0.4); border-radius: 50px; background: rgba(249, 115, 22, 0.08); }
+        .reveal .ms-title { font-size: 1.9em; margin: 60px 0 10px; }
+        .ms .box { background: rgba(51, 65, 85, 0.35); padding: 30px 34px; min-height: 210px; }
+        .ms .ms-box--accent { border: 1px solid rgba(249, 115, 22, 0.45); background: linear-gradient(135deg, rgba(249, 115, 22, 0.08), rgba(51, 65, 85, 0.35)); }
+        .reveal .ms-label { font-size: 1em; font-weight: 600; margin: 0 0 12px; }
+        .reveal .ms-question { font-size: 1.25em; font-weight: 300; margin: 0; }
+        .reveal .ms-list { list-style: none; margin: 0; padding: 0; font-size: 1.1em; }
+        .reveal .ms-list li { display: flex; align-items: center; gap: 12px; margin: 0 0 12px; }
+        .ms-list li::before { content: '➜'; flex: none; display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 50%; background: var(--accent-orange); color: var(--bg-dark); font-size: 13px; font-weight: 700; }
+        .ms-track { margin-top: 36px; }
+        .ms .ms-statement { margin-top: 30px; min-height: 0; padding: 36px 40px; text-align: center; }
+        .reveal .ms-statement p { font-family: 'Space Grotesk', sans-serif; font-size: 1.5em; font-weight: 700; margin: 0; }
+        .reveal .ms-statement .ms-chain { font-family: 'Fira Code', monospace; font-size: 1.1em; font-weight: 400; color: var(--accent-orange); margin-top: 18px; }
+        /* Slide de concepto: texto a la izquierda, imagen a la derecha */
+        .concept { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: center; margin-top: 24px; }
+        .reveal .concept img { display: block; width: 100%; max-height: 500px; object-fit: contain; margin: 0; border-radius: 4px; }
+        /* Anti-pattern: flujo del developer a la izquierda, carencias a la derecha */
+        .anti { align-items: stretch; margin-top: 70px; }
+        .ms .anti-flow { border: 1px solid rgba(251, 113, 133, 0.6); text-align: center; }
+        .reveal .anti-who { text-align: left; color: var(--accent-pink); font-size: 1.15em; margin: 0 0 18px; }
+        .anti-prompt { font-family: 'Fira Code', monospace; font-size: 0.9em; color: var(--accent-pink); text-align: left; background: rgba(2, 6, 23, 0.8); border-radius: 8px; padding: 12px 18px; }
+        .anti-arrow { color: #94a3b8; margin: 10px 0 4px; }
+        .reveal .anti-output { font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 1em; margin: 0 0 12px; }
+        .anti-accept { display: flex; justify-content: center; gap: 10px; }
+        .anti-accept span { font-family: 'Fira Code', monospace; font-size: 0.85em; color: var(--accent-pink); padding: 6px 18px; border-radius: 8px; border: 1px solid rgba(251, 113, 133, 0.25); background: rgba(251, 113, 133, 0.12); }
+        .ms .anti-list { display: flex; align-items: center; }
+        .reveal .anti-list ul { list-style: none; margin: 0; padding: 0; font-size: 1.2em; font-weight: 300; color: #cbd5e1; }
+        .reveal .anti-list li { margin: 0 0 14px; }
+        .anti-list li::before { content: '✕'; color: #94a3b8; margin-right: 14px; font-weight: 700; }
+        /* Principio: frase de contexto y la idea clave destacada en una caja, centradas */
+        .principle { text-align: center; margin-top: 110px; }
+        .ms .principle .box { width: 80%; margin: 40px auto 0; min-height: 0; padding: 34px 50px; }
+        .reveal .principle .box p { font-family: 'Space Grotesk', sans-serif; font-size: 1.45em; font-weight: 700; line-height: 1.4; margin: 0; text-align: center; }
+        /* Pipeline: cadena de pasos en una fila y la pregunta al público debajo */
+        .pipeline { display: flex; align-items: center; gap: 10px; margin-top: 120px; }
+        .pipeline span { flex: 1; padding: 18px 6px; text-align: center; font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 0.6em; color: var(--accent-orange); background: rgba(51, 65, 85, 0.35); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 10px; }
+        .pipeline span.is-key { border-color: rgba(249, 115, 22, 0.7); }
+        .pipeline span.is-end { border-color: rgba(251, 113, 133, 0.7); }
+        .pipeline i { font-style: normal; font-size: 0.6em; color: #64748b; }
+        .reveal .pipeline-question { margin: 36px 0 0; padding: 22px 30px; text-align: center; font-size: 0.75em; font-weight: 600; color: var(--accent-pink); background: rgba(251, 113, 133, 0.1); border-radius: 12px; }
+        /* /docs + CLAUDE.md: árbol de archivos y caja destacada */
+        .docs { align-items: stretch; margin-top: 90px; }
+        .ms .docs-tree { background: rgba(2, 6, 23, 0.8); border: 1px solid rgba(51, 65, 85, 0.6); }
+        .reveal .docs-tree pre { width: auto; margin: 0; box-shadow: none; font-family: 'Fira Code', monospace; font-size: 1em; line-height: 1.6; color: #cbd5e1; background: none; }
+        .reveal .docs-claude h3 { font-size: 1.4em; margin: 0 0 8px; }
+        .reveal .docs-claude .dim { font-size: 0.95em; margin: 0 0 20px; color: #cbd5e1; }
+        .reveal .docs-quote { margin: 0; padding: 16px 20px; font-size: 1em; font-weight: 600; background: rgba(2, 6, 23, 0.6); border-left: 4px solid var(--accent-orange); border-radius: 10px; }
+        /* Skills y Workflows: frase de entrada, chips de skills y flujo de pasos */
+        .reveal .flow-intro { text-align: left; font-size: 0.85em !important; margin: 110px 0 24px; }
+        .skill-chips { display: flex; flex-wrap: wrap; gap: 12px; }
+        .skill-chips span { font-family: 'Fira Code', monospace; font-size: 0.5em; font-weight: 600; color: var(--accent-orange); padding: 8px 16px; border: 1px solid rgba(249, 115, 22, 0.4); border-radius: 8px; background: rgba(249, 115, 22, 0.1); }
+        .ms .skill-box { margin-top: 30px; background: rgba(51, 65, 85, 0.35); }
+        .reveal .skill-box h3 { font-size: 1.3em; margin: 0 0 10px; }
+        .reveal .skill-box .dim { font-size: 1em; margin: 0; color: #cbd5e1; }
+        .flow-before { font-family: 'Fira Code', monospace; font-size: 0.6em; color: var(--accent-pink); text-align: left; padding: 22px 30px; border: 1px solid rgba(251, 113, 133, 0.45); border-radius: 12px; background: rgba(51, 65, 85, 0.25); }
+        .pipeline.flow-steps { margin-top: 30px; }
+        /* Token Economics: dos tipos de modelo y la regla final */
+        .models { align-items: stretch; margin-top: 0; }
+        .ms .models .box { background: rgba(51, 65, 85, 0.35); padding: 28px 32px; }
+        .ms .models .model--pink { border: 1px solid rgba(251, 113, 133, 0.6); }
+        .ms .models .model--orange { border: 1px solid rgba(249, 115, 22, 0.6); }
+        .reveal .models h3 { font-size: 1.35em; margin: 0 0 12px; }
+        .reveal .models .model--pink h3 { color: var(--accent-pink); }
+        .reveal .models .model--orange h3 { color: var(--accent-orange); }
+        .reveal .models .dim { font-size: 1em; line-height: 1.6; margin: 0; }
+        .reveal .models-rule { margin: 30px 0 0; padding: 18px; text-align: center; font-family: 'Space Grotesk', sans-serif; font-size: 0.8em; font-weight: 700; color: var(--accent-orange); border: 1px solid rgba(249, 115, 22, 0.35); border-radius: 12px; background: rgba(249, 115, 22, 0.08); }
+        /* ¿Un agente o varios?: una fila en serie frente a tres carriles en paralelo */
+        .agents { align-items: stretch; margin-top: 100px; }
+        .ms .agents-seq { border: 1px solid rgba(251, 113, 133, 0.45); background: rgba(51, 65, 85, 0.35); }
+        .reveal .agents-seq .ms-label { color: var(--accent-pink); }
+        .seq-lane { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-top: 46px; }
+        .seq-lane span { padding: 14px 0; text-align: center; font-family: 'Fira Code', monospace; font-size: 0.8em; border-radius: 8px; }
+        .seq-lane .run { color: var(--accent-pink); background: rgba(251, 113, 133, 0.18); border: 1px solid rgba(251, 113, 133, 0.5); }
+        .seq-lane .wait { color: #64748b; border: 1px dashed #475569; background: repeating-linear-gradient(45deg, transparent 0 6px, rgba(148, 163, 184, 0.08) 6px 12px); }
+        /* Lo que hace el developer mientras espera */
+        .seq-logos { margin-top: 18px; justify-items: center; }
+        .reveal .seq-logos img { width: 44px; height: 44px; margin: 0; }
+        .par { display: flex; align-items: center; margin-top: 16px; }
+        .par-task { flex: none; font-family: 'Fira Code', monospace; font-size: 0.8em; padding: 10px 16px; border: 1px solid rgba(249, 115, 22, 0.6); border-radius: 8px; background: rgba(2, 6, 23, 0.8); }
+        .par-lanes { position: relative; flex: 1; display: flex; flex-direction: column; gap: 8px; margin-left: 28px; padding-left: 20px; border-left: 2px solid rgba(249, 115, 22, 0.5); }
+        .par-lanes::before { content: ''; position: absolute; left: -30px; top: 50%; width: 28px; height: 2px; background: rgba(249, 115, 22, 0.5); }
+        .par-lanes span { position: relative; font-family: 'Fira Code', monospace; font-size: 0.8em; color: var(--accent-orange); padding: 8px 14px; border-radius: 8px; border: 1px solid rgba(249, 115, 22, 0.45); background: linear-gradient(90deg, rgba(249, 115, 22, 0.25), rgba(251, 113, 133, 0.1)); }
+        .par-lanes span::before { content: ''; position: absolute; left: -22px; top: 50%; width: 20px; height: 2px; background: rgba(249, 115, 22, 0.5); }
+        /* El problema de concurrencia */
+        .ms .conc-box { margin-top: 110px; border: 1px solid rgba(251, 113, 133, 0.6); background: rgba(51, 65, 85, 0.35); padding: 28px 32px; }
+        .reveal .conc-box .ms-label { color: var(--accent-pink); font-family: 'Space Grotesk', sans-serif; font-size: 1.3em; font-weight: 700; margin-bottom: 20px; }
+        .conc-agents { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+        .conc-agents span { font-family: 'Fira Code', monospace; font-size: 0.95em; padding: 14px 18px; border-radius: 8px; background: rgba(2, 6, 23, 0.8); }
+        .conc-a { color: var(--accent-orange); }
+        .conc-b { color: var(--accent-pink); }
+        .reveal .conc-question { margin: 44px 0 0; text-align: center; font-family: 'Space Grotesk', sans-serif; font-size: 1.25em; font-weight: 700; }
+        /* Maqueta de dashboard: se ve como una captura de una app real */
+        .dash { width: 1000px; margin: 0 auto; text-align: left; font-family: 'Inter', sans-serif; font-size: 14px; line-height: 1.4; color: #0f172a; background: #fff; border-radius: 12px; overflow: hidden; box-shadow: 0 30px 80px rgba(0, 0, 0, 0.55); }
+        .dash-chrome { display: flex; align-items: center; gap: 7px; padding: 10px 14px; background: #e2e8f0; }
+        .dash-chrome i { width: 11px; height: 11px; border-radius: 50%; background: #cbd5e1; }
+        .dash-chrome i:nth-child(1) { background: #f87171; } .dash-chrome i:nth-child(2) { background: #fbbf24; } .dash-chrome i:nth-child(3) { background: #34d399; }
+        .dash-chrome span { margin-left: 14px; flex: 1; padding: 4px 12px; border-radius: 6px; background: #fff; color: #64748b; font-size: 12px; }
+        .dash-app { display: grid; grid-template-columns: 180px 1fr; height: 540px; }
+        .dash-side { display: flex; flex-direction: column; gap: 4px; padding: 18px 12px; background: #0f172a; color: #94a3b8; }
+        .dash-logo { display: flex; align-items: center; gap: 8px; margin: 0 8px 18px; color: #f8fafc; font-weight: 700; font-size: 16px; }
+        .dash-logo b { width: 22px; height: 22px; border-radius: 6px; background: linear-gradient(135deg, var(--accent-orange), var(--accent-pink)); }
+        .dash-side span { padding: 8px 10px; border-radius: 6px; }
+        .dash-side span.is-active { color: #f8fafc; background: rgba(249, 115, 22, 0.18); }
+        .dash-main { position: relative; background: #f8fafc; }
+        .dash-top { display: flex; justify-content: space-between; align-items: center; padding: 12px 22px; background: #fff; border-bottom: 1px solid #e2e8f0; }
+        .dash-search { width: 260px; padding: 7px 12px; border: 1px solid #e2e8f0; border-radius: 8px; color: #94a3b8; font-size: 13px; }
+        .dash-user { display: flex; align-items: center; gap: 14px; }
+        .dash-bell { width: 16px; height: 16px; border-radius: 50% 50% 4px 4px; border: 2px solid #94a3b8; }
+        .dash-avatar { display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, var(--accent-orange), var(--accent-pink)); color: #fff; font-size: 12px; font-weight: 700; box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.25); }
+        .dash-menu { position: absolute; top: 58px; right: 16px; z-index: 2; width: 230px; display: flex; flex-direction: column; padding: 8px; background: #fff; border: 1px solid #e2e8f0; border-radius: 10px; box-shadow: 0 16px 40px rgba(15, 23, 42, 0.18); }
+        .dash-menu-head { display: flex; align-items: center; gap: 10px; padding: 8px 8px 12px; margin-bottom: 4px; border-bottom: 1px solid #e2e8f0; }
+        .dash-menu-head .dash-avatar { box-shadow: none; }
+        .dash-menu-head strong { display: block; font-size: 13px; }
+        .dash-menu-head small { color: #64748b; font-size: 11px; }
+        .dash-menu > span { padding: 8px; border-radius: 6px; color: #334155; font-size: 13px; }
+        .dash-menu > span:nth-of-type(1) { background: #f1f5f9; }
+        .dash-menu .dash-menu-out { margin-top: 4px; border-top: 1px solid #e2e8f0; border-radius: 0; color: #dc2626; }
+        .dash-body { padding: 22px; }
+        .reveal .dash-body h4 { margin: 0 0 14px; font-family: 'Inter', sans-serif; font-size: 18px; font-weight: 600; color: #0f172a; text-transform: none; }
+        .reveal .dash-table { width: 100%; margin: 0; border-collapse: collapse; background: #fff; border: 1px solid #e2e8f0; border-radius: 10px; font-size: 13px; }
+        .reveal .dash-table th { padding: 10px 14px; text-align: left; font-size: 11px; font-weight: 600; color: #64748b; background: #f8fafc; border-bottom: 1px solid #e2e8f0; }
+        .reveal .dash-table td { padding: 11px 14px; border-bottom: 1px solid #f1f5f9; color: #0f172a; }
+        .dash-id { font-family: 'Fira Code', monospace; color: #64748b !important; }
+        .dash-num { font-variant-numeric: tabular-nums; }
+        .dash-muted { color: #64748b !important; }
+        .dash-badge { display: inline-block; padding: 2px 10px; border-radius: 50px; font-size: 11px; font-weight: 600; }
+        .dash-badge--paid { color: #047857; background: #d1fae5; }
+        .dash-badge--pending { color: #b45309; background: #fef3c7; }
+        .dash-badge--cancel { color: #b91c1c; background: #fee2e2; }
+        /* Efecto glitch: el texto se parte en franjas naranja/rosa a ráfagas (solo con el slide visible) */
+        .glitch { position: relative; }
+        .glitch::before, .glitch::after { content: attr(data-text); position: absolute; inset: 0; opacity: 0; pointer-events: none; }
+        .glitch::before { color: var(--accent-pink); -webkit-text-fill-color: var(--accent-pink); }
+        .glitch::after { color: #f8fafc; -webkit-text-fill-color: #f8fafc; }
+        .present .glitch { animation: glitch-shake 1.5s infinite steps(1); }
+        .present .glitch::before { animation: glitch-a 1.5s infinite steps(1); }
+        .present .glitch::after { animation: glitch-b 1.5s infinite steps(1); }
+        @keyframes glitch-shake { 0%, 14%, 100% { transform: none; } 2% { transform: translate(-2px, 1px); } 6% { transform: translate(2px, -1px); } 10% { transform: translate(-1px, 0); } }
+        @keyframes glitch-a {
+            0%, 14%, 100% { opacity: 0; transform: none; clip-path: none; }
+            2% { opacity: 1; transform: translate(-6px, 0); clip-path: inset(10% 0 55% 0); }
+            5% { opacity: 1; transform: translate(5px, 0); clip-path: inset(60% 0 8% 0); }
+            8% { opacity: 1; transform: translate(-3px, 0); clip-path: inset(30% 0 40% 0); }
+            11% { opacity: 1; transform: translate(4px, 0); clip-path: inset(75% 0 2% 0); }
+        }
+        @keyframes glitch-b {
+            0%, 14%, 100% { opacity: 0; transform: none; clip-path: none; }
+            3% { opacity: 0.8; transform: translate(6px, 0); clip-path: inset(50% 0 25% 0); }
+            7% { opacity: 0.8; transform: translate(-5px, 0); clip-path: inset(5% 0 70% 0); }
+            10% { opacity: 0.8; transform: translate(3px, 0); clip-path: inset(40% 0 35% 0); }
+        }
+        @media (prefers-reduced-motion: reduce) { .present .glitch, .present .glitch::before, .present .glitch::after { animation: none; } }
+        /* Sticker final con video en bucle */
+        .applause { width: 232px; padding: 6px 6px 10px; text-align: center; white-space: normal; }
+        .reveal .applause img { display: block; width: 100%; height: auto; margin: 0; border-radius: 6px; }
+        .applause span { display: block; margin-top: 8px; font-size: 0.9em; }
+        /* Resaltado amarillo (como el 💡) que se activa como fragmento */
+        .reveal .slides section .fragment.bulb-mark { opacity: 1; visibility: inherit; padding: 0 0.15em; border-radius: 6px; -webkit-box-decoration-break: clone; box-decoration-break: clone; transition: background-color 0.5s, color 0.5s, text-shadow 0.5s; }
+        .reveal .slides section .fragment.bulb-mark.visible { background-color: #FCD34D; color: #111827; text-shadow: none; }
+        /* Slide final: baile sobre negro */
+        .reveal img.dance { width: 48px; height: auto; margin: 0; }
+        /* Post-créditos y Show Time */
+        .reveal .postcredits-tag { font-family: 'Fira Code', monospace; font-size: 0.9em; letter-spacing: 6px; color: var(--accent-orange); margin-bottom: 20px; }
+        .reveal h1.showtime { font-size: 5em; letter-spacing: 4px; }
+        /* Slides de links: iframe de fondo y una tarjeta encima (como los ejemplos de reveal.js) */
+        .link-card { position: absolute; right: 0; top: 50%; transform: translateY(-50%); width: 420px; padding: 26px 30px; text-align: left; background: rgba(17, 24, 39, 0.94); border: 1px solid rgba(249, 115, 22, 0.4); border-radius: 14px; box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5); }
+        .reveal .link-card .link-tag { font-family: 'Fira Code', monospace; font-size: 0.45em; letter-spacing: 3px; color: var(--accent-orange); margin: 0 0 8px; }
+        .reveal .link-card h3 { font-size: 1.15em; margin: 0 0 10px; }
+        .reveal .link-card p { font-size: 0.62em; line-height: 1.5; color: #cbd5e1; margin: 0 0 14px; }
+        .reveal .link-card a { font-family: 'Fira Code', monospace; font-size: 0.45em; color: var(--accent-pink); word-break: break-all; }
+        /* QR: título y un box por cada QR */
+        .reveal .qr-title { font-family: 'Space Grotesk', sans-serif; font-size: 1.9em; font-weight: 700; margin: 0 0 28px; text-shadow: 0 4px 24px rgba(0, 0, 0, 0.85); }
+        .qr-pair { display: flex; justify-content: center; gap: 40px; }
+        .qr-box { width: 340px; margin: 0; padding: 22px; background: rgba(17, 24, 39, 0.94); border: 1px solid rgba(249, 115, 22, 0.4); border-radius: 16px; box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5); }
+        .reveal .qr-box img { display: block; width: 100%; height: auto; margin: 0; padding: 14px; box-sizing: border-box; background: #fff; border-radius: 10px; }
+        .qr-box figcaption { margin-top: 16px; font-family: 'Space Grotesk', sans-serif; font-size: 0.6em; font-weight: 700; line-height: 1.3; color: var(--text-light); }
+        .qr-box figcaption span { display: block; margin-top: 6px; font-family: 'Fira Code', monospace; font-size: 0.7em; font-weight: 400; color: #94a3b8; }
+        .questions { bottom: -70px; left: 0; right: 0; width: fit-content; margin: 0 auto; --r: -8deg; font-size: 0.95em; padding: 14px 26px; }
+        .reveal .meetup-card img { display: block; width: 100%; height: auto; margin: 0 0 14px; padding: 14px; box-sizing: border-box; background: #fff; border-radius: 10px; }
+        .link-card.meetup-card { width: 360px; }
+        /* Pausa para interactuar con el público */
+        .reveal .ask-mark { font-family: 'Space Grotesk', sans-serif; font-size: 2.2em; line-height: 1; margin: 0 0 30px; }
+        .reveal .ask-box { width: 75%; margin: 0 auto; padding: 30px 50px; background: rgba(17, 24, 39, 0.7); border: 2px dashed rgba(249, 115, 22, 0.55); border-radius: 18px; box-shadow: none; font-style: normal; }
+        .reveal .ask-box p { font-family: 'Space Grotesk', sans-serif; font-size: 1.05em; font-weight: 700; line-height: 1.5; margin: 0; }
         /* Indicador para el expositor: el siguiente slide es un hito */
-        #milestone-hint { position: absolute; left: 14px; bottom: 10px; z-index: 30; font-family: 'Fira Code', monospace; font-size: 11px; color: #94a3b8; opacity: 0; filter: grayscale(1); pointer-events: none; }
-        #milestone-hint.on { opacity: 0.3; }
+        #milestone-hint { position: absolute; left: 24px; top: 16px; z-index: 30; font-family: 'Space Grotesk', sans-serif; font-weight: 900; font-size: 44px; line-height: 1; color: var(--accent-orange); opacity: 0; pointer-events: none; }
+        #milestone-hint.on { opacity: 0.6; }
 
         /* Demo del botón */
         .demo-btn { font-family: 'Inter', sans-serif; font-weight: 600; font-size: 0.9em; padding: 18px 48px; border: none; border-radius: 12px; cursor: pointer; transition: background 0.2s; }
@@ -112,7 +301,7 @@
                     <h1 class="" >La IA me escribe el código.</h1>
                     <h3 class=" subtitle mt-4">Entonces, ¿para qué me pagan?</h3>
                     <p class=" dim mt-4" style="font-weight: 300;">Del código generado a la entrega de valor con agentes.</p>
-                    <p class=" highlight" style="font-size: 0.6em; margin-top: 40px; letter-spacing: 2px;">JEAN PAUL DIAZ VIVANCO</p>
+                    <p class=" highlight" style="font-size: 0.6em; margin-top: 40px; letter-spacing: 2px;">JEAN PAUL DIAZ</p>
                 </div>
                 <!-- <img class="sticker fragment" src="https://i.redd.it/0hatpl001br71.jpg" alt="Software engineers complaining about their job" style="top: -70px; right: -40px; width: 180px; --r: 7deg;"> -->
             </section>
@@ -169,8 +358,8 @@
             <section data-transition="convex" data-background="#111827">
                 <h1 class="gradient-text" style="font-size: 4em;">01</h1>
                 <h2>KNOWLEDGE</h2>
-                <p class="subtitle">Del código costoso a la abundancia de sintaxis.</p>
-                <span class="sticker orange" style="bottom: -70px; left: 80px; --r: -8deg; font-size: 0.5em;">🦆 rubber duck certified</span>
+                <!-- <p class="subtitle">Del código costoso a la abundancia de sintaxis.</p> -->
+                <!-- <span class="sticker orange" style="bottom: -70px; left: 80px; --r: -8deg; font-size: 0.5em;">🦆 rubber duck certified</span> -->
             </section>
 
             <!-- ANTES -->
@@ -204,7 +393,7 @@
                     <span class="highlight" style="margin: 0 20px;">→</span> 
                     <span class="dim" style="font-size: 0.8em; text-decoration: line-through;">Código</span>
                 </div>
-                <span class="sticker pink fragment" style="bottom: -80px; right: 60px; --r: 5deg;">Ctrl+C / Ctrl+V → @deprecated</span>
+                <!-- <span class="sticker pink fragment" style="bottom: -80px; right: 60px; --r: 5deg;">Ctrl+C / Ctrl+V → @deprecated</span> -->
             </section>
 
             <!-- VELOCIDAD != VALOR -->
@@ -213,25 +402,25 @@
                 <div class="fragment" style="background: var(--bg-dark); padding: 20px 40px; border-radius: 10px; display: inline-block; border-left: 5px solid var(--accent-pink); margin-top: 20px;">
                     <h3 style="margin:0;">Mala Decisión <span class="highlight">+</span> Agente Rápidos</h3>
                     <h1 class="punchline" style="margin-top: 10px; font-size: 2em !important;">= PROBLEMA GIGANTE</h1>
-                    <img class="sticker" src="https://media.giphy.com/media/73FzKOYDpp7VK/giphy.gif" alt="Coyote estrellándose contra un muro" style="bottom: -215px; left: 40px; width: 300px; --r: -6deg;">
+                    <img class="sticker" src="https://media.giphy.com/media/73FzKOYDpp7VK/giphy.gif" alt="Coyote estrellándose contra un muro" style="bottom: -280px; margin:0 auto; left: 0; right: 0; width: 300px; --r: -1deg;">
                 </div>
             </section>
 
             <!-- DIFICULTADES -->
-            <section data-background="#111827">
+            <section data-background="#111827"  data-next-milestone="#1">
                 <h2>¿Qué sigue siendo difícil?</h2>
                 <div class="grid-3" style="font-size: 0.8em;">
-                    <div class="box fragment">🏗️ <strong style="color: var(--text-light);">Arquitectura</strong><br><span class="dim">Límites y escalabilidad</span></div>
-                    <div class="box fragment">🐛 <strong style="color: var(--text-light);">Debugging</strong><br><span class="dim">Errores sutiles</span></div>
+                    <div class="box fragment">🏗️ <strong style="color: var(--text-light);">Arquitectura</strong><br><span class="dim">Diseño y límitar dominio</span></div>
+                    <div class="box fragment">🐛 <strong style="color: var(--text-light);">Debugging</strong><br><span class="dim">Rastrear errores sutiles</span></div>
                     <div class="box fragment">📦 <strong style="color: var(--text-light);">Producto</strong><br><span class="dim">Necesidades reales</span></div>
-                    <div class="box fragment">⚖️ <strong style="color: var(--text-light);">Trade-offs</strong><br><span class="dim">Deuda vs Velocidad</span></div>
-                    <div class="box fragment">🛡️ <strong style="color: var(--text-light);">Seguridad</strong><br><span class="dim">Protección de datos</span></div>
-                    <div class="box fragment">🧠 <strong style="color: var(--text-light);">Decisiones</strong><br><span class="dim">Bajo incertidumbre</span></div>
+                    <div class="box fragment">⚖️ <strong style="color: var(--text-light);">Trade-offs</strong><br><span class="dim">Mantenibilidad vs Deuda vs Velocidad </span></div>
+                    <div class="box fragment">🛡️ <strong style="color: var(--text-light);">Seguridad</strong><br><span class="dim">Vulnerabilidades y protección de datos</span></div>
+                    <div class="box fragment">🧠 <strong style="color: var(--text-light);">Decisiones</strong><br><span class="dim">Elegir el camino adecuado bajo incertidumbre</span></div>
                 </div>
             </section>
 
             <!-- SINO... -->
-            <section data-background="#111827" data-next-milestone="#1">
+            <!-- <section data-background="#111827">
                 <p class="subtitle">Conocimiento técnico. No solamente: <em>¿Cómo escribo esto?</em></p>
                 <h2 class="fragment mt-4">Sino...</h2>
                 <div class="fragment" style="font-size: 1.5em; font-family: 'Space Grotesk'; font-weight: bold; line-height: 1.5; margin: 30px 0;">
@@ -239,22 +428,83 @@
                     <span class="highlight">¿Por qué?</span><br>
                     <span style="color: var(--accent-pink);">¿Qué</span> puede salir mal?
                 </div>
-            </section>
+            </section> -->
 
             <!-- HITO: POR ESTO ME PAGAN #1 -->
-            <section data-transition="zoom" data-background-gradient="radial-gradient(circle at center, #2a1d2b 0%, #111827 70%)">
-                <h2 class="punchline" style="font-size: 2em !important;">POR ESTO ME PAGAN</h2>
-                <h1 class="gradient-text milestone-num">#1</h1>
-                <p class="subtitle" style="font-size: 1em !important;">Saber qué construir, por qué, y qué puede salir mal.</p>
-                <div class="milestone-track"><span class="current"></span><span></span><span></span></div>
+            <section class="ms" data-transition="zoom" data-background-gradient="radial-gradient(circle at 85% 10%, #2a1d2b 0%, #111827 60%)">
+                <div class="ms-header">
+                    <h2>POR ESTO ME PAGAN <span class="gradient-text">#1</span></h2>
+                </div>
+                <h1 class="gradient-text ms-title">Conocimiento técnico</h1>
+                <div class="grid-2">
+                    <div class="box">
+                        <p class="dim ms-label">No solamente:</p>
+                        <p class="ms-question">¿Cómo escribo este código?</p>
+                    </div>
+                    <div class="box ms-box--accent">
+                        <p class="highlight ms-label">Sino responder:</p>
+                        <ul class="ms-list">
+                            <li>¿Qué debería construir?</li>
+                            <li>¿Por qué?</li>
+                            <li>¿Qué puede salir mal?</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="milestone-track ms-track"><span class="current"></span><span></span><span></span></div>
+            </section>
+
+            <!-- PAUSA: PREGUNTA AL PÚBLICO -->
+            <section data-background-gradient="radial-gradient(circle at 85% 10%, #2a1d2b 0%, #111827 60%)">
+                <p class="gradient-text ask-mark">#</p>
+                <blockquote class="ask-box">
+                    <p>"Si mañana la IA escribe el 90% de tu código…</p>
+                    <p class="highlight">¿qué conocimiento tuyo sigue teniendo valor?"</p>
+                </blockquote>
             </section>
 
             <!-- SECTION OPENER 02 -->
             <section data-transition="convex" data-background="#111827">
                 <h1 class="gradient-text" style="font-size: 4em;">02</h1>
                 <h2>AI FLUENCY</h2>
-                <p class="subtitle">No es saber hacer prompts. Es saber orquestar.</p>
-                <span class="sticker" style="bottom: -70px; right: 120px; --r: 6deg;">prompt engineer™ <span style="opacity:.6">(autoproclamado)</span></span>
+                 <div class="fragment" >
+                    <span class="sticker" style="bottom: -70px; right: 120px; --r: 6deg;">prompt engineer™ <span style="opacity:.6">(autoproclamado)</span></span>
+                </div>
+            </section>
+
+            <!-- THE 4D FRAMEWORK -->
+            <section class="ms" data-background-gradient="radial-gradient(circle at 95% 5%, #2a1d2b 0%, #111827 55%)">
+                <div class="ms-header">
+                    <h2>The 4D Framework</h2>
+                    <span class="ms-tag">CONCEPTO</span>
+                </div>
+                <div class="concept">
+                    <p class="subtitle">No es solamente saber hacer prompts.</p>
+                    <img src="images/4d-framework.jpeg" alt="The 4D Framework: Delegation, Description, Discernment y Diligence, las cuatro competencias de AI Fluency">
+                </div>
+            </section>
+
+            <!-- ANTI-PATTERN: EL USO PRIMITIVO -->
+            <section class="ms" data-background-gradient="radial-gradient(circle at 95% 5%, #2a1d2b 0%, #111827 55%)">
+                <div class="ms-header">
+                    <h2>El uso primitivo</h2>
+                    <span class="ms-tag">ANTI-PATTERN</span>
+                </div>
+                <div class="grid-2 anti">
+                    <div class="box anti-flow">
+                        <h3 class="anti-who">🐞 Developer</h3>
+                        <div class="anti-prompt">"Implementa esto"</div>
+                        <div class="anti-arrow">↓</div>
+                        <p class="highlight anti-output">AI Output</p>
+                        <div class="anti-accept"><span>Aceptar</span><span>Aceptar</span><span>Aceptar</span></div>
+                    </div>
+                    <div class="box anti-list">
+                        <ul>
+                            <li>Sin contexto.</li>
+                            <li>Sin estrategia.</li>
+                            <li>Sin workflow.</li>
+                        </ul>
+                    </div>
+                </div>
             </section>
 
             <!-- DIRECTOR -->
@@ -319,38 +569,132 @@
             <section data-background="#111827">
                 <h2>¿El problema fue la IA?</h2>
                 <div class="grid-2">
-                    <div class="fragment box" style="border-left: 4px solid var(--accent-pink); position: relative;">
+                    <div class="fragment box" data-fragment-index="0" style="border-left: 4px solid var(--accent-pink); position: relative;">
                         <h4 style="color: var(--accent-pink);">PROMPT INSUFICIENTE</h4>
                         <p class="dim" style="font-family: monospace;">"Cambia el botón rojo a negro"</p>
-                        <img class="sticker" src="https://http.cat/417.jpg" alt="417 Expectation Failed cat" style="top: calc(100% - 15px); left: 40px; width: 135px; --r: -8deg;">
+                        <img class="sticker fragment fade-out" data-fragment-index="2" src="https://http.cat/417.jpg" alt="417 Expectation Failed cat" style="top: calc(100% + 60px); left: 40px; width: 360px; --r: -4deg; max-height: 360px;">
                     </div>
-                    <div class="fragment box" style="border-left: 4px solid var(--accent-orange);">
+                    <div class="fragment box" data-fragment-index="1" style="border-left: 4px solid var(--accent-orange);">
                         <h4 class="highlight">PROMPT + CONTEXTO</h4>
                         <p class="dim" style="font-family: monospace;">"Cambia el botón respetando el Design System, accesibilidad y tests..."</p>
                     </div>
                 </div>
-                <h3 class="fragment mt-4 subtitle" style="color: var(--text-light) !important; font-weight: bold; margin-top: 70px;">No se trata de escribir mejores prompts.<br><span class="highlight">Se trata de construir mejores entornos.</span></h3>
+                <h3 class="fragment mt-4 subtitle" data-fragment-index="2" style="color: var(--text-light) !important; font-weight: bold; margin-top: 70px;">No se trata de escribir mejores prompts.<br><span class="highlight">Se trata de construir mejores entornos.</span></h3>
+            </section>
+
+            <!-- CONTEXT ENGINEERING -->
+            <section class="ms" data-background-gradient="radial-gradient(circle at 95% 5%, #2a1d2b 0%, #111827 55%)">
+                <div class="ms-header">
+                    <h2>CONTEXT ENGINEERING</h2>
+                    <span class="ms-tag">CORE PRINCIPLE</span>
+                </div>
+                <div class="principle">
+                    <p class="subtitle">No se trata solamente de escribir mejores prompts.</p>
+                    <div class="box ms-box--accent">
+                        <p>Se trata de construir un entorno donde el agente pueda tomar mejores decisiones.</p>
+                    </div>
+                </div>
             </section>
 
             <!-- PIPELINE DE CONTEXTO -->
-            <section data-background="#111827" data-next-milestone="#2">
-                <h2>De la cabeza al Repositorio</h2>
-                <p class="subtitle">El código explica el CÓMO. La documentación explica el POR QUÉ.</p>
-                <div class="code-block fragment mt-4" style="width: 100%; max-width: 600px; position: relative;">
-                    /docs<br>
-                    ├── architecture.md<br>
-                    ├── business-rules.md<br>
-                    └── CLAUDE.md <span class="dim">// Reglas de orquestación</span>
-                    <span class="sticker" style="top: -25px; right: -90px; --r: 8deg;">// TODO: documentar (2019)</span>
+            <section class="ms" data-background-gradient="radial-gradient(circle at 95% 5%, #2a1d2b 0%, #111827 55%)">
+                <div class="ms-header">
+                    <h2>Mi conocimiento → Contexto</h2>
+                    <span class="ms-tag">PIPELINE</span>
+                </div>
+                <div class="pipeline">
+                    <span>Experiencia</span><i>→</i>
+                    <span>Docs</span><i>→</i>
+                    <span class="is-key">CLAUDE.md</span><i>→</i>
+                    <span>Skills</span><i>→</i>
+                    <span>Workflows</span><i>→</i>
+                    <span class="is-end">Agente</span>
+                </div>
+                <p class="pipeline-question">¿Qué conocimiento tienes en tu cabeza que el agente no puede conocer leyendo el código?</p>
+            </section>
+
+            <!-- /DOCS + CLAUDE.MD -->
+            <section class="ms" data-background-gradient="radial-gradient(circle at 95% 5%, #2a1d2b 0%, #111827 55%)">
+                <div class="ms-header">
+                    <h2>/docs + CLAUDE.md</h2>
+                    <span class="ms-tag">ARQUITECTURA DE CONTEXTO</span>
+                </div>
+                <div class="grid-2 docs">
+                    <div class="box docs-tree">
+                        <p class="highlight ms-label">/docs Structure</p>
+                        <pre>├── architecture.md
+├── conventions.md
+├── business-rules.md
+├── api.md
+├── testing.md
+└── decisions.md</pre>
+                    </div>
+                    <div class="box ms-box--accent docs-claude">
+                        <h3>CLAUDE.md</h3>
+                        <p class="dim">Reglas · Contexto · Convenciones · Referencias · Validación</p>
+                        <p class="docs-quote">El código explica cómo.<br><span class="highlight">La documentación explica por qué.</span></p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SKILLS -->
+            <section class="ms" data-background-gradient="radial-gradient(circle at 95% 5%, #2a1d2b 0%, #111827 55%)">
+                <div class="ms-header">
+                    <h2>Skills</h2>
+                    <span class="ms-tag">AUTOMATIZACIÓN</span>
+                </div>
+                <p class="subtitle flow-intro">¿Qué pasa cuando una tarea se repite? Convertimos conocimiento en una Skill.</p>
+                <div class="skill-chips">
+                    <span>⚡ /code-review</span>
+                    <span>🧪 /testing</span>
+                    <span>🧩 /create-component</span>
+                    <span>♿ /accessibility</span>
+                    <span>🔀 /create-pr</span>
+                </div>
+                <div class="box skill-box">
+                    <h3>Una Skill puede contener:</h3>
+                    <p class="dim">Instrucciones específicas · Proceso paso a paso · Criterios de aceptación · Ejemplos de código · Validaciones requeridas</p>
+                </div>
+            </section>
+
+            <!-- WORKFLOWS -->
+            <section class="ms" data-background-gradient="radial-gradient(circle at 95% 5%, #2a1d2b 0%, #111827 55%)" data-next-milestone="#2">
+                <div class="ms-header">
+                    <h2>Workflows</h2>
+                    <span class="ms-tag">ESTRATEGIA</span>
+                </div>
+                <p class="subtitle flow-intro">Pasamos de un impulso simple a un flujo estructurado:</p>
+                <div class="flow-before">ANTAÑO: "Haz esto."</div>
+                <div class="pipeline flow-steps">
+                    <span>Analizar</span><i>›</i>
+                    <span>Planificar</span><i>›</i>
+                    <span>Implementar</span><i>›</i>
+                    <span>Testear</span><i>›</i>
+                    <span>Review</span><i>›</i>
+                    <span>Documentar</span><i>›</i>
+                    <span class="is-end">PR</span>
                 </div>
             </section>
 
             <!-- HITO: POR ESTO ME PAGAN #2 -->
-            <section data-transition="zoom" data-background-gradient="radial-gradient(circle at center, #2a1d2b 0%, #111827 70%)">
-                <h2 class="punchline" style="font-size: 2em !important;">POR ESTO ME PAGAN</h2>
-                <h1 class="gradient-text milestone-num">#2</h1>
-                <p class="subtitle" style="font-size: 1em !important;">Saber trasladar mi conocimiento a la IA.</p>
-                <div class="milestone-track"><span class="done"></span><span class="current"></span><span></span></div>
+            <section class="ms" data-transition="zoom" data-background-gradient="radial-gradient(circle at 85% 10%, #2a1d2b 0%, #111827 60%)">
+                <div class="ms-header">
+                    <h2>POR ESTO ME PAGAN <span class="gradient-text">#2</span></h2>
+                </div>
+                <h1 class="gradient-text ms-title">Saber usar la IA</h1>
+                <div class="box ms-box--accent ms-statement">
+                    <p>Pero sobre todo: saber trasladar mi conocimiento a la IA.</p>
+                    <p class="ms-chain">Knowledge → Context → Agent</p>
+                </div>
+                <div class="milestone-track ms-track"><span class="done"></span><span class="current"></span><span></span></div>
+            </section>
+
+            <!-- PAUSA: PREGUNTA AL PÚBLICO #2 -->
+            <section data-background-gradient="radial-gradient(circle at 85% 10%, #2a1d2b 0%, #111827 60%)">
+                <p class="gradient-text ask-mark">#</p>
+                <blockquote class="ask-box">
+                    <p>"¿Qué sabes tú que un agente no podría saber simplemente leyendo tu código?"</p>
+                </blockquote>
             </section>
 
             <!-- SECTION OPENER 04 -->
@@ -358,7 +702,27 @@
                 <h1 class="gradient-text" style="font-size: 4em;">04</h1>
                 <h2>EXECUTION</h2>
                 <p class="subtitle">Estrategias de orquestación pura.</p>
-                <span class="sticker orange" style="bottom: -70px; left: 100px; --r: -6deg;">🎼 menos teclear, más orquestar</span>
+                <span class="sticker orange" style="bottom: -70px; left: 0; right: 0; width: fit-content; margin: 0 auto; --r: -2deg;">🎼 menos teclear, más orquestar</span>
+            </section>
+
+            <!-- TOKEN ECONOMICS -->
+            <section class="ms" data-background-gradient="radial-gradient(circle at 95% 5%, #2a1d2b 0%, #111827 55%)">
+                <div class="ms-header">
+                    <h2>Token Economics</h2>
+                    <span class="ms-tag">EFICIENCIA</span>
+                </div>
+                <p class="subtitle flow-intro">No todas las tareas necesitan el mismo modelo.</p>
+                <div class="grid-2 models">
+                    <div class="box model--pink">
+                        <h3>🧠 Modelo Potente</h3>
+                        <p class="dim">Arquitectura · Razonamiento profundo · Debugging complejo · Planificación inicial</p>
+                    </div>
+                    <div class="box model--orange">
+                        <h3>⚡ Modelo Rápido / Económico</h3>
+                        <p class="dim">Boilerplate · Documentación · Cambios mecánicos · Tareas repetitivas</p>
+                    </div>
+                </div>
+                <p class="models-rule">Modelo adecuado ≠ Modelo más potente</p>
             </section>
 
             <!-- PLAN MODE -->
@@ -374,6 +738,97 @@
                         <span style="font-size: 3em;">⚡</span>
                         <h4 style="color: var(--accent-pink);">Decidir CÓMO hacerlo</h4>
                         <p class="dim">Ejecutar código</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ¿UN AGENTE O VARIOS? -->
+            <section class="ms" data-background-gradient="radial-gradient(circle at 95% 5%, #2a1d2b 0%, #111827 55%)">
+                <div class="ms-header">
+                    <h2>¿Un agente o varios?</h2>
+                    <span class="ms-tag">PARALELISMO</span>
+                </div>
+                <div class="grid-2 agents">
+                    <div class="box agents-seq fragment">
+                        <p class="ms-label">Secuencial (Tradicional)</p>
+                        <div class="seq-lane">
+                            <span class="run">Agent</span><span class="wait">esperar</span><span class="run">Agent</span><span class="wait">esperar</span>
+                        </div>
+                        <!-- Los logos aparecen y luego se borran, antes de la caja de paralelo -->
+                        <div class="fragment">
+                            <div class="seq-lane seq-logos fragment fade-out">
+                                <i></i><img src="images/youtube.svg" alt="YouTube"><i></i><img src="images/dota2.svg" alt="Dota 2">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="box ms-box--accent fragment">
+                        <p class="highlight ms-label">Trabajo en Paralelo</p>
+                        <div class="par">
+                            <span class="par-task">Task</span>
+                            <div class="par-lanes"><span>Agent A</span><span>Agent B</span><span>Agent C</span></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- EL PROBLEMA DE CONCURRENCIA -->
+            <section class="ms" data-background-gradient="radial-gradient(circle at 95% 5%, #2a1d2b 0%, #111827 55%)">
+                <div class="ms-header">
+                    <h2>El problema de concurrencia</h2>
+                    <span class="ms-tag">DESAFÍO</span>
+                </div>
+                <div class="box conc-box">
+                    <p class="ms-label">Ejemplo: Construyendo un Dashboard</p>
+                    <div class="conc-agents">
+                        <span class="conc-a">Agent A: Maquetar tabla</span>
+                        <span class="conc-b">Agent B: Maquetar User Menu</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- DASHBOARD DE EJEMPLO (maqueta en HTML) -->
+            <section data-background-gradient="radial-gradient(circle at 95% 5%, #2a1d2b 0%, #111827 55%)">
+                <div class="dash" role="img" aria-label="Dashboard moderno con una tabla de pedidos y el menú de perfil abierto en la esquina superior derecha">
+                    <div class="dash-chrome"><i></i><i></i><i></i><span>app.midashboard.com/pedidos</span></div>
+                    <div class="dash-app">
+                        <aside class="dash-side">
+                            <div class="dash-logo"><b></b>Acme</div>
+                            <span>Inicio</span>
+                            <span class="is-active">Pedidos</span>
+                            <span>Clientes</span>
+                            <span>Productos</span>
+                            <span>Reportes</span>
+                        </aside>
+                        <div class="dash-main">
+                            <header class="dash-top">
+                                <div class="dash-search">Buscar pedidos…</div>
+                                <div class="dash-user">
+                                    <span class="dash-bell"></span>
+                                    <span class="dash-avatar">JP</span>
+                                    <div class="dash-menu">
+                                        <div class="dash-menu-head"><span class="dash-avatar">JP</span><div><strong>Jean Paul</strong><small>jean@midashboard.com</small></div></div>
+                                        <span>Mi perfil</span>
+                                        <span>Configuración</span>
+                                        <span>Facturación</span>
+                                        <span class="dash-menu-out">Cerrar sesión</span>
+                                    </div>
+                                </div>
+                            </header>
+                            <div class="dash-body">
+                                <h4>Pedidos recientes</h4>
+                                <table class="dash-table">
+                                    <thead><tr><th>Pedido</th><th>Cliente</th><th>Estado</th><th>Monto</th><th>Fecha</th></tr></thead>
+                                    <tbody>
+                                        <tr><td class="dash-id">#1042</td><td>María Torres</td><td><span class="dash-badge dash-badge--paid">Pagado</span></td><td class="dash-num">S/ 1,250.00</td><td class="dash-muted">12 oct</td></tr>
+                                        <tr><td class="dash-id">#1041</td><td>Carlos Ruiz</td><td><span class="dash-badge dash-badge--pending">Pendiente</span></td><td class="dash-num">S/ 480.00</td><td class="dash-muted">12 oct</td></tr>
+                                        <tr><td class="dash-id">#1040</td><td>Lucía Fernández</td><td><span class="dash-badge dash-badge--paid">Pagado</span></td><td class="dash-num">S/ 2,100.00</td><td class="dash-muted">11 oct</td></tr>
+                                        <tr><td class="dash-id">#1039</td><td>Diego Salas</td><td><span class="dash-badge dash-badge--cancel">Cancelado</span></td><td class="dash-num">S/ 320.00</td><td class="dash-muted">11 oct</td></tr>
+                                        <tr><td class="dash-id">#1038</td><td>Ana Quispe</td><td><span class="dash-badge dash-badge--paid">Pagado</span></td><td class="dash-num">S/ 960.00</td><td class="dash-muted">10 oct</td></tr>
+                                        <tr><td class="dash-id">#1037</td><td>Jorge Vega</td><td><span class="dash-badge dash-badge--pending">Pendiente</span></td><td class="dash-num">S/ 1,780.00</td><td class="dash-muted">10 oct</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </section>
@@ -401,11 +856,15 @@
             </section>
 
             <!-- HITO: POR ESTO ME PAGAN #3 -->
-            <section data-transition="zoom" data-background-gradient="radial-gradient(circle at center, #2a1d2b 0%, #111827 70%)">
-                <h2 class="punchline" style="font-size: 2em !important;">POR ESTO ME PAGAN</h2>
-                <h1 class="gradient-text milestone-num">#3</h1>
-                <p class="subtitle" style="font-size: 1em !important;">El agente escribe, el developer orquesta y entrega.</p>
-                <div class="milestone-track"><span class="done"></span><span class="done"></span><span class="current"></span></div>
+            <section class="ms" data-transition="zoom" data-background-gradient="radial-gradient(circle at 85% 10%, #2a1d2b 0%, #111827 60%)">
+                <div class="ms-header">
+                    <h2>POR ESTO ME PAGAN <span class="gradient-text">#3</span></h2>
+                </div>
+                <h1 class="gradient-text ms-title">Orquestar y entregar</h1>
+                <div class="box ms-box--accent ms-statement">
+                    <p>El agente escribe, el developer orquesta y entrega.</p>
+                </div>
+                <div class="milestone-track ms-track"><span class="done"></span><span class="done"></span><span class="current"></span></div>
             </section>
 
             <!-- SECTION OPENER 05 -->
@@ -417,10 +876,10 @@
 
             <!-- LA PARADOJA -->
             <section data-background-image="https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?q=80&w=2070&auto=format&fit=crop" data-background-opacity="0.1" data-background-color="#111827">
-                <div style="border: 1px solid var(--accent-orange); padding: 40px; background: rgba(17, 24, 39, 0.9); border-radius: 20px; box-shadow: 0 10px 30px rgba(249, 115, 22, 0.1);">
-                    <h3 class="subtitle highlight" style="letter-spacing: 3px;">LA PARADOJA</h3>
-                    <h2 class="mt-4">Mientras mejor sea la IA programando...</h2>
-                    <h1 class="gradient-text mt-4">Más importante es entender programación.</h1>
+                <div style="border: 1px solid var(--accent-orange); padding: 32px 40px; background: rgba(17, 24, 39, 0.9); border-radius: 20px; box-shadow: 0 10px 30px rgba(249, 115, 22, 0.1);">
+                    <h3 class="subtitle highlight glitch" data-text="LA PARADOJA" style="letter-spacing: 3px; font-size: 1.1em !important;">LA PARADOJA</h3>
+                    <h2 class="mt-4" style="font-size: 1.6em;">Mientras mejor sea la IA programando...</h2>
+                    <h1 class="gradient-text mt-4" style="font-size: 3.1em;">Más importante es entender programación.</h1>
                 </div>
             </section>
 
@@ -445,10 +904,102 @@
             <section data-transition="zoom" data-background="#111827">
                 <!-- Icono representativo (Reemplazando G de google por un logo genérico tech o mantener texto) -->
                 <h1 style="font-size: 3em;">💡</h1>
-                <h2>Don’t compete with AI at writing code.</h2>
-                <h1 class="punchline mt-4" style="font-size: 2.2em !important;">Learn to tell it what code is worth writing.</h1>
-                <p class="fragment dim mt-4" style="margin-top: 50px;">¡Gracias CodeOn! — Jean Paul Diaz</p>
-                <img class="sticker fragment" src="https://http.cat/200.jpg" alt="200 OK cat" style="bottom: 20px; right: 90px; width: 140px; --r: 8deg;">
+                <h2>La IA escribe el código.</h2>
+                <h1 class="punchline mt-4 fragment" data-fragment-index="0" style="font-size: 1.7em !important; line-height: 1.35;"><span class="fragment bulb-mark" data-fragment-index="1">Por esto me pagan: saber qué construir, trasladar mi conocimiento a la IA y entregar valor.</span></h1>
+                <p class="fragment dim mt-4" data-fragment-index="1" style="margin-top: 30px;">¡Gracias CodeOn! — Jean Paul Diaz</p>
+                <div class="sticker fragment applause" data-fragment-index="2" style="top: -20px; right: -10px; --r: 6deg;">
+                    <img src="images/dicaprio-applause.gif" alt="Leonardo DiCaprio aplaudiendo">
+                    <span>👏 aquí es donde aplauden</span>
+                </div>
+            </section>
+
+            <!-- FINAL: PANTALLA NEGRA CON BAILE -->
+            <section data-background-color="#000000">
+                <img class="dance" src="images/dancing-banana.gif" alt="Plátano bailando">
+                <!-- Pon aquí el archivo de música: images/technical-difficulties.mp3 -->
+                <audio src="images/technical-difficulties.mp3" data-autoplay loop></audio>
+            </section>
+
+            <!-- POST-CRÉDITOS -->
+            <section data-background-color="#000000">
+                <p class="subtitle">No te vayas todavía…</p>
+            </section>
+
+            <!-- SHOW TIME -->
+            <section data-transition="zoom" data-background-color="#000000">
+                <h1 class="gradient-text showtime glitch" data-text="SHOW TIME">SHOW TIME</h1>
+            </section>
+
+            <!-- LINKS QUE TE RECOMIENDO -->
+            <section data-transition="convex" data-background-gradient="radial-gradient(circle at 95% 5%, #2a1d2b 0%, #111827 55%)">
+                <h1 class="gradient-text">Links que te recomiendo</h1>
+            </section>
+
+            <!-- LINK: 4D FRAMEWORK -->
+            <section data-background-iframe="https://academy.claude.com/es/courses/ai-fluency-framework-foundations/the-4d-framework" data-background-interactive>
+                <div class="link-card">
+                    <p class="link-tag">CURSOS</p>
+                    <h3>Claude Academy</h3>
+                    <p>La lección de Claude Academy sobre las cuatro competencias de AI Fluency y más</p>
+                    <a href="https://academy.claude.com/es/courses/ai-fluency-framework-foundations/the-4d-framework" target="_blank" rel="noopener">academy.claude.com/es/courses/ai-fluency-framework-foundations/the-4d-framework</a>
+                </div>
+            </section>
+
+            <!-- LINK: CLAUDE.MD (GitHub bloquea iframes; de fondo va una copia renderizada en claude-md.html) -->
+            <section data-background-iframe="claude-md.html" data-background-interactive>
+                <div class="link-card">
+                    <p class="link-tag">CLAUDE.MD</p>
+                    <h3>andrej-karpathy-skills</h3>
+                    <p>Guías de comportamiento para reducir los errores comunes de los LLM al programar: pensar antes de codear, priorizar lo simple y hacer cambios quirúrgicos.</p>
+                    <a href="https://github.com/multica-ai/andrej-karpathy-skills/blob/main/CLAUDE.md" target="_blank" rel="noopener">github.com/multica-ai/andrej-karpathy-skills/blob/main/CLAUDE.md</a>
+                </div>
+            </section>
+
+            <!-- LINK: HUMANOYDEV -->
+            <section data-background-iframe="https://humanoydev.com/" data-background-interactive>
+                <div class="link-card">
+                    <p class="link-tag">MI ESPACIO</p>
+                    <h3>humanoydev</h3>
+                    <p>Un espacio para construir software con IA sin dejar de pensar como humano. Experimentos, artículos y recursos.</p>
+                    <a href="https://humanoydev.com/" target="_blank" rel="noopener">humanoydev.com/</a>
+                </div>
+            </section>
+
+            <!-- LINK: FRONTEND.PE -->
+            <section data-background-iframe="https://frontend.pe/" data-background-interactive>
+                <div class="link-card">
+                    <p class="link-tag">COMUNIDAD</p>
+                    <h3>Frontend.pe</h3>
+                    <p>La comunidad frontend del Perú: meetups, talleres y networking para profesionales, estudiantes y entusiastas de la tecnología.</p>
+                    <a href="https://frontend.pe/" target="_blank" rel="noopener">frontend.pe/</a>
+                </div>
+            </section>
+
+            <!-- QR: WHATSAPP FRONTEND.PE + ESTAS DIAPOSITIVAS -->
+            <section data-background-video="https://cdn.pixabay.com/video/2025/07/02/289001_large.mp4" data-background-video-loop data-background-video-muted data-background-opacity="0.9">
+                <h2 class="qr-title">Llévatelo</h2>
+                <div class="qr-pair">
+                    <figure class="qr-box">
+                        <img src="images/qr-frontendpe-whatsapp.png" alt="QR para unirse al grupo de WhatsApp de Frontend Perú">
+                        <figcaption>Únete al WhatsApp de Frontend Perú</figcaption>
+                    </figure>
+                    <figure class="qr-box">
+                        <img src="images/qr-get-on-code.svg" alt="QR a jean.humanoydev.com">
+                        <figcaption>Estas diapositivas<span>jean.humanoydev.com</span></figcaption>
+                    </figure>
+                </div>
+                <span class="sticker orange fragment questions">🙋 ¿Preguntas? ¡Dispara!</span>
+            </section>
+
+            <!-- CIERRE: PRÓXIMO EVENTO DE FRONTEND PERÚ (embed de Luma de fondo; luma.com bloquea iframes directos) -->
+            <section data-background-iframe="https://luma.com/embed/event/evt-AIPfW5LkvQuWiVA/simple" data-background-interactive data-background-color="#111827">
+                <div class="link-card meetup-card">
+                    <p class="link-tag">PRÓXIMO EVENTO</p>
+                    <h3>Frontend.pe Meetup #1126</h3>
+                    <p>Jueves 5 de noviembre · 6:00 p. m. ¡Nos vemos ahí!</p>
+                    <img src="images/qr-frontendpe-meetup.svg" alt="QR al evento Frontend.pe Meetup #1126 en Luma">
+                    <a href="https://luma.com/vr94w3ju" target="_blank" rel="noopener">luma.com/vr94w3ju</a>
+                </div>
             </section>
 
         </div>
@@ -470,7 +1021,7 @@
         const milestoneHint = document.getElementById('milestone-hint');
         function updateMilestoneHint(event) {
             const next = event.currentSlide.dataset.nextMilestone;
-            milestoneHint.textContent = next ? '💸 ' + next : '';
+            milestoneHint.textContent = next ? '#' : '';
             milestoneHint.classList.toggle('on', Boolean(next));
         }
         Reveal.on('ready', updateMilestoneHint);

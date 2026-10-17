@@ -267,9 +267,15 @@
         .reveal .qr-box img { display: block; width: 100%; height: auto; margin: 0; padding: 14px; box-sizing: border-box; background: #fff; border-radius: 10px; }
         .qr-box figcaption { margin-top: 16px; font-family: 'Space Grotesk', sans-serif; font-size: 0.6em; font-weight: 700; line-height: 1.3; color: var(--text-light); }
         .qr-box figcaption span { display: block; margin-top: 6px; font-family: 'Fira Code', monospace; font-size: 0.7em; font-weight: 400; color: #94a3b8; }
-        .questions { bottom: -70px; left: 0; right: 0; width: fit-content; margin: 0 auto; --r: -8deg; font-size: 0.95em; padding: 14px 26px; }
-        .reveal .meetup-card img { display: block; width: 100%; height: auto; margin: 0 0 14px; padding: 14px; box-sizing: border-box; background: #fff; border-radius: 10px; }
-        .link-card.meetup-card { width: 360px; }
+        /* En el flujo (no absoluto): queda centrado bajo los QR y reveal centra todo el conjunto */
+        .questions { position: relative; display: inline-block; margin-top: 36px; --r: -4deg; font-size: 0.65em; padding: 10px 22px; }
+        .reveal .meetup-card img { display: block; width: 200px; height: auto; margin: 4px 0 12px; padding: 12px; box-sizing: border-box; background: #fff; border-radius: 10px; }
+        .reveal .meetup-card h3 { font-size: 0.95em; }
+        .meetup-row { display: flex; align-items: center; justify-content: center; gap: 50px; }
+        .link-card.meetup-card { position: static; transform: none; flex: none; width: 380px; }
+        .reveal img.devi.devi--inline { position: static; flex: none; width: 340px; }
+        /* Devi, la mascota de CodeOn: sticker sin marco, con el mismo bamboleo */
+        .reveal img.devi { position: absolute; z-index: 10; height: auto; margin: 0; transform: rotate(var(--r)); animation: wobble 4s ease-in-out infinite; filter: drop-shadow(0 10px 18px rgba(0, 0, 0, 0.45)); }
         /* Pausa para interactuar con el público */
         .reveal .ask-mark { font-family: 'Space Grotesk', sans-serif; font-size: 2.2em; line-height: 1; margin: 0 0 30px; }
         .reveal .ask-box { width: 75%; margin: 0 auto; padding: 30px 50px; background: rgba(17, 24, 39, 0.7); border: 2px dashed rgba(249, 115, 22, 0.55); border-radius: 18px; box-shadow: none; font-style: normal; }
@@ -302,6 +308,7 @@
                     <h3 class=" subtitle mt-4">Entonces, ¿para qué me pagan?</h3>
                     <p class=" dim mt-4" style="font-weight: 300;">Del código generado a la entrega de valor con agentes.</p>
                     <p class=" highlight" style="font-size: 0.6em; margin-top: 40px; letter-spacing: 2px;">JEAN PAUL DIAZ</p>
+                    <img class="devi" src="images/devi/devi-brazos-cruzados.png" alt="Devi, la mascota de CodeOn, con los brazos cruzados" style="bottom: -60px; right: -70px; width: 230px; --r: 4deg;">
                 </div>
                 <!-- <img class="sticker fragment" src="https://i.redd.it/0hatpl001br71.jpg" alt="Software engineers complaining about their job" style="top: -70px; right: -40px; width: 180px; --r: 7deg;"> -->
             </section>
@@ -460,6 +467,7 @@
                     <p>"Si mañana la IA escribe el 90% de tu código…</p>
                     <p class="highlight">¿qué conocimiento tuyo sigue teniendo valor?"</p>
                 </blockquote>
+                <img class="devi" src="images/devi/devi-cafe.png" alt="Devi tomando café" style="bottom: -40px; right: -50px; width: 210px; --r: -4deg;">
             </section>
 
             <!-- SECTION OPENER 02 -->
@@ -865,6 +873,7 @@
                     <p>El agente escribe, el developer orquesta y entrega.</p>
                 </div>
                 <div class="milestone-track ms-track"><span class="done"></span><span class="done"></span><span class="current"></span></div>
+                <img class="devi fragment" src="images/devi/devi-celebra.png" alt="Devi celebrando" style="bottom: -50px; right: -60px; width: 220px; --r: 5deg;">
             </section>
 
             <!-- SECTION OPENER 05 -->
@@ -928,6 +937,7 @@
             <!-- SHOW TIME -->
             <section data-transition="zoom" data-background-color="#000000">
                 <h1 class="gradient-text showtime glitch" data-text="SHOW TIME">SHOW TIME</h1>
+                <img class="devi" src="images/devi/devi-compu.png" alt="Devi programando en su laptop" style="bottom: -70px; left: 0; right: 0; margin: 0 auto; width: 240px; --r: 0deg;">
             </section>
 
             <!-- LINKS QUE TE RECOMIENDO -->
@@ -993,12 +1003,16 @@
 
             <!-- CIERRE: PRÓXIMO EVENTO DE FRONTEND PERÚ (embed de Luma de fondo; luma.com bloquea iframes directos) -->
             <section data-background-iframe="https://luma.com/embed/event/evt-AIPfW5LkvQuWiVA/simple" data-background-interactive data-background-color="#111827">
-                <div class="link-card meetup-card">
-                    <p class="link-tag">PRÓXIMO EVENTO</p>
-                    <h3>Frontend.pe Meetup #1126</h3>
-                    <p>Jueves 5 de noviembre · 6:00 p. m. ¡Nos vemos ahí!</p>
-                    <img src="images/qr-frontendpe-meetup.svg" alt="QR al evento Frontend.pe Meetup #1126 en Luma">
-                    <a href="https://luma.com/vr94w3ju" target="_blank" rel="noopener">luma.com/vr94w3ju</a>
+                <!-- En el flujo (no absoluto) para que reveal centre el conjunto y nada se corte -->
+                <div class="meetup-row">
+                    <img class="devi devi--inline" src="images/devi/devi-last-dance.png" alt="Devi despidiéndose: The Last Dance" style="--r: -5deg;">
+                    <div class="link-card meetup-card">
+                        <p class="link-tag">PRÓXIMO EVENTO</p>
+                        <h3>Frontend.pe Meetup #1126</h3>
+                        <p>Jueves 5 de noviembre · 6:00 p. m. ¡Nos vemos ahí!</p>
+                        <img src="images/qr-frontendpe-meetup.svg" alt="QR al evento Frontend.pe Meetup #1126 en Luma">
+                        <a href="https://luma.com/vr94w3ju" target="_blank" rel="noopener">luma.com/vr94w3ju</a>
+                    </div>
                 </div>
             </section>
 

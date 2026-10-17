@@ -16,7 +16,7 @@ npm run deploy            # build + `wrangler deploy`
 npm run cf-typegen        # Regenerate worker-configuration.d.ts (global `Env` type)
 ```
 
-There is no test suite. The README uses npm, but both `package-lock.json` and `pnpm-lock.yaml` are committed.
+Requires Node 22+ (`.nvmrc`; run `nvm use` first): Wrangler refuses to start on Node 20. There is no test suite. The README uses npm, but both `package-lock.json` and `pnpm-lock.yaml` are committed.
 
 ## Architecture
 

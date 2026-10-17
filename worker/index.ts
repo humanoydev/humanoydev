@@ -6,7 +6,8 @@
  *
  *   humanoydev.com/            → sitio principal
  *   jean.humanoydev.com/       → contenido de /jean
- *   humanoydev.com/jean        → redirección 301 a jean.humanoydev.com
+ *   jean.humanoydev.com/x/     → archivos estáticos de public/jean/x/ (p. ej. diapositivas)
+ *   humanoydev.com/jean/x      → redirección 301 a jean.humanoydev.com/x
  *   www.humanoydev.com/*       → redirección 301 a humanoydev.com
  *   jean.humanoydev.com/otra   → redirección 301 a humanoydev.com/otra
  *
@@ -21,6 +22,16 @@ const JEAN_PREFIX = "jean.";
 // Archivos que la página de jean necesita en su propio subdominio.
 function isAsset(pathname: string): boolean {
   return pathname.startsWith("/_next/") || /\.[a-z0-9]+$/i.test(pathname);
+}
+
+// Las redirecciones de los assets (p. ej. añadir la barra final) apuntan a /jean/...;
+// en el subdominio deben apuntar a la ruta sin el prefijo.
+function withoutJeanPrefix(response: Response): Response {
+  const location = response.headers.get("Location");
+  if (!location?.startsWith("/jean/")) return response;
+  const fixed = new Response(response.body, response);
+  fixed.headers.set("Location", location.slice("/jean".length));
+  return fixed;
 }
 
 export default {
@@ -42,6 +53,13 @@ export default {
         rewritten.pathname = "/jean";
         return env.ASSETS.fetch(new Request(rewritten, request));
       }
+      // Archivos de public/jean/ (p. ej. diapositivas) se sirven sin el prefijo /jean.
+      if (!url.pathname.startsWith("/_next/")) {
+        const rewritten = new URL(url);
+        rewritten.pathname = `/jean${url.pathname}`;
+        const response = await env.ASSETS.fetch(new Request(rewritten, request));
+        if (response.status !== 404) return withoutJeanPrefix(response);
+      }
       if (isAsset(url.pathname)) {
         return env.ASSETS.fetch(request);
       }
@@ -53,7 +71,10 @@ export default {
 
     // URL canónica de la página de Jean en producción
     if (isProduction && (url.pathname === "/jean" || url.pathname.startsWith("/jean/"))) {
-      return Response.redirect(`https://${JEAN_PREFIX}${APEX}/`, 301);
+      const target = new URL(url);
+      target.hostname = `${JEAN_PREFIX}${APEX}`;
+      target.pathname = url.pathname.slice("/jean".length) || "/";
+      return Response.redirect(target.toString(), 301);
     }
 
     return env.ASSETS.fetch(request);

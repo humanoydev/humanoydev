@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <title>CodeOn 2026 - Jean Paul Diaz</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- Reveal.js CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/reset.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/reveal.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/theme/night.min.css" id="theme">
+    
+    <!-- Fuentes Premium -->
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&family=Inter:wght@300;400;600&family=Space+Grotesk:wght@700;900&display=swap" rel="stylesheet">
+    
+    <style>
+        /* PALETA DE COLORES PERSONALIZADA */
+        :root {
+            --bg-dark: #111827;
+            --bg-muted: #334155;
+            --accent-orange: #F97316;
+            --accent-pink: #FB7185;
+            --text-light: #F8FAFC;
+        }
+        
+        .reveal { font-family: 'Inter', sans-serif; background-color: var(--bg-dark); color: var(--text-light); }
+        .reveal h1, .reveal h2, .reveal h3 { font-family: 'Space Grotesk', sans-serif; text-transform: none; margin-bottom: 20px; color: var(--text-light); }
+        
+        /* Ajuste estricto de tamaños para evitar overflow */
+        .reveal h1 { font-size: 2.8em; line-height: 1.1; }
+        .reveal h2 { font-size: 2em; line-height: 1.2; }
+        .subtitle { font-size: 1.2em !important; color: #cbd5e1; font-weight: 300; font-family: 'Inter', sans-serif; }
+        .reveal p { font-size: 0.85em; line-height: 1.4; }
+        
+        /* Utilidades de Diseño Alto Impacto usando la nueva paleta */
+        .gradient-text {
+            background: linear-gradient(90deg, var(--accent-orange), var(--accent-pink));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 900;
+        }
+        .punchline {
+            color: var(--accent-pink);
+            font-size: 1.5em !important;
+            font-weight: 900;
+            text-shadow: 0 10px 30px rgba(251, 113, 133, 0.4);
+        }
+        .highlight { color: var(--accent-orange); }
+        .dim { color: #94a3b8; }
+        
+        /* Layouts horizontales */
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; align-items: start; margin-top: 30px; }
+        .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; align-items: center; margin-top: 30px; }
+        
+        /* Elementos UI */
+        .pill { background: var(--bg-muted); border: 1px solid var(--accent-orange); padding: 8px 20px; border-radius: 50px; font-size: 0.6em; display: inline-block; margin: 5px; font-weight: 600; color: var(--text-light); }
+        .code-block { font-family: 'Fira Code', monospace; background: #0f172a; color: var(--accent-orange); padding: 20px; border-radius: 8px; font-size: 0.7em; text-align: left; border: 1px solid var(--bg-muted); box-shadow: 0 10px 30px rgba(0,0,0,0.5); margin: 20px auto; display: inline-block; }
+        .meme-container img { max-height: 35vh; border-radius: 12px; border: 2px solid var(--bg-muted); box-shadow: 0 10px 20px rgba(0,0,0,0.3); }
+        
+        /* Cajas de impacto */
+        .box { background: var(--bg-muted); padding: 25px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.05); font-size: 0.75em; text-align: left; box-shadow: 0 4px 15px rgba(0,0,0,0.2);}
+
+        /* Stickers decorativos */
+        .sticker { position: absolute; z-index: 10; --r: -6deg; transform: rotate(var(--r)); animation: wobble 4s ease-in-out infinite; font-family: 'Fira Code', monospace; font-size: 0.42em; font-weight: 600; line-height: 1.3; padding: 8px 14px; border-radius: 10px; background: var(--text-light); color: var(--bg-dark); border: 3px solid #fff; box-shadow: 0 6px 16px rgba(0,0,0,0.45); white-space: nowrap; }
+        .sticker.orange { background: var(--accent-orange); }
+        .sticker.pink { background: var(--accent-pink); }
+        .reveal img.sticker { padding: 0; margin: 0; width: 150px; border: 5px solid #fff; border-radius: 8px; background: #fff; }
+        @keyframes wobble { 0%, 100% { transform: rotate(var(--r)); } 50% { transform: rotate(calc(var(--r) + 3deg)) scale(1.04); } }
+
+        /* Encuesta: borde naranja en la opción que acaba de aparecer; con todas visibles, sigue al hover */
+        /* subgrid: emoji, título, descripción y dato comparten filas entre las 3 cards, así la división queda alineada */
+        .poll .box { border: 2px solid transparent; transition: border-color 0.3s; font-size: 0.58em; text-align: center; padding: 18px; display: grid; grid-row: span 4; grid-template-rows: subgrid; row-gap: 0; }
+        .poll .box > .dim { display: block; margin-top: 6px; line-height: 1.35; }
+        .poll .box.current-fragment { border-color: var(--accent-orange); }
+        .poll .poll-stat { margin-top: 14px; padding-bottom: 2px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.1); font-size: 0.85em; color: var(--text-light); }
+        .poll .poll-stat .gradient-text { font-size: 1.8em; display: block; line-height: 1.1; }
+        .poll:not(:has(.fragment:not(.visible))):hover .box { border-color: transparent; }
+        .poll:not(:has(.fragment:not(.visible))) .box:hover { border-color: var(--accent-orange); }
+
+        /* Hitos "POR ESTO ME PAGAN" */
+        .milestone-num { font-size: 5em !important; line-height: 1; margin: 0 0 20px; }
+        .milestone-track { display: flex; justify-content: center; align-items: center; margin-top: 40px; }
+        .milestone-track span { position: relative; width: 14px; height: 14px; border-radius: 50%; background: var(--bg-muted); }
+        .milestone-track span + span { margin-left: 70px; }
+        .milestone-track span + span::before { content: ''; position: absolute; right: 14px; top: 6px; width: 70px; height: 2px; background: var(--bg-muted); }
+        .milestone-track .done { background: var(--accent-orange); }
+        .milestone-track .current { background: var(--accent-pink); box-shadow: 0 0 0 6px rgba(251, 113, 133, 0.25); }
+        /* Indicador para el expositor: el siguiente slide es un hito */
+        #milestone-hint { position: absolute; left: 14px; bottom: 10px; z-index: 30; font-family: 'Fira Code', monospace; font-size: 11px; color: #94a3b8; opacity: 0; filter: grayscale(1); pointer-events: none; }
+        #milestone-hint.on { opacity: 0.3; }
+
+        /* Demo del botón */
+        .demo-btn { font-family: 'Inter', sans-serif; font-weight: 600; font-size: 0.9em; padding: 18px 48px; border: none; border-radius: 12px; cursor: pointer; transition: background 0.2s; }
+        .demo-btn--red { background: #EF4444; color: #111827; box-shadow: 0 10px 30px rgba(239, 68, 68, 0.4); }
+        .demo-btn--red:hover { background: #DC2626; }
+        .demo-btn--bad { background: #000; color: #000; outline: none; box-shadow: 0 0 0 1px #1f2937; }
+        .demo-btn--bad:hover { background: #EF4444; }
+    </style>
+</head>
+<body>
+    <div class="reveal">
+        <div id="milestone-hint"></div>
+        <div class="slides">
+            
+            <!-- PORTADA CODEON -->
+            <section data-transition="zoom" data-background-video="https://cdn.pixabay.com/video/2025/07/02/289001_large.mp4" data-background-video-loop data-background-video-muted data-background-opacity="0.9">
+                <div class="fragment">
+                    <div class="" style="margin-bottom: 40px;">
+                        <span class="pill" style="background: var(--accent-orange); border:none; color: var(--bg-dark);">CodeOn 2026</span>
+                        <span class="pill" style="background: var(--accent-pink); border:none; color: var(--bg-dark);">Octubre</span>
+                    </div>
+                    <h1 class="" >La IA me escribe el código.</h1>
+                    <h3 class=" subtitle mt-4">Entonces, ¿para qué me pagan?</h3>
+                    <p class=" dim mt-4" style="font-weight: 300;">Del código generado a la entrega de valor con agentes.</p>
+                    <p class=" highlight" style="font-size: 0.6em; margin-top: 40px; letter-spacing: 2px;">JEAN PAUL DIAZ VIVANCO</p>
+                </div>
+                <!-- <img class="sticker fragment" src="https://i.redd.it/0hatpl001br71.jpg" alt="Software engineers complaining about their job" style="top: -70px; right: -40px; width: 180px; --r: 7deg;"> -->
+            </section>
+            <!-- https://alcor.com/wp-content/uploads/2025/08/meme-13.png.webp -->
+            <!-- QUIÉN SOY -->
+            <section data-background="#111827">
+                <h2>Jean Paul Diaz</h2>
+                <p class="subtitle">Frontend Engineer · Tech Lead</p>
+                <span class="sticker" style="top: -40px; right: 40px; --r: 8deg;">✅ works on my machine expert</span>
+                <div class="fragment mt-4">
+                    <span class="pill">📦 Construcción de Productos Reales</span>
+                    <span class="pill">🏗️ Arquitectura Frontend</span>
+                    <span class="pill">🤖 AI-Assisted Development</span>
+                    <span class="pill" style="border-color: var(--accent-pink);">⚡ Claude Code Ninja</span>
+                    <div style="display: flex; justify-content: center; align-items: center; gap: 50px; margin-top: 40px;">
+                        <img src="logos/brikl.svg" alt="Brikl" style="height: 38px; margin: 0;">
+                        <img src="logos/interbank.svg" alt="Interbank" style="height: 34px; margin: 0;">
+                        <img src="logos/rappibank.png" alt="RappiBank" style="height: 34px; margin: 0;">
+                        <img src="logos/tcs.svg" alt="TCS" style="height: 46px; margin: 0; filter: brightness(0) invert(1);">
+                    </div>
+                </div>
+            </section>
+
+            <!-- ENCUESTA -->
+            <section data-transition="slide" data-background="#111827">
+                <h2 style="margin-bottom: 10px;">¿Dónde estás parado hoy?</h2>
+                <p class="subtitle" style="margin: 0; font-size: 1em !important;">Levanta la mano…</p>
+                <p class="dim" style="font-size: 0.5em; margin-top: 5px;">(puedes levantarla más de una vez)</p>
+                <div class="grid-3 poll" style="align-items: stretch; margin-top: 20px;">
+                    <div class="box fragment text-center" data-fragment-index="0">
+                        <div style="font-size: 1.8em; line-height: 1.2;">💬</div>
+                        <strong style="color: var(--text-light);">Chat</strong>
+                        <span class="dim">Usas ChatGPT, Gemini o Claude, codeas, copias y pegas</span>
+                        <div class="fragment poll-stat" data-fragment-index="3"><span class="gradient-text">63%</span> usa chats de IA</div>
+                    </div>
+                    <div class="box fragment text-center" data-fragment-index="1">
+                        <div style="font-size: 1.8em; line-height: 1.2;">🤖</div>
+                        <strong style="color: var(--text-light);">Agente</strong>
+                        <span class="dim">La IA trabaja dentro de tu editor o terminal<br><span style="white-space: nowrap;">Copilot · Cursor · Claude Code</span></span>
+                        <div class="fragment poll-stat" data-fragment-index="3"><span class="gradient-text">66%</span> usa asistentes o agentes de código</div>
+                    </div>
+                    <div class="box fragment text-center" data-fragment-index="2">
+                        <div style="font-size: 1.8em; line-height: 1.2;">🎼</div>
+                        <strong style="color: var(--text-light);">Orquestación</strong>
+                        <span class="dim">Varios agentes en paralelo o en flujos automatizados</span>
+                        <div class="fragment poll-stat" data-fragment-index="3"><span class="gradient-text">26%</span> usa flujos de agentes automatizados</div>
+                    </div>
+                </div>
+                <p class="fragment" data-fragment-index="3" style="margin-top: 20px; margin-bottom: 0; font-size: 0.62em;">Solo el <strong class="highlight">17%</strong> no usa IA… pero solo el <strong style="color: var(--accent-pink);">6.6%</strong> confía en ella para decisiones importantes.</p>
+                <p class="fragment dim" data-fragment-index="3" style="font-size: 0.4em; margin-top: 10px;">Fuente: <a href="https://survey.stackoverflow.co/2026/ai" target="_blank" rel="noopener" style="color: inherit; text-decoration: underline;">Stack Overflow Developer Survey 2026</a> · +30.000 devs · 169 países</p>
+            </section>
+
+            <!-- SECTION OPENER 01 -->
+            <section data-transition="convex" data-background="#111827">
+                <h1 class="gradient-text" style="font-size: 4em;">01</h1>
+                <h2>KNOWLEDGE</h2>
+                <p class="subtitle">Del código costoso a la abundancia de sintaxis.</p>
+                <span class="sticker orange" style="bottom: -70px; left: 80px; --r: -8deg; font-size: 0.5em;">🦆 rubber duck certified</span>
+            </section>
+
+            <!-- ANTES -->
+            <section data-background="#111827">
+                <h2>La Fricción Desapareció</h2>
+                <div class="grid-2">
+                    <div class="fragment box text-left">
+                        <h4 style="color: var(--accent-pink);">ANTES (Lento)</h4>
+                        <ul style="font-size: 0.9em; line-height: 1.6;" class="dim">
+                            <li>🔍 Google manual</li>
+                            <li>💬 Stack Overflow c/p</li>
+                            <li>📚 Leer Docs</li>
+                            <li>🤖 Prompts aislados</li>
+                        </ul>
+                    </div>
+                    <div class="fragment meme-container text-center">
+                        <img src="https://i.imgflip.com/1ur9b0.jpg" alt="Drake Meme">
+                        <p class="highlight" style="font-size: 0.7em; margin-top:10px;">Agente haciendo el ticket entero</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ECUACIÓN -->
+            <section data-transition="zoom" data-background="#111827">
+                <h2>El código se volvió barato.</h2>
+                <p class="subtitle fragment">La capacidad de producir sintaxis ya no es el diferenciador.</p>
+                <div class="fragment mt-4" style="background: var(--bg-muted); padding: 20px 40px; border-radius: 50px; display: inline-block;">
+                    <span style="font-size: 1.5em; font-weight: bold;">Problema</span> 
+                    <span class="highlight" style="margin: 0 20px;">→</span> 
+                    <span class="gradient-text" style="font-size: 1.5em;">Agente</span> 
+                    <span class="highlight" style="margin: 0 20px;">→</span> 
+                    <span class="dim" style="font-size: 0.8em; text-decoration: line-through;">Código</span>
+                </div>
+                <span class="sticker pink fragment" style="bottom: -80px; right: 60px; --r: 5deg;">Ctrl+C / Ctrl+V → @deprecated</span>
+            </section>
+
+            <!-- VELOCIDAD != VALOR -->
+            <section data-background-video="https://assets.mixkit.co/videos/preview/mixkit-fast-train-passing-by-a-station-4309-large.mp4" data-background-video-loop="true" data-background-opacity="0.3" data-background-color="#111827">
+                <h1 style="text-shadow: 0 5px 15px #000;">Velocidad ≠ Valor</h1>
+                <div class="fragment" style="background: var(--bg-dark); padding: 20px 40px; border-radius: 10px; display: inline-block; border-left: 5px solid var(--accent-pink); margin-top: 20px;">
+                    <h3 style="margin:0;">Mala Decisión <span class="highlight">+</span> Agente Rápidos</h3>
+                    <h1 class="punchline" style="margin-top: 10px; font-size: 2em !important;">= PROBLEMA GIGANTE</h1>
+                    <img class="sticker" src="https://media.giphy.com/media/73FzKOYDpp7VK/giphy.gif" alt="Coyote estrellándose contra un muro" style="bottom: -215px; left: 40px; width: 300px; --r: -6deg;">
+                </div>
+            </section>
+
+            <!-- DIFICULTADES -->
+            <section data-background="#111827">
+                <h2>¿Qué sigue siendo difícil?</h2>
+                <div class="grid-3" style="font-size: 0.8em;">
+                    <div class="box fragment">🏗️ <strong style="color: var(--text-light);">Arquitectura</strong><br><span class="dim">Límites y escalabilidad</span></div>
+                    <div class="box fragment">🐛 <strong style="color: var(--text-light);">Debugging</strong><br><span class="dim">Errores sutiles</span></div>
+                    <div class="box fragment">📦 <strong style="color: var(--text-light);">Producto</strong><br><span class="dim">Necesidades reales</span></div>
+                    <div class="box fragment">⚖️ <strong style="color: var(--text-light);">Trade-offs</strong><br><span class="dim">Deuda vs Velocidad</span></div>
+                    <div class="box fragment">🛡️ <strong style="color: var(--text-light);">Seguridad</strong><br><span class="dim">Protección de datos</span></div>
+                    <div class="box fragment">🧠 <strong style="color: var(--text-light);">Decisiones</strong><br><span class="dim">Bajo incertidumbre</span></div>
+                </div>
+            </section>
+
+            <!-- SINO... -->
+            <section data-background="#111827" data-next-milestone="#1">
+                <p class="subtitle">Conocimiento técnico. No solamente: <em>¿Cómo escribo esto?</em></p>
+                <h2 class="fragment mt-4">Sino...</h2>
+                <div class="fragment" style="font-size: 1.5em; font-family: 'Space Grotesk'; font-weight: bold; line-height: 1.5; margin: 30px 0;">
+                    <span class="highlight">¿Qué</span> debería construir?<br>
+                    <span class="highlight">¿Por qué?</span><br>
+                    <span style="color: var(--accent-pink);">¿Qué</span> puede salir mal?
+                </div>
+            </section>
+
+            <!-- HITO: POR ESTO ME PAGAN #1 -->
+            <section data-transition="zoom" data-background-gradient="radial-gradient(circle at center, #2a1d2b 0%, #111827 70%)">
+                <h2 class="punchline" style="font-size: 2em !important;">POR ESTO ME PAGAN</h2>
+                <h1 class="gradient-text milestone-num">#1</h1>
+                <p class="subtitle" style="font-size: 1em !important;">Saber qué construir, por qué, y qué puede salir mal.</p>
+                <div class="milestone-track"><span class="current"></span><span></span><span></span></div>
+            </section>
+
+            <!-- SECTION OPENER 02 -->
+            <section data-transition="convex" data-background="#111827">
+                <h1 class="gradient-text" style="font-size: 4em;">02</h1>
+                <h2>AI FLUENCY</h2>
+                <p class="subtitle">No es saber hacer prompts. Es saber orquestar.</p>
+                <span class="sticker" style="bottom: -70px; right: 120px; --r: 6deg;">prompt engineer™ <span style="opacity:.6">(autoproclamado)</span></span>
+            </section>
+
+            <!-- DIRECTOR -->
+            <section data-background="#111827">
+                <h2>Developer + Agent</h2>
+                <p class="subtitle">Dejas de escribir. Te conviertes en director.</p>
+                <div class="code-block fragment mt-4" style="font-size: 0.8em; border-color: var(--accent-orange);">
+                    <span style="color: var(--text-light);">Developer</span> ──> <span style="color: var(--accent-orange);">Contexto</span> ──> <span style="color: var(--accent-pink);">Agente</span> ──> <span style="color: var(--text-light);">Validación</span>
+                </div>
+                <span class="sticker orange fragment" style="bottom: -60px; right: 60px; --r: -7deg; font-size: 0.55em;">🎬 ¡Y... acción!</span>
+            </section>
+
+            <!-- SECTION OPENER 03 -->
+            <section data-transition="convex" data-background="#111827">
+                <h1 class="gradient-text" style="font-size: 4em;">03</h1>
+                <h2>CONTEXT ENG.</h2>
+                <p class="subtitle">Cómo alimentar a la IA con contexto de calidad.</p>
+            </section>
+
+            <!-- EL BOTÓN ROJO -->
+            <section data-background-color="#334155">
+                <button class="demo-btn demo-btn--red">Comprar ahora</button>
+                <br>
+                <div class="code-block fragment" style="font-size: 0.95em; border-color: var(--accent-pink); background: var(--bg-dark); margin-top: 50px;">
+                    > Agente, cambia el botón rojo a negro.
+                </div>
+                <h2 class="fragment mt-4" style="color: var(--text-light);">¿Terminamos?</h2>
+                <span class="sticker pink fragment" style="bottom: -60px; right: 80px; --r: 6deg;">¿qué podría salir mal? 🙃</span>
+            </section>
+
+            <!-- TASK FAILED SUCCESSFULLY -->
+            <section data-background="#111827">
+                <h2 class="punchline">Botón Negro + Texto Negro</h2>
+                <div class="grid-2" style="align-items: center; margin-top: 10px;">
+                    <div class="text-center" style="position: relative;">
+                        <button class="demo-btn demo-btn--bad">Comprar ahora</button>
+                        <p class="dim" style="font-size: 0.5em; margin-top: 15px;">👆 pasa el mouse</p>
+                        <span class="sticker pink" style="top: -45px; right: 10px; --r: 8deg;">contraste 1:1 😎</span>
+                    </div>
+                    <div class="code-block" style="font-size: 0.55em; margin: 0; line-height: 1.6;">
+                        <span style="color: var(--text-light);">.btn-primary {</span><br>
+                        <span style="color: var(--accent-pink);">-  background: var(--color-danger);</span><br>
+                        <span style="color: #4ade80;">+  background: #000000;</span> <span class="dim">// hardcode</span><br>
+                        <span style="color: var(--text-light);">&nbsp;&nbsp;&nbsp;color: #111827;</span> <span class="dim">// nadie lo miró</span><br>
+                        <span style="color: var(--text-light);">&nbsp;&nbsp;&nbsp;outline: none;</span> <span class="dim">// adiós teclado</span><br>
+                        <span style="color: var(--text-light);">}</span><br>
+                        <span style="color: var(--text-light);">.btn-primary:hover {</span><br>
+                        <span style="color: var(--text-light);">&nbsp;&nbsp;&nbsp;background: #EF4444;</span> <span class="dim">// sigue rojo</span><br>
+                        <span style="color: var(--text-light);">}</span>
+                    </div>
+                </div>
+                <h3 class="subtitle" style="margin-top: 25px; font-size: 0.9em !important;">Se ve "bien", pero destruiste:</h3>
+                <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-top: 10px; font-size: 0.7em;">
+                    <div class="box fragment text-center" style="border-left: 2px solid var(--accent-pink); padding: 14px;">❌ Accesibilidad (WCAG)</div>
+                    <div class="box fragment text-center" style="border-left: 2px solid var(--accent-pink); padding: 14px;">❌ Estados (Hover/Active)</div>
+                    <div class="box fragment text-center" style="border-left: 2px solid var(--accent-pink); padding: 14px;">❌ Design System Tokens</div>
+                    <div class="box fragment text-center" style="border-left: 2px solid var(--accent-pink); padding: 14px;">❌ Tests Unitarios</div>
+                </div>
+            </section>
+
+            <!-- CULPA DE QUIEN -->
+            <section data-background="#111827">
+                <h2>¿El problema fue la IA?</h2>
+                <div class="grid-2">
+                    <div class="fragment box" style="border-left: 4px solid var(--accent-pink); position: relative;">
+                        <h4 style="color: var(--accent-pink);">PROMPT INSUFICIENTE</h4>
+                        <p class="dim" style="font-family: monospace;">"Cambia el botón rojo a negro"</p>
+                        <img class="sticker" src="https://http.cat/417.jpg" alt="417 Expectation Failed cat" style="top: calc(100% - 15px); left: 40px; width: 135px; --r: -8deg;">
+                    </div>
+                    <div class="fragment box" style="border-left: 4px solid var(--accent-orange);">
+                        <h4 class="highlight">PROMPT + CONTEXTO</h4>
+                        <p class="dim" style="font-family: monospace;">"Cambia el botón respetando el Design System, accesibilidad y tests..."</p>
+                    </div>
+                </div>
+                <h3 class="fragment mt-4 subtitle" style="color: var(--text-light) !important; font-weight: bold; margin-top: 70px;">No se trata de escribir mejores prompts.<br><span class="highlight">Se trata de construir mejores entornos.</span></h3>
+            </section>
+
+            <!-- PIPELINE DE CONTEXTO -->
+            <section data-background="#111827" data-next-milestone="#2">
+                <h2>De la cabeza al Repositorio</h2>
+                <p class="subtitle">El código explica el CÓMO. La documentación explica el POR QUÉ.</p>
+                <div class="code-block fragment mt-4" style="width: 100%; max-width: 600px; position: relative;">
+                    /docs<br>
+                    ├── architecture.md<br>
+                    ├── business-rules.md<br>
+                    └── CLAUDE.md <span class="dim">// Reglas de orquestación</span>
+                    <span class="sticker" style="top: -25px; right: -90px; --r: 8deg;">// TODO: documentar (2019)</span>
+                </div>
+            </section>
+
+            <!-- HITO: POR ESTO ME PAGAN #2 -->
+            <section data-transition="zoom" data-background-gradient="radial-gradient(circle at center, #2a1d2b 0%, #111827 70%)">
+                <h2 class="punchline" style="font-size: 2em !important;">POR ESTO ME PAGAN</h2>
+                <h1 class="gradient-text milestone-num">#2</h1>
+                <p class="subtitle" style="font-size: 1em !important;">Saber trasladar mi conocimiento a la IA.</p>
+                <div class="milestone-track"><span class="done"></span><span class="current"></span><span></span></div>
+            </section>
+
+            <!-- SECTION OPENER 04 -->
+            <section data-transition="convex" data-background="#111827">
+                <h1 class="gradient-text" style="font-size: 4em;">04</h1>
+                <h2>EXECUTION</h2>
+                <p class="subtitle">Estrategias de orquestación pura.</p>
+                <span class="sticker orange" style="bottom: -70px; left: 100px; --r: -6deg;">🎼 menos teclear, más orquestar</span>
+            </section>
+
+            <!-- PLAN MODE -->
+            <section data-background="#111827">
+                <h2>Plan Mode: Planificar ≠ Ejecutar</h2>
+                <div class="grid-2 mt-4">
+                    <div class="box fragment text-center" style="border-top: 4px solid var(--accent-orange);">
+                        <span style="font-size: 3em;">🧠</span>
+                        <h4 class="highlight">Decidir QUÉ hacer</h4>
+                        <p class="dim">Analizar e Investigar</p>
+                    </div>
+                    <div class="box fragment text-center" style="border-top: 4px solid var(--accent-pink);">
+                        <span style="font-size: 3em;">⚡</span>
+                        <h4 style="color: var(--accent-pink);">Decidir CÓMO hacerlo</h4>
+                        <p class="dim">Ejecutar código</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SPIDERMAN CONCURRENCY -->
+            <section data-background-image="https://i.imgflip.com/1tkjq9.jpg" data-background-size="cover" data-background-opacity="0.12" data-background-color="#111827">
+                <h2>¿Varios agentes en la misma carpeta?</h2>
+                <div class="meme-container fragment mt-4">
+                    <img src="https://http.cat/409.jpg" alt="409 Conflict cat" style="transform: rotate(-3deg); border: 6px solid #fff;">
+                    <h3 class="punchline" style="margin-top:-20px;">CONFLICTO DE CONCURRENCIA</h3>
+                </div>
+            </section>
+
+            <!-- WORKTREES -->
+            <section data-background="#111827" data-next-milestone="#3">
+                <h2>🌳 Aislamiento: Git Worktrees</h2>
+                <p class="subtitle">Mantén a tus agentes separados y felices.</p>
+                <span class="sticker orange" style="top: -40px; right: 60px; --r: 7deg;">🌳 git happens</span>
+                <div class="code-block fragment mt-4" style="font-size: 0.8em;">
+                    main<br>
+                    ├── agent/dashboard  <span style="color: var(--accent-orange);">(Agent A)</span><br>
+                    ├── agent/tests      <span style="color: var(--accent-pink);">(Agent B)</span><br>
+                    └── agent/docs       <span style="color: var(--text-light);">(Agent C)</span><br>
+                </div>
+            </section>
+
+            <!-- HITO: POR ESTO ME PAGAN #3 -->
+            <section data-transition="zoom" data-background-gradient="radial-gradient(circle at center, #2a1d2b 0%, #111827 70%)">
+                <h2 class="punchline" style="font-size: 2em !important;">POR ESTO ME PAGAN</h2>
+                <h1 class="gradient-text milestone-num">#3</h1>
+                <p class="subtitle" style="font-size: 1em !important;">El agente escribe, el developer orquesta y entrega.</p>
+                <div class="milestone-track"><span class="done"></span><span class="done"></span><span class="current"></span></div>
+            </section>
+
+            <!-- SECTION OPENER 05 -->
+            <section data-transition="convex" data-background="#111827">
+                <h1 class="gradient-text" style="font-size: 4em;">05</h1>
+                <h2>EL FUTURO</h2>
+                <p class="subtitle">CodeOn 2026+</p>
+            </section>
+
+            <!-- LA PARADOJA -->
+            <section data-background-image="https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?q=80&w=2070&auto=format&fit=crop" data-background-opacity="0.1" data-background-color="#111827">
+                <div style="border: 1px solid var(--accent-orange); padding: 40px; background: rgba(17, 24, 39, 0.9); border-radius: 20px; box-shadow: 0 10px 30px rgba(249, 115, 22, 0.1);">
+                    <h3 class="subtitle highlight" style="letter-spacing: 3px;">LA PARADOJA</h3>
+                    <h2 class="mt-4">Mientras mejor sea la IA programando...</h2>
+                    <h1 class="gradient-text mt-4">Más importante es entender programación.</h1>
+                </div>
+            </section>
+
+            <!-- ROADMAP HORIZONTAL -->
+            <section data-background="#111827">
+                <h2>El Roadmap del Nuevo Dev</h2>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 50px; font-weight: bold; font-family: 'Space Grotesk'; font-size: 0.75em; border-bottom: 2px solid var(--bg-muted); padding-bottom: 20px;">
+                    <span class="fragment">1. Entender</span>
+                    <span class="fragment highlight">→</span>
+                    <span class="fragment">2. Diseñar</span>
+                    <span class="fragment highlight">→</span>
+                    <span class="fragment">3. Dar Contexto</span>
+                    <span class="fragment highlight">→</span>
+                    <span class="fragment">4. Orquestar</span>
+                    <span class="fragment highlight">→</span>
+                    <span class="fragment gradient-text" style="font-size: 1.5em; margin-left: 20px;">5. Entregar Valor</span>
+                </div>
+                <span class="sticker fragment" style="bottom: -90px; right: 40px; --r: -5deg; font-size: 0.5em;">6. ???&nbsp;&nbsp;7. Profit 💸</span>
+            </section>
+
+            <!-- CIERRE -->
+            <section data-transition="zoom" data-background="#111827">
+                <!-- Icono representativo (Reemplazando G de google por un logo genérico tech o mantener texto) -->
+                <h1 style="font-size: 3em;">💡</h1>
+                <h2>Don’t compete with AI at writing code.</h2>
+                <h1 class="punchline mt-4" style="font-size: 2.2em !important;">Learn to tell it what code is worth writing.</h1>
+                <p class="fragment dim mt-4" style="margin-top: 50px;">¡Gracias CodeOn! — Jean Paul Diaz</p>
+                <img class="sticker fragment" src="https://http.cat/200.jpg" alt="200 OK cat" style="bottom: 20px; right: 90px; width: 140px; --r: 8deg;">
+            </section>
+
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/reveal.min.js"></script>
+    <script>
+        Reveal.initialize({
+            hash: true,
+            progress: true,
+            center: true,
+            transition: 'slide',
+            margin: 0.1,
+            width: 1100,
+            height: 700
+        });
+
+        // Indicador discreto para el expositor: el siguiente slide es un hito "POR ESTO ME PAGAN"
+        const milestoneHint = document.getElementById('milestone-hint');
+        function updateMilestoneHint(event) {
+            const next = event.currentSlide.dataset.nextMilestone;
+            milestoneHint.textContent = next ? '💸 ' + next : '';
+            milestoneHint.classList.toggle('on', Boolean(next));
+        }
+        Reveal.on('ready', updateMilestoneHint);
+        Reveal.on('slidechanged', updateMilestoneHint);
+    </script>
+</body>
+</html>

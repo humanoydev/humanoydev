@@ -10,6 +10,7 @@
     "run_worker_first": true,
     "not_found_handling": "404-page"
   },
+  // `npm run preview` usa wrangler.local.jsonc, que es esta config sin routes.
   "routes": [
     { "pattern": "humanoydev.com", "custom_domain": true },
     { "pattern": "www.humanoydev.com", "custom_domain": true },

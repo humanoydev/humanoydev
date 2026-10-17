@@ -1,0 +1,16 @@
+// Config solo para `npm run preview`. Es igual a wrangler.jsonc pero sin `routes`:
+// con routes, `wrangler dev` reescribe cada petición al primer dominio
+// (humanoydev.com) y el Worker no puede ver jean.localhost.
+// Si cambias wrangler.jsonc, replica aquí lo que no sean las routes.
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "humanoydev",
+  "main": "worker/index.ts",
+  "compatibility_date": "2026-10-01",
+  "assets": {
+    "directory": "./out",
+    "binding": "ASSETS",
+    "run_worker_first": true,
+    "not_found_handling": "404-page"
+  }
+}

@@ -7,7 +7,7 @@
     "build": "next build",
     "lint": "eslint",
     "typecheck:worker": "tsc -p worker",
-    "preview": "next build && wrangler dev",
+    "preview": "next build && wrangler dev -c wrangler.local.jsonc",
     "deploy": "next build && wrangler deploy",
     "cf-typegen": "wrangler types"
   },

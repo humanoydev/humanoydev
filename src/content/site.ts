@@ -59,18 +59,44 @@ export type Talk = {
   date: string;
   title: string;
   event: string;
+  eventHref?: string;
   description: string;
   slidesHref: string;
 };
 
 export const talks: Talk[] = [
   {
+    date: "11 jul 2016",
+    title: "Automatización en el flujo front-end",
+    event: "ISIL JS Day",
+    description:
+      "Jade (hoy Pug), Stylus, CoffeeScript y Gulp.js para automatizar el flujo de trabajo front-end.",
+    slidesHref: "https://jeanpaul1304.github.io/gulpjs-expo/",
+  },
+  {
+    date: "27 mar 2019",
+    title: "Progressive Web Apps & Workbox",
+    event: "Google I/O Extended",
+    description:
+      "Qué hace a una web app instalable, rápida y confiable: manifest, service workers, estrategias de caché con Workbox y Lighthouse.",
+    slidesHref: "https://jeanpaul1304.github.io/pwa-expo/",
+  },
+  {
     date: "12–13 sep 2026",
     title: "AI Fluency & Claude Code",
-    event: "f13, UTEC, Lima",
+    event: "F13: Code Summit, UTEC, Lima",
+    eventHref: "https://f13.pe/",
     description:
-      "Claude Code como laboratorio para trabajar con IA con criterio, no como un tutorial de funciones.",
-    slidesHref: "#",
+      "De programar con IA a hacer ingeniería con IA: Claude Code como laboratorio para trabajar con criterio, no como un tutorial de funciones.",
+    slidesHref:
+      "https://docs.google.com/presentation/d/1ON7QR0ZnDbmqnaetGMMabgJn_TCFmDEQ5Ymij1tAZcY/edit?usp=sharing",
+  },
+  {
+    date: "17 oct 2026",
+    title: "La IA me escribe el código. Entonces, ¿para qué me pagan?",
+    event: "CodeOn 2026",
+    description: "Del código generado a la entrega de valor con agentes.",
+    slidesHref: `${JEAN_URL}/get-on-code-2026/`,
   },
   {
     // TODO: confirmar título oficial y fecha.
@@ -94,13 +120,28 @@ export type Project = {
 
 export const projects: Project[] = [
   {
-    kind: "Skill para Claude",
-    title: "claude-design-reconcile",
+    kind: "Arquitectura y Team Lead Frontend",
+    title: "Banca por Internet Interbank",
     description:
-      "Sincroniza diseños de Claude Design, componentes React y Figma en ambas direcciones.",
-    linkText: "Ver el proyecto",
-    href: "#",
-    mono: true,
+      "Diseñé la arquitectura frontend y lideré al equipo de la plataforma web con la que los clientes de Interbank operan sus cuentas, transferencias y pagos.",
+    linkText: "Ver Banca por Internet",
+    href: "https://interbank.pe/canales-digitales/banca-por-internet",
+  },
+  {
+    kind: "Banking Tech Lead",
+    title: "RappiBank",
+    description:
+      "Lideré la tecnología bancaria del banco digital que nació de la alianza entre Rappi e Interbank en el Perú.",
+    linkText: "Ver RappiBank",
+    href: "https://interbank.pe/rappibank?tabs=que-es",
+  },
+  {
+    kind: "Frontend Tech Lead",
+    title: "Comunal: app y dashboard",
+    description:
+      "Lideré el frontend de la app para buscar, reservar y pagar salas de reuniones en la red de coworking de Comunal, y de su dashboard.",
+    linkText: "Ver Comunal",
+    href: "https://app.comunal.co/",
   },
   {
     kind: "Flujo de trabajo",

@@ -1,8 +1,12 @@
 import type { Metadata } from "next";
+import { openGraphBase } from "@/app/shared-metadata";
+
+const description = "La comunidad de humanoydev está en construcción: newsletter, encuentros y colaboraciones.";
 
 export const metadata: Metadata = {
   title: "Comunidad",
-  description: "La comunidad de humanoydev está en construcción: newsletter, encuentros y colaboraciones.",
+  description,
+  openGraph: { ...openGraphBase, title: "Comunidad · humanoydev", description, url: "/comunidad" },
 };
 
 type CommitState = "done" | "active" | "todo";

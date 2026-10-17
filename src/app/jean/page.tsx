@@ -1,10 +1,24 @@
 import type { Metadata } from "next";
-import { CONTACT_EMAIL, SITE_URL, projects, talks } from "@/content/site";
+import { openGraphBase } from "@/app/shared-metadata";
+import { CONTACT_EMAIL, JEAN_URL, SITE_URL, projects, talks } from "@/content/site";
+
+const title = "Jean Paul Diaz · web dev";
+const description = "Charlas, diapositivas y proyectos de Jean Paul Diaz, web dev.";
 
 // Esta ruta se sirve en jean.humanoydev.com: el Worker reescribe "/" a "/jean".
+// La imagen vive en public/jean/og.png, que el subdominio sirve como /og.png.
 export const metadata: Metadata = {
-  title: { absolute: "Jean Paul Diaz · web dev" },
-  description: "Charlas, diapositivas y proyectos de Jean Paul Diaz, web dev.",
+  title: { absolute: title },
+  description,
+  alternates: { canonical: JEAN_URL },
+  openGraph: {
+    ...openGraphBase,
+    type: "profile",
+    title,
+    description,
+    url: JEAN_URL,
+    images: [{ url: `${JEAN_URL}/og.png`, width: 1200, height: 630, alt: "Jean Paul Diaz, web dev" }],
+  },
 };
 
 const sections = [
@@ -74,7 +88,9 @@ export default function JeanPage() {
                 <p className="row__meta">{talk.date}</p>
                 <div className="row__body">
                   <h3 className="row__title">{talk.title}</h3>
-                  <p className="row__sub">{talk.event}</p>
+                  <p className="row__sub">
+                    {talk.eventHref ? <a href={talk.eventHref}>{talk.event}</a> : talk.event}
+                  </p>
                   <p className="row__desc">{talk.description}</p>
                 </div>
                 <a href={talk.slidesHref} className="text-link">

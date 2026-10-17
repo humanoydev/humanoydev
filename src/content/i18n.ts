@@ -3,8 +3,8 @@ import type { Metadata } from "next";
 export type Locale = "es" | "en";
 
 // Cada página del sitio principal con su ruta en cada idioma.
-// Si agregas una página, agrégala aquí para que funcione el botón ES/EN.
-const pagePaths: Record<Locale, string>[] = [
+// Si agregas una página, agrégala aquí: la usan el botón ES/EN, el hreflang y el sitemap.
+export const pagePaths: Record<Locale, string>[] = [
   { es: "/", en: "/en" },
   { es: "/explorar", en: "/en/explore" },
   { es: "/comunidad", en: "/en/community" },

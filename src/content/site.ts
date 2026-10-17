@@ -64,22 +64,14 @@ export type Talk = {
   slidesHref: string;
 };
 
+// De la más reciente a la más antigua: la página de Jean muestra las primeras 3.
 export const talks: Talk[] = [
   {
-    date: "11 jul 2016",
-    title: "Automatización en el flujo front-end",
-    event: "ISIL JS Day",
-    description:
-      "Jade (hoy Pug), Stylus, CoffeeScript y Gulp.js para automatizar el flujo de trabajo front-end.",
-    slidesHref: "https://jeanpaul1304.github.io/gulpjs-expo/",
-  },
-  {
-    date: "27 mar 2019",
-    title: "Progressive Web Apps & Workbox",
-    event: "Google I/O Extended",
-    description:
-      "Qué hace a una web app instalable, rápida y confiable: manifest, service workers, estrategias de caché con Workbox y Lighthouse.",
-    slidesHref: "https://jeanpaul1304.github.io/pwa-expo/",
+    date: "17 oct 2026",
+    title: "La IA me escribe el código. Entonces, ¿para qué me pagan?",
+    event: "CodeOn 2026",
+    description: "Del código generado a la entrega de valor con agentes.",
+    slidesHref: `${JEAN_URL}/get-on-code-2026/`,
   },
   {
     date: "12–13 sep 2026",
@@ -92,20 +84,20 @@ export const talks: Talk[] = [
       "https://docs.google.com/presentation/d/1ON7QR0ZnDbmqnaetGMMabgJn_TCFmDEQ5Ymij1tAZcY/edit?usp=sharing",
   },
   {
-    date: "17 oct 2026",
-    title: "La IA me escribe el código. Entonces, ¿para qué me pagan?",
-    event: "CodeOn 2026",
-    description: "Del código generado a la entrega de valor con agentes.",
-    slidesHref: `${JEAN_URL}/get-on-code-2026/`,
+    date: "27 mar 2019",
+    title: "Progressive Web Apps & Workbox",
+    event: "Google I/O Extended",
+    description:
+      "Qué hace a una web app instalable, rápida y confiable: manifest, service workers, estrategias de caché con Workbox y Lighthouse.",
+    slidesHref: "https://jeanpaul1304.github.io/pwa-expo/",
   },
   {
-    // TODO: confirmar título oficial y fecha.
-    date: "[fecha]",
-    title: "¿Por qué me pagan?",
-    event: "GDG Lima",
+    date: "11 jul 2016",
+    title: "Automatización en el flujo front-end",
+    event: "ISIL JS Day",
     description:
-      "Conocimiento, contexto, ejecución y valor: lo que aporta un desarrollador cuando la IA escribe código.",
-    slidesHref: "#",
+      "Jade (hoy Pug), Stylus, CoffeeScript y Gulp.js para automatizar el flujo de trabajo front-end.",
+    slidesHref: "https://jeanpaul1304.github.io/gulpjs-expo/",
   },
 ];
 

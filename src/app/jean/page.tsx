@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import { openGraphBase } from "@/app/shared-metadata";
-import { CONTACT_EMAIL, JEAN_URL, SITE_URL, projects, talks } from "@/content/site";
+import { CONTACT_EMAIL, JEAN_URL, SITE_URL, projects, talks, type Talk } from "@/content/site";
 
 const title = "Jean Paul Diaz · web dev";
 const description = "Charlas, diapositivas y proyectos de Jean Paul Diaz, web dev.";
@@ -26,6 +27,26 @@ const sections = [
   { href: "#proyectos", label: "Proyectos" },
   { href: "#contacto", label: "Contacto" },
 ];
+
+const VISIBLE_TALKS = 3;
+
+function renderTalk(talk: Talk) {
+  return (
+    <li key={talk.title} className="row">
+      <p className="row__meta">{talk.date}</p>
+      <div className="row__body">
+        <h3 className="row__title">{talk.title}</h3>
+        <p className="row__sub">
+          {talk.eventHref ? <a href={talk.eventHref}>{talk.event}</a> : talk.event}
+        </p>
+        <p className="row__desc">{talk.description}</p>
+      </div>
+      <a href={talk.slidesHref} className="text-link">
+        Ver diapositivas
+      </a>
+    </li>
+  );
+}
 
 export default function JeanPage() {
   return (
@@ -72,33 +93,33 @@ export default function JeanPage() {
               </a>
             </div>
           </div>
-          {/* TODO: reemplazar por tu foto (public/jean.jpg) con un <img> y su alt. */}
-          <div className="photo" aria-hidden="true">
-            [Tu foto]
-          </div>
+          {/* Ruta con /jean: funciona en local (/jean) y en el subdominio (el Worker sirve el asset). */}
+          <Image
+            src="/jean/images/sticker-720.png"
+            width={720}
+            height={720}
+            alt="Ilustración de Jean Paul Diaz con saco y los brazos cruzados"
+            className="photo photo--sticker"
+            priority
+          />
         </section>
 
         <section id="charlas" aria-labelledby="charlas-title" className="container section">
           <h2 id="charlas-title" className="section-title section-head">
             Charlas y presentaciones
           </h2>
-          <ol className="rows">
-            {talks.map((talk) => (
-              <li key={talk.title} className="row">
-                <p className="row__meta">{talk.date}</p>
-                <div className="row__body">
-                  <h3 className="row__title">{talk.title}</h3>
-                  <p className="row__sub">
-                    {talk.eventHref ? <a href={talk.eventHref}>{talk.event}</a> : talk.event}
-                  </p>
-                  <p className="row__desc">{talk.description}</p>
-                </div>
-                <a href={talk.slidesHref} className="text-link">
-                  Ver diapositivas
-                </a>
-              </li>
-            ))}
-          </ol>
+          <ol className="rows">{talks.slice(0, VISIBLE_TALKS).map(renderTalk)}</ol>
+          {talks.length > VISIBLE_TALKS && (
+            <details className="more">
+              <summary className="text-link">
+                <span className="more__open">Ver más charlas</span>
+                <span className="more__close">Ver menos</span>
+              </summary>
+              <ol className="rows" start={VISIBLE_TALKS + 1}>
+                {talks.slice(VISIBLE_TALKS).map(renderTalk)}
+              </ol>
+            </details>
+          )}
         </section>
 
         <section id="proyectos" aria-labelledby="proyectos-title" className="container section">

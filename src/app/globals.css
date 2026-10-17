@@ -156,7 +156,7 @@ h1, h2, h3, p { margin: 0; }
 .bio__desc { margin-top: 36px; max-width: 46ch; font-size: 21px; line-height: 1.55; }
 .bio .actions { margin-top: 32px; }
 .photo { flex: 0 1 340px; aspect-ratio: 4 / 5; border-radius: var(--radius-panel); background: var(--surface); display: flex; align-items: center; justify-content: center; color: var(--muted); }
-.photo--sticker { aspect-ratio: 1; height: auto; background: none; }
+img.photo { width: 340px; max-width: 100%; height: auto; object-fit: cover; }
 .projects { margin-top: 40px; display: flex; flex-wrap: wrap; gap: 48px 40px; }
 .project { flex: 1 1 300px; min-width: 0; border-top: 1.5px solid var(--ink); padding-top: 20px; }
 .project__kind { font-size: 16px; color: var(--muted); }

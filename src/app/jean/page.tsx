@@ -95,11 +95,11 @@ export default function JeanPage() {
           </div>
           {/* Ruta con /jean: funciona en local (/jean) y en el subdominio (el Worker sirve el asset). */}
           <Image
-            src="/jean/images/sticker-720.png"
-            width={720}
-            height={720}
-            alt="Ilustración de Jean Paul Diaz con saco y los brazos cruzados"
-            className="photo photo--sticker"
+            src="/jean/images/foto-saco-680.jpg"
+            width={680}
+            height={850}
+            alt="Jean Paul Diaz con saco gris y los brazos cruzados"
+            className="photo"
             priority
           />
         </section>

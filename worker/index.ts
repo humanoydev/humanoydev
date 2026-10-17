@@ -36,62 +36,80 @@ function withoutJeanPrefix(response: Response): Response {
   return fixed;
 }
 
+// Cabeceras de seguridad para todas las respuestas, redirecciones incluidas.
+const SECURITY_HEADERS: Record<string, string> = {
+  "X-Content-Type-Options": "nosniff",
+  "Referrer-Policy": "strict-origin-when-cross-origin",
+  "X-Frame-Options": "SAMEORIGIN",
+};
+
+function withSecurityHeaders(response: Response): Response {
+  // Las respuestas de ASSETS y Response.redirect tienen cabeceras inmutables.
+  const secured = new Response(response.body, response);
+  for (const [name, value] of Object.entries(SECURITY_HEADERS)) secured.headers.set(name, value);
+  return secured;
+}
+
+async function route(request: Request, env: Env): Promise<Response> {
+  const url = new URL(request.url);
+  const host = url.hostname;
+  const isProduction = host === APEX || host.endsWith(`.${APEX}`);
+
+  // www → dominio raíz
+  if (host === `www.${APEX}`) {
+    url.hostname = APEX;
+    return Response.redirect(url.toString(), 301);
+  }
+
+  // jean.humanoydev.com (o jean.localhost en desarrollo)
+  if (host.startsWith(JEAN_PREFIX)) {
+    if (url.pathname === "/" || url.pathname === "/index.html") {
+      const rewritten = new URL(url);
+      rewritten.pathname = "/jean";
+      return env.ASSETS.fetch(new Request(rewritten, request));
+    }
+    if (url.pathname === "/en" || url.pathname === "/en/") {
+      const rewritten = new URL(url);
+      rewritten.pathname = "/en/jean";
+      return env.ASSETS.fetch(new Request(rewritten, request));
+    }
+    // Archivos de public/jean/ (p. ej. diapositivas) se sirven sin el prefijo /jean.
+    if (!url.pathname.startsWith("/_next/")) {
+      const rewritten = new URL(url);
+      rewritten.pathname = `/jean${url.pathname}`;
+      const response = await env.ASSETS.fetch(new Request(rewritten, request));
+      if (response.status !== 404) return withoutJeanPrefix(response);
+    }
+    if (isAsset(url.pathname)) {
+      return env.ASSETS.fetch(request);
+    }
+    // Cualquier otra página pertenece al sitio principal.
+    const target = new URL(url);
+    target.hostname = host.slice(JEAN_PREFIX.length);
+    return Response.redirect(target.toString(), 301);
+  }
+
+  // URL canónica de la versión en inglés de la página de Jean en producción
+  if (isProduction && (url.pathname === "/en/jean" || url.pathname === "/en/jean/")) {
+    const target = new URL(url);
+    target.hostname = `${JEAN_PREFIX}${APEX}`;
+    target.pathname = "/en";
+    return Response.redirect(target.toString(), 301);
+  }
+
+  // URL canónica de la página de Jean en producción
+  if (isProduction && (url.pathname === "/jean" || url.pathname.startsWith("/jean/"))) {
+    const target = new URL(url);
+    target.hostname = `${JEAN_PREFIX}${APEX}`;
+    target.pathname = url.pathname.slice("/jean".length) || "/";
+    return Response.redirect(target.toString(), 301);
+  }
+
+  return env.ASSETS.fetch(request);
+}
+
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
-    const url = new URL(request.url);
-    const host = url.hostname;
-    const isProduction = host === APEX || host.endsWith(`.${APEX}`);
-
-    // www → dominio raíz
-    if (host === `www.${APEX}`) {
-      url.hostname = APEX;
-      return Response.redirect(url.toString(), 301);
-    }
-
-    // jean.humanoydev.com (o jean.localhost en desarrollo)
-    if (host.startsWith(JEAN_PREFIX)) {
-      if (url.pathname === "/" || url.pathname === "/index.html") {
-        const rewritten = new URL(url);
-        rewritten.pathname = "/jean";
-        return env.ASSETS.fetch(new Request(rewritten, request));
-      }
-      if (url.pathname === "/en" || url.pathname === "/en/") {
-        const rewritten = new URL(url);
-        rewritten.pathname = "/en/jean";
-        return env.ASSETS.fetch(new Request(rewritten, request));
-      }
-      // Archivos de public/jean/ (p. ej. diapositivas) se sirven sin el prefijo /jean.
-      if (!url.pathname.startsWith("/_next/")) {
-        const rewritten = new URL(url);
-        rewritten.pathname = `/jean${url.pathname}`;
-        const response = await env.ASSETS.fetch(new Request(rewritten, request));
-        if (response.status !== 404) return withoutJeanPrefix(response);
-      }
-      if (isAsset(url.pathname)) {
-        return env.ASSETS.fetch(request);
-      }
-      // Cualquier otra página pertenece al sitio principal.
-      const target = new URL(url);
-      target.hostname = host.slice(JEAN_PREFIX.length);
-      return Response.redirect(target.toString(), 301);
-    }
-
-    // URL canónica de la versión en inglés de la página de Jean en producción
-    if (isProduction && (url.pathname === "/en/jean" || url.pathname === "/en/jean/")) {
-      const target = new URL(url);
-      target.hostname = `${JEAN_PREFIX}${APEX}`;
-      target.pathname = "/en";
-      return Response.redirect(target.toString(), 301);
-    }
-
-    // URL canónica de la página de Jean en producción
-    if (isProduction && (url.pathname === "/jean" || url.pathname.startsWith("/jean/"))) {
-      const target = new URL(url);
-      target.hostname = `${JEAN_PREFIX}${APEX}`;
-      target.pathname = url.pathname.slice("/jean".length) || "/";
-      return Response.redirect(target.toString(), 301);
-    }
-
-    return env.ASSETS.fetch(request);
+    return withSecurityHeaders(await route(request, env));
   },
 } satisfies ExportedHandler<Env>;

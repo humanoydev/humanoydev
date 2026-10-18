@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import { openGraphBase } from "@/app/shared-metadata";
-import { CONTACT_EMAIL, JEAN_URL, SITE_URL, projects, talks, type Talk } from "@/content/site";
+import { CONTACT_EMAIL, JEAN_URL, LINKEDIN_URL, SITE_URL, projects, talks, type Talk } from "@/content/site";
 
 const title = "Jean Paul Diaz · web dev";
 const description = "Charlas, diapositivas y proyectos de Jean Paul Diaz, web dev.";
@@ -165,7 +165,14 @@ export default function JeanPage() {
 
       <footer className="container site-footer">
         <p>© 2026 Jean Paul Diaz</p>
-        <a href={SITE_URL}>Parte de humanoydev.com</a>
+        <ul className="footer-links">
+          <li>
+            <a href={LINKEDIN_URL}>LinkedIn</a>
+          </li>
+          <li>
+            <a href={SITE_URL}>Parte de humanoydev.com</a>
+          </li>
+        </ul>
       </footer>
     </>
   );

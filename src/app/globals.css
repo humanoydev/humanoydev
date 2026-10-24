@@ -366,6 +366,8 @@ a.jpa__brand:hover { color: var(--accent); }
 .jpa-admin__status--yes { background: var(--mint); color: #2f5a22; }
 .jpa-admin__status--no { background: var(--peach); color: var(--accent-hover); }
 .jpa-admin__actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.jpa-admin .jpa-admin__remind { border-color: var(--butter); background: #fff8dc; }
+.jpa-admin .jpa-admin__remind:hover { background: var(--ink); border-color: var(--ink); color: #fff; }
 .jpa-admin .jpa-admin__delete { color: #a2311b; }
 .jpa-admin .jpa-admin__delete:hover { background: #a2311b; border-color: #a2311b; color: #fff; }
 

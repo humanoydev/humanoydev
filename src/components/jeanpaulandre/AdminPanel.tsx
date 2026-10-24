@@ -48,10 +48,20 @@ function waPhone(phone: string) {
   return digits.length === 9 && digits.startsWith("9") ? `51${digits}` : digits;
 }
 
-function whatsappLink(guest: Guest) {
-  const text =
-    `¡Hola, ${guest.name}! 🥳 Te invitamos al baby shower de ${BABY_NAME}, ` +
-    `el ${babyShower.dateLabel.toLowerCase()}. Aquí está tu invitación: ${inviteLink(guest.token)}`;
+const fecha = babyShower.dateLabel.toLowerCase();
+
+// Mensajes de WhatsApp: la invitación y el recordatorio para quien aún no confirma.
+const MESSAGES = {
+  invite: (guest: Guest) =>
+    `¡Hola, ${guest.name}! 🥳 Te invitamos al baby shower de ${BABY_NAME}, el ${fecha}. ` +
+    `Aquí está tu invitación: ${inviteLink(guest.token)}`,
+  reminder: (guest: Guest) =>
+    `¡Hola, ${guest.name}! 💛 Te recordamos el baby shower de ${BABY_NAME}, el ${fecha}. ` +
+    `¿Nos acompañas? Confírmanos antes del ${babyShower.rsvpByLabel} aquí: ${inviteLink(guest.token)}`,
+};
+
+function whatsappLink(guest: Guest, message: keyof typeof MESSAGES = "invite") {
+  const text = MESSAGES[message](guest);
   // api.whatsapp.com y no wa.me: la redirección de wa.me rompe algunos emojis (salen como �).
   const params = new URLSearchParams({ text });
   if (guest.phone) params.set("phone", waPhone(guest.phone));
@@ -268,6 +278,16 @@ export function AdminPanel() {
                 <a className="jpa__chip" href={whatsappLink(guest)} target="_blank" rel="noopener noreferrer">
                   WhatsApp
                 </a>
+                {guest.attending === null && (
+                  <a
+                    className="jpa__chip jpa-admin__remind"
+                    href={whatsappLink(guest, "reminder")}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    Recordar
+                  </a>
+                )}
                 <button type="button" className="jpa__chip" onClick={() => copy(guest)}>
                   {copied === guest.id ? "¡Copiado!" : "Copiar link"}
                 </button>

@@ -12,5 +12,13 @@
     "binding": "ASSETS",
     "run_worker_first": true,
     "not_found_handling": "404-page"
-  }
+  },
+  // Base de datos del baby shower (invitados, visitas y respuestas). Ver worker/babyshower.ts.
+  "d1_databases": [{ "binding": "DB", "database_name": "jeanpaulandre", "migrations_dir": "migrations" }],
+  // Cloudflare Access del panel /admin (no son secretos). Vacías, la API de admin se niega
+  // en producción. Ejemplo: "https://<equipo>.cloudflareaccess.com" y el "Application Audience (AUD) Tag".
+  "vars": { "ACCESS_TEAM_DOMAIN": "", "ACCESS_AUD": "" },
+  // Aviso por correo de cada respuesta (worker/babyshower.ts, notifyRsvp). Las direcciones
+  // van en el secreto NOTIFY_TO y deben estar verificadas en Email Routing de humanoydev.com.
+  "send_email": [{ "name": "NOTIFY_EMAIL" }]
 }

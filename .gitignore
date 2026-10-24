@@ -46,3 +46,8 @@ next-env.d.ts
 
 # claude code (configuración personal)
 .claude/settings.local.json
+
+# Ecografía de Jean Paul André: el repo es público. Se despliega desde la copia local
+# (npm run deploy sube ./out), pero no se sube a GitHub.
+/public/jeanpaulandre/videos/
+/public/jeanpaulandre/images/ecografia-*

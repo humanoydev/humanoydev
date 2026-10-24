@@ -10,10 +10,26 @@
     "run_worker_first": true,
     "not_found_handling": "404-page"
   },
+  // Base de datos del baby shower (invitados, visitas y respuestas). Ver worker/babyshower.ts.
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "jeanpaulandre",
+      "database_id": "3625c030-ebf7-43b6-af66-598678802da1",
+      "migrations_dir": "migrations"
+    }
+  ],
+  // Cloudflare Access del panel /admin (no son secretos). Vacías, la API de admin se niega
+  // en producción. Ejemplo: "https://<equipo>.cloudflareaccess.com" y el "Application Audience (AUD) Tag".
+  "vars": { "ACCESS_TEAM_DOMAIN": "", "ACCESS_AUD": "" },
+  // Aviso por correo de cada respuesta (worker/babyshower.ts, notifyRsvp). Las direcciones
+  // van en el secreto NOTIFY_TO y deben estar verificadas en Email Routing de humanoydev.com.
+  "send_email": [{ "name": "NOTIFY_EMAIL" }],
   // `npm run preview` usa wrangler.local.jsonc, que es esta config sin routes.
   "routes": [
     { "pattern": "humanoydev.com", "custom_domain": true },
     { "pattern": "www.humanoydev.com", "custom_domain": true },
-    { "pattern": "jean.humanoydev.com", "custom_domain": true }
+    { "pattern": "jean.humanoydev.com", "custom_domain": true },
+    { "pattern": "jeanpaulandre.humanoydev.com", "custom_domain": true }
   ]
 }

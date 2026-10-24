@@ -174,3 +174,383 @@ img.photo { width: 340px; max-width: 100%; height: auto; object-fit: cover; }
 .footer-links { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 0 24px; }
 
 .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+
+/* Jean Paul André (jeanpaulandre.humanoydev.com): cápsula del tiempo, en tono infantil.
+   Redefine los tokens dentro de .jpa para que el resto de clases tome sus colores.
+   Los fondos y dibujos van a todo el ancho; solo el texto queda en .container. */
+body:has(.jpa) { background: #fdf8ef; }
+.jpa { --ground: #fdf8ef; --ink: #4a372c; --ink-soft: #6f5a4c; --line: #ecdfca; --accent: #b4532f; --accent-hover: #8e3f22; --sky: #d6e8f5; --peach: #fbdccb; --mint: #dbe9d2; --butter: #f8e6a8; --star: #f2c14e; --font-round: "Fredoka Variable"; --max: 1040px; position: relative; min-height: 100vh; overflow-x: clip; background: var(--ground); color: var(--ink); }
+.jpa__top { position: absolute; z-index: 3; top: 0; left: 0; right: 0; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 8px 24px; padding-block: 16px; font-family: var(--font-round), system-ui, sans-serif; font-size: 16px; font-weight: 500; color: var(--ink-soft); }
+.jpa__brand { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; color: var(--ink); text-decoration: none; font-weight: 600; }
+a.jpa__brand:hover { color: var(--accent); }
+.jpa__brand-star { width: 20px; height: 20px; color: var(--star); }
+
+/* Parallax: Parallax.tsx pone --scene-offset en cada .jpa-scene (distancia de su centro
+   al centro de la pantalla). Lo lejano (negativo) se queda atrás y lo cercano (positivo)
+   pasa más rápido. Usa `translate` para no chocar con las animaciones de `transform`. */
+.jpa-scene { position: relative; }
+.jpa-px { translate: 0 calc(var(--scene-offset, 0) * var(--depth) * 1px); will-change: translate; }
+.jpa-px--far { --depth: -0.45; }
+.jpa-px--mid { --depth: -0.25; }
+.jpa-px--near { --depth: 0.2; }
+.jpa-px--front { --depth: 0.4; }
+.jpa-px--content { --depth: -0.35; }
+
+/* Encabezado a pantalla completa: cielo, globos y colinas con animalitos */
+/* isolation: el z-index de las colinas solo cuenta dentro del encabezado. */
+.jpa__hero { isolation: isolate; overflow: hidden; min-height: 100vh; min-height: 100svh; display: flex; flex-direction: column; justify-content: center; padding-block: 120px 240px; background: linear-gradient(180deg, #c6dff1, var(--sky) 35%, #eaf3f9 70%, #fdf3e6); text-align: center; }
+/* Sin eventos: así el texto no tapa a los juguetes del cielo que quedan detrás. */
+.jpa__hero-content { position: relative; z-index: 1; width: 100%; pointer-events: none; }
+.jpa-sky, .jpa-ground { position: absolute; pointer-events: none; }
+.jpa-sky { inset: 0; }
+.jpa-sky > * { position: absolute; }
+.jpa-sky__moon { top: 13%; right: 13%; width: 64px; color: var(--butter); }
+.jpa-sky__cloud { color: #fff; }
+.jpa-sky__cloud--1 { top: 9%; left: 20%; width: 170px; }
+.jpa-sky__cloud--2 { top: 40%; right: 25%; width: 130px; opacity: 0.75; }
+.jpa-sky__cloud--3 { top: 56%; right: -40px; width: 280px; }
+.jpa-sky__cloud--4 { top: 60%; left: -50px; width: 240px; }
+.jpa-sky__birds { top: 18%; right: 32%; width: 72px; }
+.jpa-sky__balloon--bear { top: 18%; left: 6%; width: 170px; }
+.jpa-sky__balloon--mid { top: 24%; right: 7%; width: 112px; }
+.jpa-sky__balloon--small { top: 8%; left: 36%; width: 56px; opacity: 0.9; }
+.jpa-sky__star { color: var(--star); }
+.jpa-sky__star--1 { top: 22%; left: 27%; width: 20px; }
+.jpa-sky__star--2 { top: 10%; right: 38%; width: 28px; }
+.jpa-sky__star--3 { top: 46%; left: 21%; width: 22px; }
+.jpa-sky__star--4 { top: 34%; right: 19%; width: 18px; }
+.jpa-ground { z-index: 2; left: 0; right: 0; bottom: 0; height: 230px; }
+.jpa-ground > * { position: absolute; }
+.jpa-ground__hills { inset: 0; width: 100%; height: 100%; }
+.jpa-ground__bunny { left: 7%; bottom: 84px; width: 120px; }
+.jpa-ground__blocks { left: 23%; bottom: 34px; width: 136px; }
+.jpa-ground__duck { right: 27%; bottom: 30px; width: 116px; }
+.jpa-ground__elephant { right: 5%; bottom: 46px; width: 200px; }
+@media (max-width: 760px) {
+  .jpa__hero { padding-block: 104px 170px; }
+  .jpa-sky__moon { top: 9%; right: 8%; width: 44px; }
+  .jpa-sky__cloud--1 { top: 6%; left: 28%; width: 110px; }
+  .jpa-sky__cloud--2 { display: none; }
+  .jpa-sky__cloud--3 { top: 62%; right: -50px; width: 170px; }
+  .jpa-sky__cloud--4 { top: 66%; left: -50px; width: 150px; }
+  .jpa-sky__birds { top: 15%; right: 26%; width: 50px; }
+  .jpa-sky__balloon--bear { top: 12%; left: 3%; width: 88px; }
+  .jpa-sky__balloon--mid { top: 20%; right: 3%; width: 62px; }
+  .jpa-sky__balloon--small { display: none; }
+  .jpa-ground { height: 150px; }
+  .jpa-ground__bunny { left: 3%; bottom: 54px; width: 76px; }
+  .jpa-ground__blocks { left: 30%; bottom: 18px; width: 84px; }
+  .jpa-ground__duck { display: none; }
+  .jpa-ground__elephant { right: 3%; bottom: 26px; width: 124px; }
+}
+
+/* Dibujos sueltos en las demás secciones, a todo el ancho y detrás del contenido */
+.jpa-deco { position: absolute; z-index: 0; pointer-events: none; }
+.jpa-deco ~ :not(.jpa-deco) { position: relative; z-index: 1; }
+.jpa-deco--balloons { top: 60px; left: 3%; width: 110px; }
+.jpa-deco--cloud { top: 40px; right: 4%; width: 150px; color: var(--sky); }
+.jpa-deco--balloon-right { bottom: 40px; right: 5%; width: 96px; }
+.jpa-deco--kite { top: -60px; right: 6%; width: 90px; }
+.jpa-deco--cloud-left { top: 40%; left: -30px; width: 170px; color: var(--sky); }
+.jpa-deco--blocks { bottom: 60px; left: 4%; width: 110px; }
+.jpa-deco--kite-left { top: 40px; left: 4%; width: 80px; }
+.jpa-deco--balloons-right { top: -40px; right: 4%; width: 100px; }
+.jpa-deco--blocks-left { bottom: 80px; left: 3%; width: 110px; }
+@media (max-width: 1240px) {
+  /* Con poco margen a los lados, los dibujos se achican y se asoman por el borde. */
+  .jpa-deco--balloons { left: -20px; width: 76px; }
+  .jpa-deco--cloud { right: -30px; width: 110px; }
+  .jpa-deco--balloon-right { right: -14px; width: 64px; }
+  .jpa-deco--kite { right: 8px; width: 60px; }
+  .jpa-deco--blocks, .jpa-deco--blocks-left { left: -24px; width: 76px; }
+  .jpa-deco--kite-left { top: 24px; left: -10px; width: 56px; }
+  .jpa-deco--balloons-right { right: -12px; width: 70px; }
+}
+
+/* Animaciones suaves, solo si el sistema no pide reducir movimiento */
+@media (prefers-reduced-motion: no-preference) {
+  .jpa-sky__cloud { animation: jpa-drift 9s ease-in-out infinite alternate; }
+  .jpa-sky__cloud--2 { animation-duration: 11s; animation-direction: alternate-reverse; }
+  .jpa-sky__cloud--3 { animation-duration: 13s; }
+  .jpa-sky__cloud--4 { animation-duration: 12s; animation-direction: alternate-reverse; }
+  .jpa-sky__star { animation: jpa-twinkle 2.8s ease-in-out infinite; }
+  .jpa-sky__star--2 { animation-delay: 0.7s; }
+  .jpa-sky__star--3 { animation-delay: 1.4s; }
+  .jpa-sky__star--4 { animation-delay: 2.1s; }
+  .jpa-sky__balloon, .jpa-deco--balloons, .jpa-deco--balloons-right, .jpa-deco--balloon-right { animation: jpa-bob 6s ease-in-out infinite; }
+  .jpa-sky__balloon--mid { animation-duration: 7s; animation-delay: -3s; }
+  .jpa-sky__balloon--small { animation-duration: 8s; animation-delay: -1s; }
+  .jpa-deco--balloons { animation-duration: 7s; animation-delay: -2s; }
+  .jpa-deco--kite, .jpa-deco--kite-left { transform-origin: 50% 0; animation: jpa-sway 4s ease-in-out infinite; }
+  .jpa-deco--blocks, .jpa-deco--blocks-left { animation: jpa-float 5s ease-in-out infinite; }
+  .jpa-bird { transform-box: fill-box; transform-origin: center; animation: jpa-flap 0.9s ease-in-out infinite alternate; }
+  .jpa-bird--late { animation-delay: -0.45s; }
+  .jpa-bunny__ear { transform-box: fill-box; transform-origin: 50% 100%; animation: jpa-ear 5s ease-in-out infinite; }
+  .jpa-bunny__ear--left { animation-delay: 0.15s; }
+  .jpa-ground__duck { transform-origin: 50% 100%; animation: jpa-waddle 3.2s ease-in-out infinite; }
+  .jpa-ground__elephant { transform-origin: 50% 100%; animation: jpa-breathe 4s ease-in-out infinite; }
+}
+@keyframes jpa-drift { from { transform: translateX(-24px); } to { transform: translateX(24px); } }
+@keyframes jpa-twinkle { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(0.7); opacity: 0.5; } }
+@keyframes jpa-bob { 0%, 100% { transform: translateY(-12px) rotate(-3deg); } 50% { transform: translateY(12px) rotate(3deg); } }
+@keyframes jpa-sway { 0%, 100% { transform: rotate(-8deg); } 50% { transform: rotate(8deg); } }
+@keyframes jpa-float { 0%, 100% { transform: translateY(0) rotate(-3deg); } 50% { transform: translateY(-10px) rotate(3deg); } }
+@keyframes jpa-flap { from { transform: scaleY(1); } to { transform: scaleY(0.5); } }
+@keyframes jpa-ear { 0%, 80%, 100% { transform: rotate(0); } 85% { transform: rotate(-14deg); } 90% { transform: rotate(8deg); } }
+@keyframes jpa-waddle { 0%, 100% { transform: rotate(-5deg); } 50% { transform: rotate(5deg); } }
+@keyframes jpa-breathe { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.03, 0.98); } }
+
+/* Juguetes (Toy.tsx): capas = posición/reposo/parallax > mudanza (__move) > reacción (__react). */
+/* Fondo de burbujas (BubbleField.tsx): un lienzo para toda la página, detrás del contenido.
+   Lo que no tenga posición (p. ej. el pie) necesita position: relative para quedar encima. */
+.jpa-bubbles { position: absolute; inset: 0; z-index: 0; width: 100%; height: 100%; pointer-events: none; }
+
+.jpa .jpa-toy { display: block; pointer-events: auto; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+.jpa-toy__move, .jpa-toy__react { display: block; }
+.jpa-toy svg { display: block; width: 100%; height: auto; overflow: visible; }
+.jpa-toy__move { position: relative; transform: translate(var(--toy-x, 0), var(--toy-y, 0)); transition: transform 1.4s cubic-bezier(0.45, 0.05, 0.3, 1); }
+.jpa-toy--hop .jpa-toy__move { transition-duration: 0.9s; transition-timing-function: ease-out; }
+.jpa-toy--waddle .jpa-toy__move { transition-duration: 1.6s; transition-timing-function: linear; }
+/* La nube se muda de golpe mientras es invisible. */
+.jpa-toy--puff .jpa-toy__move { transition: transform 0s 0.65s; }
+.jpa-toy--fly.is-playing .jpa-toy__react { animation: jpa-toy-fly 1.4s ease-in-out; }
+.jpa-toy--float-away.is-playing .jpa-toy__react { animation: jpa-toy-away 2.6s ease-in-out; }
+.jpa-toy--loop.is-playing .jpa-toy__react { transform-origin: 50% 30%; animation: jpa-toy-loop 1.2s ease-in-out; }
+.jpa-toy--hop.is-playing .jpa-toy__react { transform-origin: 50% 100%; animation: jpa-toy-hop 0.9s ease-out; }
+.jpa-toy--waddle.is-playing .jpa-toy__react { transform-origin: 50% 100%; animation: jpa-toy-waddle 0.4s ease-in-out 4; }
+.jpa-toy--trumpet.is-playing .jpa-toy__react { transform-origin: 50% 100%; animation: jpa-toy-trumpet 1.2s ease-in-out; }
+.jpa-toy--puff.is-playing .jpa-toy__react { animation: jpa-toy-puff 1.6s ease-in-out; }
+.jpa-toy--wobble.is-playing .jpa-toy__react { animation: jpa-toy-wobble 1s ease-in-out; }
+.jpa-toy--tumble.is-playing .jpa-block { transform-box: fill-box; transform-origin: 50% 100%; animation: jpa-block-hop 0.7s ease-out both; }
+.jpa-toy--tumble.is-playing .jpa-block:nth-child(2) { animation-delay: 0.15s; }
+.jpa-toy--tumble.is-playing .jpa-block:nth-child(3) { transform-origin: 50% 50%; animation-name: jpa-block-flip; animation-delay: 0.3s; }
+@keyframes jpa-toy-fly { 0%, 100% { transform: none; } 30% { transform: rotate(-8deg) scale(1.06); } 70% { transform: rotate(6deg); } }
+@keyframes jpa-toy-away { 0% { transform: none; opacity: 1; } 45% { transform: translateY(-240px) rotate(10deg); opacity: 0; } 55% { transform: translateY(180px); opacity: 0; } 100% { transform: none; opacity: 1; } }
+@keyframes jpa-toy-loop { 0% { transform: none; } 50% { transform: translate(-30px, -50px) rotate(-200deg) scale(0.9); } 100% { transform: rotate(-360deg); } }
+@keyframes jpa-toy-hop { 0%, 100% { transform: none; } 25% { transform: translateY(-46px) scale(0.94, 1.06); } 50% { transform: scale(1.1, 0.9); } 72% { transform: translateY(-22px); } 88% { transform: scale(1.05, 0.95); } }
+@keyframes jpa-toy-waddle { 0%, 100% { transform: none; } 25% { transform: rotate(-9deg) translateY(-5px); } 75% { transform: rotate(9deg) translateY(-5px); } }
+@keyframes jpa-toy-trumpet { 0%, 100% { transform: none; } 20% { transform: rotate(-7deg) scale(1.06); } 40% { transform: rotate(5deg); } 60% { transform: rotate(-3deg); } }
+@keyframes jpa-toy-puff { 0% { transform: none; opacity: 1; } 40% { transform: scale(1.5); opacity: 0; } 60% { transform: scale(0.3); opacity: 0; } 100% { transform: none; opacity: 1; } }
+@keyframes jpa-toy-wobble { 0%, 100% { transform: none; } 25% { transform: rotate(-28deg) scale(1.2); } 60% { transform: rotate(16deg); } }
+@keyframes jpa-block-hop { 0%, 100% { transform: none; } 40% { transform: translateY(-26px) rotate(-12deg); } 70% { transform: rotate(5deg); } }
+@keyframes jpa-block-flip { 0% { transform: none; } 50% { transform: translateY(-60px) rotate(180deg); } 100% { transform: rotate(360deg); } }
+
+/* Panel de invitados (/admin, AdminPanel.tsx). El encabezado .jpa__top flota: de ahí el padding. */
+.jpa-admin { position: relative; z-index: 1; padding-block: 104px 120px; }
+.jpa-admin__title { font-family: var(--font-round), system-ui, sans-serif; font-size: clamp(32px, 4vw, 44px); font-weight: 600; }
+.jpa-admin .jpa__error { margin-top: 16px; }
+.jpa-admin__stats { margin: 28px 0 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; }
+.jpa-admin__stats div { padding: 16px 20px; border-radius: 20px; background: #fff; }
+.jpa-admin__stats dt { font-size: 15px; color: var(--ink-soft); }
+.jpa-admin__stats dd { margin: 4px 0 0; font-family: var(--font-round), system-ui, sans-serif; font-size: 32px; font-weight: 600; }
+.jpa-admin__add { margin-top: 24px; }
+.jpa-admin__add .jpa__field { margin-top: 0; }
+.jpa-admin__add .btn { margin-top: 18px; }
+.jpa-admin__add .btn:disabled { opacity: 0.6; cursor: not-allowed; }
+.jpa-admin__toolbar { margin-top: 36px; display: flex; flex-wrap: wrap; gap: 12px; justify-content: space-between; align-items: center; }
+.jpa-admin__filters { display: flex; flex-wrap: wrap; gap: 8px; }
+.jpa-admin .jpa__chip { border: 2px solid var(--line); }
+.jpa-admin .jpa__chip[aria-pressed="true"] { background: var(--ink); border-color: var(--ink); color: #fff; }
+.jpa-admin .jpa__chip:disabled { opacity: 0.5; cursor: not-allowed; }
+.jpa-admin__count { margin-left: 8px; min-width: 24px; padding: 1px 8px; border-radius: var(--radius-pill); background: var(--line); font-size: 14px; font-weight: 600; text-align: center; }
+.jpa-admin .jpa__chip[aria-pressed="true"] .jpa-admin__count { background: rgba(255, 255, 255, 0.2); }
+.jpa-admin__count:empty { display: none; }
+.jpa-admin__list { list-style: none; margin: 20px 0 0; padding: 0; display: flex; flex-direction: column; gap: 12px; }
+.jpa-admin__guest { display: flex; flex-wrap: wrap; gap: 12px 20px; align-items: center; padding: 18px 22px; border-radius: 22px; background: #fff; }
+.jpa-admin__who { flex: 1 1 260px; min-width: 0; }
+.jpa-admin__name { font-family: var(--font-round), system-ui, sans-serif; font-size: 20px; font-weight: 600; }
+.jpa-admin__meta { margin-top: 2px; font-size: 15px; color: var(--ink-soft); }
+.jpa-admin__message { margin-top: 8px; font-family: var(--font-serif), Georgia, serif; font-style: italic; font-size: 17px; }
+.jpa-admin__status { padding: 6px 14px; border-radius: var(--radius-pill); font-family: var(--font-round), system-ui, sans-serif; font-size: 15px; font-weight: 600; white-space: nowrap; }
+.jpa-admin__status--new { background: var(--line); color: var(--ink-soft); }
+.jpa-admin__status--seen { background: var(--sky); }
+.jpa-admin__status--yes { background: var(--mint); color: #2f5a22; }
+.jpa-admin__status--no { background: var(--peach); color: var(--accent-hover); }
+.jpa-admin__actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.jpa-admin .jpa-admin__delete { color: #a2311b; }
+.jpa-admin .jpa-admin__delete:hover { background: #a2311b; border-color: #a2311b; color: #fff; }
+
+/* Globo de diálogo y corazones */
+.jpa-toy__bubble { position: absolute; top: -6px; left: 50%; translate: -50% -100%; padding: 6px 14px; border: 2px solid var(--ink); border-radius: 16px; background: #fff; font-family: var(--font-round), system-ui, sans-serif; font-size: 17px; font-weight: 600; white-space: nowrap; color: var(--ink); opacity: 0; scale: 0.5; transition: opacity 0.2s, scale 0.25s cubic-bezier(0.3, 1.6, 0.5, 1); pointer-events: none; }
+.jpa-toy.is-playing .jpa-toy__bubble { opacity: 1; scale: 1; }
+.jpa-sky__balloon--bear .jpa-toy__bubble { top: 66%; left: 92%; translate: 0 -50%; }
+.jpa-ground__duck .jpa-toy__bubble { left: 20%; }
+.jpa-ground__elephant .jpa-toy__bubble { top: 30%; left: 10%; padding: 0; border: 0; background: none; }
+.jpa-hearts { position: relative; display: block; width: 60px; height: 20px; }
+.jpa-hearts svg { position: absolute; bottom: 0; width: 22px; color: #e98a6d; opacity: 0; }
+.jpa-hearts svg:nth-child(2) { left: 18px; width: 16px; }
+.jpa-hearts svg:nth-child(3) { left: 36px; width: 20px; }
+.is-playing .jpa-hearts svg { animation: jpa-heart-rise 1.4s ease-out both; }
+.is-playing .jpa-hearts svg:nth-child(2) { animation-delay: 0.2s; }
+.is-playing .jpa-hearts svg:nth-child(3) { animation-delay: 0.4s; }
+@keyframes jpa-heart-rise { 0% { opacity: 0; transform: translateY(20px) scale(0.4); } 30% { opacity: 1; } 100% { opacity: 0; transform: translateY(-70px) scale(1.1) rotate(-12deg); } }
+
+.jpa__name { display: block; font-family: var(--font-round), system-ui, sans-serif; font-weight: 600; font-size: clamp(56px, 12vw, 152px); line-height: 0.98; letter-spacing: -0.01em; color: var(--ink); }
+.jpa__name-accent { color: var(--accent); }
+.jpa__tagline { margin-top: 24px; font-size: clamp(24px, 3vw, 34px); color: var(--ink-soft); }
+.jpa__pill { display: inline-block; padding: 6px 18px; border-radius: var(--radius-pill); background: #fff; font-family: var(--font-round), system-ui, sans-serif; font-size: 16px; font-weight: 600; letter-spacing: 0.04em; color: var(--accent); }
+.jpa__hello { margin-top: 28px; font-family: var(--font-round), system-ui, sans-serif; font-size: clamp(26px, 3.4vw, 36px); font-weight: 500; }
+.jpa__invite-title { margin-top: 8px; font-size: clamp(20px, 2.4vw, 26px); font-weight: 400; color: var(--ink-soft); }
+.jpa__invite-title .jpa__name { margin-top: 12px; }
+
+/* Carta con polaroid */
+.jpa__letter { display: flex; flex-wrap: wrap; gap: 56px 80px; align-items: center; padding-block: 112px; }
+.jpa__photo { position: relative; flex: 0 1 320px; margin: 0 auto; padding: 14px 14px 0; border-radius: 6px; background: #fff; box-shadow: 0 24px 48px -28px rgba(74, 55, 44, 0.5); transform: rotate(-2.5deg); }
+/* Ampliado hacia la carita para dejar fuera los datos y el marco del ecógrafo. */
+.jpa__video { position: relative; aspect-ratio: 4 / 5; overflow: hidden; border-radius: 4px; background: #000; }
+.jpa__video video { display: block; width: 100%; height: 100%; object-fit: cover; transform: scale(1.25); transform-origin: 50% 65%; }
+.jpa__video-toggle { position: absolute; right: 10px; bottom: 10px; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; padding: 0; border: 0; border-radius: 50%; background: rgba(255, 255, 255, 0.85); color: var(--ink); cursor: pointer; }
+.jpa__video-toggle:hover { background: #fff; }
+.jpa__video-toggle svg { width: 20px; height: 20px; fill: currentColor; }
+.jpa__photo-caption { padding: 14px 4px 18px; text-align: center; font-size: 22px; color: var(--ink-soft); }
+.jpa__tape { position: absolute; top: -12px; width: 92px; height: 28px; border-radius: 3px; opacity: 0.85; }
+.jpa__tape--left { left: -18px; background: var(--peach); transform: rotate(-28deg); }
+.jpa__tape--right { right: -18px; background: var(--mint); transform: rotate(24deg); }
+.jpa__letter-text { flex: 1 1 420px; min-width: 0; }
+.jpa__label { font-family: var(--font-round), system-ui, sans-serif; font-size: 16px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); }
+.jpa__prose { margin-top: 20px; max-width: 34ch; font-family: var(--font-serif), Georgia, serif; font-size: clamp(21px, 2.2vw, 25px); line-height: 1.55; }
+.jpa__sign { margin-top: 28px; display: inline-flex; align-items: center; gap: 10px; font-size: 28px; color: var(--accent); }
+.jpa__heart { display: inline-block; width: 1em; height: 1em; vertical-align: -0.12em; color: #e98a6d; }
+
+/* Capítulos: tarjetas de colores */
+.jpa__chapters { padding-bottom: 140px; }
+.jpa__chapter-list { list-style: none; margin: 20px 0 0; padding: 0; display: flex; flex-direction: column; gap: 20px; }
+.jpa__chapter { --card: var(--peach); position: relative; display: flex; flex-wrap: wrap; gap: 16px 28px; align-items: center; padding: 28px 32px; border-radius: 28px; background: var(--card); }
+.jpa__chapter:nth-child(4n + 2) { --card: var(--mint); }
+.jpa__chapter:nth-child(4n + 3) { --card: var(--sky); }
+.jpa__chapter:nth-child(4n + 4) { --card: var(--butter); }
+.jpa__chapter--pending { background: var(--ground); border: 2px dashed var(--line); }
+.jpa__numeral { flex: 0 0 64px; height: 64px; display: flex; align-items: center; justify-content: center; border-radius: 50%; background: #fff; font-family: var(--font-round), system-ui, sans-serif; font-size: 26px; font-weight: 600; color: var(--accent); }
+.jpa__chapter-body { flex: 1 1 320px; min-width: 0; }
+.jpa__chapter-title { font-family: var(--font-round), system-ui, sans-serif; font-weight: 600; font-size: clamp(28px, 3.4vw, 36px); line-height: 1.15; }
+.jpa__chapter-title a { color: var(--ink); text-decoration: none; }
+.jpa__chapter-title a::after { content: ""; position: absolute; inset: 0; border-radius: inherit; }
+.jpa__chapter:has(a:hover) { box-shadow: 0 0 0 3px var(--accent); }
+.jpa__chapter:has(a:focus-visible) { outline: 3px solid var(--accent); outline-offset: 3px; }
+.jpa__chapter-title a:focus-visible { outline: none; }
+.jpa__chapter-sub { margin-top: 6px; font-size: 18px; color: var(--ink-soft); }
+.jpa__chapter-status { padding: 8px 18px; border-radius: var(--radius-pill); background: #fff; font-family: var(--font-round), system-ui, sans-serif; font-size: 16px; font-weight: 500; text-align: center; }
+.jpa__chapter--pending .jpa__chapter-title, .jpa__chapter--pending .jpa__numeral { color: var(--ink-soft); }
+.jpa__chapter--pending .jpa__numeral, .jpa__chapter--pending .jpa__chapter-status { background: var(--line); }
+.jpa__countdown { display: block; font-weight: 600; color: var(--accent); }
+.jpa__countdown:empty { display: none; }
+
+/* Invitación: tarjetas de detalles y formulario */
+.jpa__details { padding-block: 72px 56px; display: flex; flex-wrap: wrap; gap: 20px; }
+.jpa__details > .jpa__card { flex: 1 1 320px; }
+.jpa__card { min-width: 0; padding: 32px; border-radius: 28px; background: var(--peach); }
+@media (max-width: 600px) { .jpa__card { padding: 26px 22px; } }
+.jpa__card--sky { background: var(--sky); }
+.jpa__card--mint { background: var(--mint); }
+.jpa__card-title { margin-top: 10px; font-family: var(--font-round), system-ui, sans-serif; font-size: clamp(24px, 2.8vw, 30px); font-weight: 600; line-height: 1.2; }
+.jpa__card-text { margin-top: 8px; font-size: 18px; line-height: 1.55; color: var(--ink-soft); }
+.jpa__countdown-pill:not(:empty) { margin-top: 14px; display: inline-block; padding: 4px 14px; border-radius: var(--radius-pill); background: #fff; font-family: var(--font-round), system-ui, sans-serif; font-size: 16px; font-weight: 600; color: var(--accent); }
+.jpa__card-actions { margin-top: 18px; display: flex; flex-wrap: wrap; gap: 10px; }
+.jpa__chip { display: inline-flex; align-items: center; min-height: 44px; padding: 0 18px; border: 0; border-radius: var(--radius-pill); background: #fff; color: var(--ink); font: inherit; font-family: var(--font-round), system-ui, sans-serif; font-size: 16px; font-weight: 600; text-decoration: none; cursor: pointer; }
+.jpa__chip:hover { background: var(--ink); color: #fff; }
+
+/* Tarjeta "Dónde" con mapa de fondo (VenueCard.tsx). El pin queda en (--pin-x, --pin-y);
+   un degradado del color de la tarjeta deja legible el texto encima del mapa. */
+.jpa__venue { --pin-x: 74%; --pin-y: 56%; position: relative; overflow: hidden; isolation: isolate; min-height: 340px; display: flex; flex-direction: column; }
+/* Mapa (MapLibre) debajo; encima, el botón transparente con el degradado y el pin. */
+/* .jpa__venue delante: MapLibre le pone position: relative (.maplibregl-map) y lo dejaría sin altura. */
+.jpa__venue .jpa__map-canvas { position: absolute; inset: 0; z-index: 0; background: #eee8dc; }
+.jpa__map-canvas canvas { filter: sepia(0.35) saturate(1.3) hue-rotate(-12deg) brightness(1.02); }
+.jpa__map { position: absolute; inset: 0; z-index: 0; padding: 0; border: 0; background: none; cursor: pointer; }
+.jpa__map::after { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, var(--peach) 30%, rgba(251, 220, 203, 0.75) 48%, rgba(251, 220, 203, 0) 70%); pointer-events: none; }
+.jpa__map-pin { position: absolute; left: var(--pin-x); top: var(--pin-y); width: 40px; translate: -50% -100%; filter: drop-shadow(0 4px 6px rgba(74, 55, 44, 0.35)); transition: scale 0.2s ease; }
+.jpa__map:hover .jpa__map-pin { scale: 1.12; }
+.jpa__map:focus-visible { outline: 3px solid var(--accent); outline-offset: -3px; }
+.jpa__venue-text { position: relative; z-index: 1; max-width: 60%; pointer-events: none; }
+.jpa__venue-text .jpa__card-actions, .jpa__venue-text p { pointer-events: auto; }
+.jpa__venue-note { margin-top: 10px; display: inline-block; padding: 4px 12px; border-radius: var(--radius-pill); background: #fff; font-family: var(--font-round), system-ui, sans-serif; font-size: 16px; font-weight: 600; color: var(--accent); }
+.jpa__map-credit { position: absolute; z-index: 1; right: 8px; bottom: 6px; padding: 1px 6px; border-radius: 6px; background: rgba(255, 255, 255, 0.8); font-size: 11px; color: var(--ink-soft); }
+.jpa__map-credit a { color: inherit; }
+@media (max-width: 520px) {
+  .jpa__venue { min-height: 460px; }
+  .jpa__venue { --pin-x: 50%; --pin-y: 80%; }
+  .jpa__map::after { background: linear-gradient(180deg, var(--peach) 38%, rgba(251, 220, 203, 0.7) 52%, rgba(251, 220, 203, 0) 68%); }
+  .jpa__venue-text { max-width: none; }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .jpa__map-pin { animation: jpa-pin-bounce 2.4s ease-in-out infinite; }
+  .jpa__directions { animation: jpa-sheet-up 0.3s cubic-bezier(0.3, 1.3, 0.5, 1); }
+}
+@keyframes jpa-pin-bounce { 0%, 70%, 100% { transform: translateY(0); } 80% { transform: translateY(-10px); } 90% { transform: translateY(0); } }
+@keyframes jpa-sheet-up { from { transform: translateY(24px); opacity: 0; } to { transform: none; opacity: 1; } }
+
+/* Selector de apps para llegar */
+.jpa__directions { position: absolute; z-index: 2; left: 12px; right: 12px; bottom: 12px; padding: 20px 20px 18px; border-radius: 22px; background: #fff; box-shadow: 0 18px 40px -18px rgba(74, 55, 44, 0.5); }
+.jpa__directions-title { padding-right: 36px; font-family: var(--font-round), system-ui, sans-serif; font-size: 18px; font-weight: 600; }
+.jpa__directions-list { margin-top: 14px; display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+.jpa__directions-list .jpa__chip { justify-content: center; background: var(--ground); border: 2px solid var(--line); }
+.jpa__directions-list .jpa__chip:hover { background: var(--ink); border-color: var(--ink); color: #fff; }
+.jpa__directions-close { position: absolute; top: 10px; right: 10px; width: 40px; height: 40px; padding: 0; border: 0; border-radius: 50%; background: var(--ground); color: var(--ink); font-size: 24px; line-height: 1; cursor: pointer; }
+.jpa__rsvp { padding-block: 20px 140px; }
+.jpa__rsvp .jpa__card-title { margin-top: 0; }
+.jpa__choices { margin: 24px 0 0; padding: 0; border: 0; display: flex; flex-wrap: wrap; gap: 12px; }
+.jpa__choice { position: relative; transition: transform 0.2s ease, box-shadow 0.2s ease; flex: 1 1 220px; display: flex; align-items: center; gap: 12px; min-height: 60px; padding: 0 22px; border: 2px solid transparent; border-radius: 20px; background: #fff; font-family: var(--font-round), system-ui, sans-serif; font-size: 19px; font-weight: 500; cursor: pointer; }
+.jpa__choice:has(input:checked) { border-color: var(--accent); }
+.jpa__choice:has(input:focus-visible) { outline: 3px solid var(--accent); outline-offset: 3px; }
+.jpa__choice input { width: 20px; height: 20px; margin: 0; accent-color: var(--accent); }
+/* Botones Sí / No: el corazón late y suelta corazoncitos; la nube se mece y llueve. */
+.jpa__choice-icon { position: relative; flex: 0 0 34px; height: 30px; display: flex; align-items: center; justify-content: center; }
+.jpa__choice--yes .jpa__choice-icon > svg { width: 26px; height: 26px; color: #e98a6d; }
+.jpa__choice--no .jpa__choice-icon > svg { width: 34px; color: #b8c8d8; }
+.jpa__burst, .jpa__rain { position: absolute; inset: 0; pointer-events: none; }
+.jpa__burst svg { position: absolute; top: 50%; left: 50%; width: 12px; margin: -6px 0 0 -6px; color: #e98a6d; opacity: 0; }
+.jpa__burst svg:nth-child(1) { --dx: 0px; --dy: -40px; }
+.jpa__burst svg:nth-child(2) { --dx: 35px; --dy: -20px; color: #f2c14e; }
+.jpa__burst svg:nth-child(3) { --dx: 35px; --dy: 20px; }
+.jpa__burst svg:nth-child(4) { --dx: 0px; --dy: 40px; color: #8fb6d9; }
+.jpa__burst svg:nth-child(5) { --dx: -35px; --dy: 20px; }
+.jpa__burst svg:nth-child(6) { --dx: -35px; --dy: -20px; color: #f2c14e; }
+.jpa__rain i { position: absolute; top: 60%; width: 3px; height: 8px; border-radius: 3px; background: #8fb6d9; opacity: 0; }
+.jpa__rain i:nth-child(1) { left: 9px; }
+.jpa__rain i:nth-child(2) { left: 16px; }
+.jpa__rain i:nth-child(3) { left: 23px; }
+@media (hover: hover) {
+  .jpa__choice:hover { transform: translateY(-3px); box-shadow: 0 10px 22px -14px rgba(74, 55, 44, 0.45); }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .jpa__choice--yes:hover .jpa__choice-icon > svg { animation: jpa-heartbeat 0.9s ease-in-out infinite; }
+  .jpa__choice--no:hover .jpa__choice-icon > svg { animation: jpa-cloud-sway 1.6s ease-in-out infinite; }
+  .jpa__choice--yes:has(input:checked) { animation: jpa-choice-pop 0.5s cubic-bezier(0.3, 1.6, 0.5, 1); }
+  .jpa__choice--yes:has(input:checked) .jpa__choice-icon > svg { animation: jpa-heartbeat 0.6s ease-in-out 2; }
+  .jpa__choice--yes:has(input:checked) .jpa__burst svg { animation: jpa-burst 0.9s ease-out both; }
+  .jpa__choice--yes:has(input:checked) .jpa__burst svg:nth-child(even) { animation-delay: 0.08s; }
+  .jpa__choice--no:has(input:checked) { animation: jpa-choice-sad 0.6s ease-in-out; }
+  .jpa__choice--no:has(input:checked) .jpa__rain i { animation: jpa-rain 0.8s ease-in 3; }
+  .jpa__choice--no:has(input:checked) .jpa__rain i:nth-child(2) { animation-delay: 0.25s; }
+  .jpa__choice--no:has(input:checked) .jpa__rain i:nth-child(3) { animation-delay: 0.5s; }
+}
+@keyframes jpa-heartbeat { 0%, 100% { transform: scale(1); } 30% { transform: scale(1.3); } 60% { transform: scale(0.95); } }
+@keyframes jpa-cloud-sway { 0%, 100% { transform: translateX(-3px); } 50% { transform: translateX(3px); } }
+@keyframes jpa-choice-pop { 0% { transform: scale(1); } 40% { transform: scale(1.06) rotate(-1deg); } 100% { transform: scale(1); } }
+@keyframes jpa-choice-sad { 0%, 100% { transform: none; } 20% { transform: translateX(-6px); } 40% { transform: translateX(5px); } 60% { transform: translateX(-3px) translateY(2px); } 80% { transform: translateX(2px); } }
+@keyframes jpa-burst { 0% { opacity: 0; transform: translate(0, 0) scale(0.3); } 25% { opacity: 1; } 100% { opacity: 0; transform: translate(var(--dx), var(--dy)) scale(1.1) rotate(15deg); } }
+@keyframes jpa-rain { 0% { opacity: 0; transform: translateY(0); } 20% { opacity: 1; } 100% { opacity: 0; transform: translateY(18px); } }
+.jpa__field { margin-top: 24px; display: flex; flex-direction: column; gap: 6px; }
+.jpa__field-label { font-family: var(--font-round), system-ui, sans-serif; font-size: 18px; font-weight: 600; }
+.jpa__optional { font-weight: 400; color: var(--ink-soft); }
+.jpa__field-hint { font-size: 16px; color: var(--ink-soft); }
+.jpa__field textarea { margin-top: 6px; padding: 16px 18px; border: 2px solid transparent; border-radius: 20px; background: #fff; color: var(--ink); font: inherit; font-size: 18px; resize: vertical; }
+.jpa__field textarea:focus { outline: none; border-color: var(--accent); }
+.jpa__error { margin-top: 16px; font-weight: 600; color: #a2311b; }
+.jpa__rsvp .btn { margin-top: 24px; }
+.jpa__rsvp .btn:disabled { opacity: 0.6; cursor: progress; }
+.jpa__thanks { text-align: center; }
+.jpa__thanks-heart { width: 48px; height: 48px; margin-bottom: 12px; color: #e98a6d; }
+.jpa__thanks .jpa__card-text { margin-inline: auto; max-width: 46ch; }
+
+.jpa__footer { position: relative; padding-block: 28px 56px; border-top: 2px dashed var(--line); display: flex; flex-wrap: wrap; gap: 8px 32px; justify-content: space-between; align-items: center; font-size: 16px; color: var(--ink-soft); }
+.jpa__footer a { display: inline-flex; align-items: center; min-height: 44px; color: var(--ink-soft); }
+/* En pantallas angostas, los cubitos del final y el pie van centrados. Los cubitos van por
+   encima del contenido (z-index 2), porque ahí el contenedor ocupa todo el ancho y si no se
+   llevaría los toques. Por eso quedan fijos en el espacio libre bajo la tarjeta, sin parallax,
+   para no tapar el texto. */
+@media (max-width: 760px) {
+  .jpa-deco--blocks, .jpa-deco--blocks-left { left: calc(50% - 38px); bottom: 28px; z-index: 2; translate: none; }
+  .jpa__chapters, .jpa__rsvp { padding-bottom: 150px; }
+  .jpa__footer { flex-direction: column; justify-content: center; text-align: center; }
+}

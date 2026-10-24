@@ -23,7 +23,7 @@ function uberQuery(venue: Venue) {
     "pickup=my_location",
     `dropoff[latitude]=${venue.lat}`,
     `dropoff[longitude]=${venue.lng}`,
-    `dropoff[nickname]=${label(venue.name)}`,
+    `dropoff[nickname]=${label(venue.uberName ?? venue.name)}`,
     `dropoff[formatted_address]=${label(place)}`,
   ].join("&");
 }

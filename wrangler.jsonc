@@ -19,9 +19,13 @@
       "migrations_dir": "migrations"
     }
   ],
-  // Cloudflare Access del panel /admin (no son secretos). Vacías, la API de admin se niega
-  // en producción. Ejemplo: "https://<equipo>.cloudflareaccess.com" y el "Application Audience (AUD) Tag".
-  "vars": { "ACCESS_TEAM_DOMAIN": "", "ACCESS_AUD": "" },
+  // Cloudflare Access del panel /admin (no son secretos): equipo y "Application Audience (AUD) Tag"
+  // de la aplicación jeanpaulandre. Vacías, la API de admin se niega en producción.
+  // wrangler.local.jsonc las deja vacías: en local (*.localhost) el admin no pide login.
+  "vars": {
+    "ACCESS_TEAM_DOMAIN": "https://empty-base-4a4a.cloudflareaccess.com",
+    "ACCESS_AUD": "bcd7441046f8154207e6390b2ae04d72304f9cd0fbd71cb369f54b81c9b77af4"
+  },
   // Aviso por correo de cada respuesta (worker/babyshower.ts, notifyRsvp). Las direcciones
   // van en el secreto NOTIFY_TO y deben estar verificadas en Email Routing de humanoydev.com.
   "send_email": [{ "name": "NOTIFY_EMAIL" }],

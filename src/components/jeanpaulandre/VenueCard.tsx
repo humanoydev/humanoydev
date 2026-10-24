@@ -13,15 +13,18 @@ const MAP_STYLE = "https://tiles.openfreemap.org/styles/positron";
 const ZOOM = 16;
 
 // Parámetros de Uber con los corchetes literales, como en su documentación.
+// Uber lee los "+" como espacios ("SoHo+" sale "SoHo"): se cambian por el "＋" de ancho
+// completo, que se ve igual.
 function uberQuery(venue: Venue) {
+  const label = (text: string) => encodeURIComponent(text.replace(/\+/g, "＋"));
   const place = [venue.name, venue.address].filter(Boolean).join(", ");
   return [
     "action=setPickup",
     "pickup=my_location",
     `dropoff[latitude]=${venue.lat}`,
     `dropoff[longitude]=${venue.lng}`,
-    `dropoff[nickname]=${encodeURIComponent(venue.name)}`,
-    `dropoff[formatted_address]=${encodeURIComponent(place)}`,
+    `dropoff[nickname]=${label(venue.name)}`,
+    `dropoff[formatted_address]=${label(place)}`,
   ].join("&");
 }
 

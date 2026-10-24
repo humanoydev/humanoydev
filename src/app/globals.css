@@ -230,18 +230,17 @@ a.jpa__brand:hover { color: var(--accent); }
   .jpa__hero { padding-block: 104px 170px; }
   .jpa-sky__moon { top: 9%; right: 8%; width: 44px; }
   .jpa-sky__cloud--1 { top: 6%; left: 28%; width: 110px; }
-  .jpa-sky__cloud--2 { display: none; }
   .jpa-sky__cloud--3 { top: 62%; right: -50px; width: 170px; }
   .jpa-sky__cloud--4 { top: 66%; left: -50px; width: 150px; }
   .jpa-sky__birds { top: 15%; right: 26%; width: 50px; }
-  .jpa-sky__balloon--bear { top: 12%; left: 3%; width: 88px; }
-  .jpa-sky__balloon--mid { top: 20%; right: 3%; width: 62px; }
-  .jpa-sky__balloon--small { display: none; }
+  .jpa-sky__balloon--bear { top: 5%; left: 2%; width: 74px; }
+  .jpa-sky__balloon--mid { top: 10%; right: 3%; width: 54px; }
   .jpa-ground { height: 150px; }
   .jpa-ground__bunny { left: 3%; bottom: 54px; width: 76px; }
   .jpa-ground__blocks { left: 30%; bottom: 18px; width: 84px; }
-  .jpa-ground__duck { display: none; }
   .jpa-ground__elephant { right: 3%; bottom: 26px; width: 124px; }
+  /* Se ocultan en pantallas angostas. Doble clase para ganarle a ".jpa .jpa-toy { display: block }". */
+  .jpa .jpa-toy.jpa-sky__cloud--2, .jpa .jpa-toy.jpa-sky__balloon--small, .jpa .jpa-toy.jpa-ground__duck { display: none; }
 }
 
 /* Dibujos sueltos en las demás secciones, a todo el ancho y detrás del contenido */

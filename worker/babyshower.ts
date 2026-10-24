@@ -1,7 +1,7 @@
 /**
  * API del baby shower de Jean Paul André, en jeanpaulandre.humanoydev.com/api/...
  *
- *   POST /api/invite  { token }                       → datos de la invitación; registra la visita
+ *   POST /api/invite  { token, device?, model? }      → datos de la invitación; registra la visita
  *   PUT  /api/rsvp    { token, attending, message }   → guarda (o cambia) la respuesta
  *
  * Administración (protegida con Cloudflare Access, ver isAdmin):
@@ -41,18 +41,49 @@ async function findGuest(env: Env, token: unknown): Promise<Guest | null> {
   return env.DB.prepare("SELECT id, name FROM guests WHERE token = ?").bind(token).first<Guest>();
 }
 
+// Texto corto y simple que manda el navegador (identificador o modelo); si no, null.
+function cleanText(value: unknown, max: number): string | null {
+  return typeof value === "string" && /^[\w .()+-]{1,200}$/.test(value) ? value.slice(0, max) : null;
+}
+
+// Modelo del teléfono según el User-Agent ("Android 14; SM-A546E;" → "SM-A546E"). Chrome lo
+// oculta ("K"); en ese caso lo manda la invitación si el navegador lo informa. iPhone nunca lo dice.
+function modelFromUserAgent(ua: string | null): string | null {
+  const model = ua?.match(/Android [\d.]+; (?:[a-z]{2}-[a-z]{2}; )?([^;)]+?)(?: Build[^;)]*)?[;)]/)?.[1]?.trim();
+  return model && model !== "K" ? cleanText(model, 40) : null;
+}
+
+// Red de la visita como hash con sal (NETWORK_SALT) de la IP: permite ver si dos visitas
+// vienen de la misma red sin guardar la IP. En IPv6 se usa el prefijo /64 (las operadoras
+// rotan el resto de la dirección).
+async function networkHash(request: Request, env: Env): Promise<string | null> {
+  const ip = request.headers.get("CF-Connecting-IP");
+  if (!ip || !env.NETWORK_SALT) return null;
+  const network = ip.includes(":") ? ip.split(":").slice(0, 4).join(":") : ip;
+  const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(`${env.NETWORK_SALT}:${network}`));
+  return Array.from(new Uint8Array(digest).slice(0, 6), (byte) => byte.toString(16).padStart(2, "0")).join("");
+}
+
 async function openInvite(request: Request, env: Env): Promise<Response> {
-  const guest = await findGuest(env, (await readBody(request))?.token);
+  const body = await readBody(request);
+  const guest = await findGuest(env, body?.token);
   if (!guest) return json({ error: "not_found" }, 404);
+  const userAgent = request.headers.get("User-Agent")?.slice(0, 300) ?? null;
 
   const [rsvp] = await env.DB.batch<{ attending: number; message: string }>([
     env.DB.prepare("SELECT attending, message FROM rsvps WHERE guest_id = ?").bind(guest.id),
-    // Navegador, ciudad y país de la visita; la IP no se guarda.
-    env.DB.prepare("INSERT INTO visits (guest_id, user_agent, city, country) VALUES (?, ?, ?, ?)").bind(
+    // Navegador, ciudad, país, dispositivo y red de la visita; la IP no se guarda.
+    env.DB.prepare(
+      `INSERT INTO visits (guest_id, user_agent, city, country, device_id, model, network)
+       VALUES (?, ?, ?, ?, ?, ?, ?)`,
+    ).bind(
       guest.id,
-      request.headers.get("User-Agent")?.slice(0, 300) ?? null,
+      userAgent,
       request.cf?.city ?? null,
       request.cf?.country ?? null,
+      cleanText(body?.device, 40),
+      cleanText(body?.model, 40) ?? modelFromUserAgent(userAgent),
+      await networkHash(request, env),
     ),
   ]);
   const answer = rsvp.results[0];
@@ -168,15 +199,24 @@ async function listGuests(env: Env): Promise<Response> {
   const { results } = await env.DB.prepare(
     `SELECT g.id, g.token, g.name, g.phone, g.created_at AS createdAt,
             COUNT(v.id) AS visits, MAX(v.visited_at) AS lastVisit,
-            COUNT(DISTINCT v.user_agent) AS devices,
+            COUNT(DISTINCT COALESCE(v.device_id, v.user_agent)) AS devices,
+            COUNT(DISTINCT v.network) AS networks, COUNT(DISTINCT v.city) AS cities,
             r.attending, r.message, r.updated_at AS answeredAt
      FROM guests g
      LEFT JOIN visits v ON v.guest_id = g.id
      LEFT JOIN rsvps r ON r.guest_id = g.id
      GROUP BY g.id
      ORDER BY g.id DESC`,
-  ).all<{ attending: number | null }>();
-  return json(results.map((row) => ({ ...row, attending: row.attending === null ? null : row.attending === 1 })));
+  ).all<{ attending: number | null; devices: number; networks: number; cities: number }>();
+  return json(
+    results.map(({ networks, cities, ...row }) => ({
+      ...row,
+      attending: row.attending === null ? null : row.attending === 1,
+      // Pista, no prueba: más de un dispositivo y además otra red u otra ciudad. La misma persona
+      // en WhatsApp y en Chrome, en la misma red, no cuenta.
+      possibleShare: row.devices > 1 && (networks > 1 || cities > 1),
+    })),
+  );
 }
 
 async function addGuests(request: Request, env: Env): Promise<Response> {
@@ -202,7 +242,8 @@ async function addGuests(request: Request, env: Env): Promise<Response> {
 
 async function listVisits(env: Env, id: string): Promise<Response> {
   const { results } = await env.DB.prepare(
-    `SELECT visited_at AS visitedAt, user_agent AS userAgent, city, country
+    `SELECT visited_at AS visitedAt, user_agent AS userAgent, city, country,
+            device_id AS deviceId, model, network
      FROM visits WHERE guest_id = ? ORDER BY id DESC LIMIT 100`,
   )
     .bind(id)

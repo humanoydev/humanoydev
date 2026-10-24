@@ -22,9 +22,37 @@ const jsonBody = (data: unknown) => ({
   body: JSON.stringify(data),
 });
 
+// Identificador al azar de este navegador, para saber si un link se abrió en otros
+// dispositivos (posible reenvío). No dice nada de la persona. Sin localStorage, null.
+function deviceId(): string | null {
+  try {
+    let id = localStorage.getItem("jpa-device");
+    if (!id) {
+      id = crypto.randomUUID?.() ?? Math.random().toString(36).slice(2);
+      localStorage.setItem("jpa-device", id);
+    }
+    return id;
+  } catch {
+    return null;
+  }
+}
+
+type UserAgentData = { getHighEntropyValues(hints: string[]): Promise<{ model?: string }> };
+
+// Modelo del teléfono en Chrome para Android (que lo oculta del User-Agent). Safari no lo da.
+async function deviceModel(): Promise<string | null> {
+  const data = (navigator as Navigator & { userAgentData?: UserAgentData }).userAgentData;
+  try {
+    return (await data?.getHighEntropyValues(["model"]))?.model || null;
+  } catch {
+    return null;
+  }
+}
+
 // Abre la invitación (y queda registrada la visita). null si el token no existe.
 export async function getInvite(token: string): Promise<Invite | null> {
-  const response = await fetch("/api/invite", { method: "POST", ...jsonBody({ token }) });
+  const body = { token, device: deviceId(), model: await deviceModel() };
+  const response = await fetch("/api/invite", { method: "POST", ...jsonBody(body) });
   if (response.status === 404) return null;
   if (!response.ok) throw new Error(`No se pudo abrir la invitación (${response.status})`);
   return response.json();

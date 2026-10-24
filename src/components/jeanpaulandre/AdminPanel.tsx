@@ -15,15 +15,25 @@ type Guest = {
   visits: number;
   // Navegadores distintos que abrieron el link: más de uno sugiere que se reenvió.
   devices: number;
+  // Más de un dispositivo y además otra red u otra ciudad (lo calcula la API): pista de reenvío.
+  possibleShare: boolean;
   lastVisit: string | null;
   attending: boolean | null;
   message: string | null;
   answeredAt: string | null;
 };
 
-type Visit = { visitedAt: string; userAgent: string | null; city: string | null; country: string | null };
+type Visit = {
+  visitedAt: string;
+  userAgent: string | null;
+  city: string | null;
+  country: string | null;
+  deviceId: string | null;
+  model: string | null;
+  network: string | null;
+};
 
-type Filter = "todos" | "sin-abrir" | "sin-responder" | "asisten" | "no-asisten";
+type Filter = "reenvio" | "todos" | "sin-abrir" | "sin-responder" | "asisten" | "no-asisten";
 
 const FILTERS: { id: Filter; label: string; match: (guest: Guest) => boolean }[] = [
   { id: "todos", label: "Todos", match: () => true },
@@ -31,6 +41,7 @@ const FILTERS: { id: Filter; label: string; match: (guest: Guest) => boolean }[]
   { id: "sin-responder", label: "Abrieron, sin responder", match: (g) => g.visits > 0 && g.attending === null },
   { id: "asisten", label: "Asisten", match: (g) => g.attending === true },
   { id: "no-asisten", label: "No asisten", match: (g) => g.attending === false },
+  { id: "reenvio", label: "Posible reenvío", match: (g) => g.possibleShare },
 ];
 
 // D1 guarda las fechas en UTC sin zona ("2026-11-01 18:30:00"); se muestran en hora de Lima.
@@ -85,6 +96,23 @@ function describeBrowser(ua: string | null) {
 const regionNames = new Intl.DisplayNames(["es"], { type: "region" });
 
 // "Lima, Perú"; en local (sin datos de Cloudflare) no hay ubicación.
+// Numera dispositivos (1, 2…) y redes (A, B…) en el orden en que aparecieron, para comparar visitas.
+// Las visitas viejas, sin identificador, se agrupan por navegador.
+function labelVisits(list: Visit[]) {
+  const devices = new Map<string, number>();
+  const networks = new Map<string, string>();
+  for (const visit of [...list].reverse()) {
+    const device = visit.deviceId ?? visit.userAgent ?? "";
+    if (!devices.has(device)) devices.set(device, devices.size + 1);
+    if (visit.network && !networks.has(visit.network))
+      networks.set(visit.network, String.fromCharCode(65 + networks.size));
+  }
+  return (visit: Visit) => ({
+    device: devices.get(visit.deviceId ?? visit.userAgent ?? "")!,
+    network: visit.network ? networks.get(visit.network) : undefined,
+  });
+}
+
 function describePlace(visit: Visit) {
   const country = visit.country ? regionNames.of(visit.country) : null;
   return [visit.city, country].filter(Boolean).join(", ") || "Ubicación desconocida";
@@ -330,7 +358,17 @@ export function AdminPanel() {
           return (
             <li key={guest.id} className="jpa-admin__guest">
               <div className="jpa-admin__who">
-                <p className="jpa-admin__name">{guest.name}</p>
+                <p className="jpa-admin__name">
+                  {guest.name}
+                  {guest.possibleShare && (
+                    <span
+                      className="jpa-admin__share"
+                      title="Se abrió en varios dispositivos y desde otra red u otra ciudad"
+                    >
+                      ⚠️ Posible reenvío
+                    </span>
+                  )}
+                </p>
                 <p className="jpa-admin__meta">
                   {guest.phone ?? "Sin teléfono"}
                   {guest.lastVisit && ` · Última visita: ${formatDate(guest.lastVisit)}`}
@@ -373,13 +411,23 @@ export function AdminPanel() {
               {openVisits === guest.id && (
                 <ol className="jpa-admin__visits">
                   {!visits[guest.id] && <li>Cargando…</li>}
-                  {visits[guest.id]?.map((visit, index) => (
-                    <li key={index}>
-                      <span className="jpa-admin__visit-date">{formatDate(visit.visitedAt)}</span>
-                      <span>{describeBrowser(visit.userAgent)}</span>
-                      <span className="jpa-admin__visit-place">{describePlace(visit)}</span>
-                    </li>
-                  ))}
+                  {visits[guest.id]?.map((visit, index, list) => {
+                    const label = labelVisits(list)(visit);
+                    return (
+                      <li key={index}>
+                        <span className="jpa-admin__visit-date">{formatDate(visit.visitedAt)}</span>
+                        <span className="jpa-admin__visit-device">Dispositivo {label.device}</span>
+                        <span>
+                          {describeBrowser(visit.userAgent)}
+                          {visit.model && ` · ${visit.model}`}
+                        </span>
+                        <span className="jpa-admin__visit-place">
+                          {describePlace(visit)}
+                          {label.network && ` · red ${label.network}`}
+                        </span>
+                      </li>
+                    );
+                  })}
                 </ol>
               )}
             </li>

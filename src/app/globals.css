@@ -368,6 +368,11 @@ a.jpa__brand:hover { color: var(--accent); }
 .jpa-admin__actions { display: flex; flex-wrap: wrap; gap: 8px; }
 .jpa-admin .jpa-admin__remind { border-color: var(--butter); background: #fff8dc; }
 .jpa-admin .jpa-admin__remind:hover { background: var(--ink); border-color: var(--ink); color: #fff; }
+.jpa-admin__visits-toggle { margin-top: 6px; min-height: 32px; padding: 0; border: 0; background: none; color: var(--accent); font: inherit; font-size: 15px; font-weight: 600; text-decoration: underline; cursor: pointer; }
+.jpa-admin__visits { flex-basis: 100%; list-style: none; margin: 4px 0 0; padding: 12px 16px; border-radius: 16px; background: var(--ground); display: flex; flex-direction: column; gap: 6px; font-size: 15px; }
+.jpa-admin__visits li { display: flex; flex-wrap: wrap; gap: 4px 14px; }
+.jpa-admin__visit-date { min-width: 130px; font-weight: 600; }
+.jpa-admin__visit-place { color: var(--ink-soft); }
 .jpa-admin .jpa-admin__delete { color: #a2311b; }
 .jpa-admin .jpa-admin__delete:hover { background: #a2311b; border-color: #a2311b; color: #fff; }
 

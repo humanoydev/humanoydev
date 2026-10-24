@@ -7,6 +7,7 @@
  * Administración (protegida con Cloudflare Access, ver isAdmin):
  *   GET    /api/admin/guests                      → invitados con visitas y respuesta
  *   POST   /api/admin/guests  { guests: [{ name, phone? }] } → agrega invitados con su token
+ *   GET    /api/admin/guests/:id/visits           → cada visita: fecha, navegador, ciudad y país
  *   DELETE /api/admin/guests/:id                  → elimina un invitado (y sus visitas y respuesta)
  *
  * Cada respuesta manda un aviso por correo a papá y mamá (ver notifyRsvp).
@@ -46,9 +47,12 @@ async function openInvite(request: Request, env: Env): Promise<Response> {
 
   const [rsvp] = await env.DB.batch<{ attending: number; message: string }>([
     env.DB.prepare("SELECT attending, message FROM rsvps WHERE guest_id = ?").bind(guest.id),
-    env.DB.prepare("INSERT INTO visits (guest_id, user_agent) VALUES (?, ?)").bind(
+    // Navegador, ciudad y país de la visita; la IP no se guarda.
+    env.DB.prepare("INSERT INTO visits (guest_id, user_agent, city, country) VALUES (?, ?, ?, ?)").bind(
       guest.id,
       request.headers.get("User-Agent")?.slice(0, 300) ?? null,
+      request.cf?.city ?? null,
+      request.cf?.country ?? null,
     ),
   ]);
   const answer = rsvp.results[0];
@@ -164,6 +168,7 @@ async function listGuests(env: Env): Promise<Response> {
   const { results } = await env.DB.prepare(
     `SELECT g.id, g.token, g.name, g.phone, g.created_at AS createdAt,
             COUNT(v.id) AS visits, MAX(v.visited_at) AS lastVisit,
+            COUNT(DISTINCT v.user_agent) AS devices,
             r.attending, r.message, r.updated_at AS answeredAt
      FROM guests g
      LEFT JOIN visits v ON v.guest_id = g.id
@@ -195,6 +200,16 @@ async function addGuests(request: Request, env: Env): Promise<Response> {
   return json({ added: guests.length }, 201);
 }
 
+async function listVisits(env: Env, id: string): Promise<Response> {
+  const { results } = await env.DB.prepare(
+    `SELECT visited_at AS visitedAt, user_agent AS userAgent, city, country
+     FROM visits WHERE guest_id = ? ORDER BY id DESC LIMIT 100`,
+  )
+    .bind(id)
+    .all();
+  return json(results);
+}
+
 async function deleteGuest(env: Env, id: string): Promise<Response> {
   // Las visitas y la respuesta se borran en cascada; por si D1 no aplica las claves foráneas, también a mano.
   await env.DB.batch([
@@ -209,8 +224,9 @@ async function handleAdmin(request: Request, env: Env, url: URL): Promise<Respon
   if (!(await isAdmin(request, env, url))) return json({ error: "forbidden" }, 403);
   if (url.pathname === "/api/admin/guests" && request.method === "GET") return listGuests(env);
   if (url.pathname === "/api/admin/guests" && request.method === "POST") return addGuests(request, env);
-  const match = /^\/api\/admin\/guests\/(\d+)$/.exec(url.pathname);
-  if (match && request.method === "DELETE") return deleteGuest(env, match[1]);
+  const match = /^\/api\/admin\/guests\/(\d+)(\/visits)?$/.exec(url.pathname);
+  if (match?.[2] && request.method === "GET") return listVisits(env, match[1]);
+  if (match && !match[2] && request.method === "DELETE") return deleteGuest(env, match[1]);
   return json({ error: "not_found" }, 404);
 }
 

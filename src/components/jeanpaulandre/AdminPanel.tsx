@@ -13,11 +13,15 @@ type Guest = {
   phone: string | null;
   createdAt: string;
   visits: number;
+  // Navegadores distintos que abrieron el link: más de uno sugiere que se reenvió.
+  devices: number;
   lastVisit: string | null;
   attending: boolean | null;
   message: string | null;
   answeredAt: string | null;
 };
+
+type Visit = { visitedAt: string; userAgent: string | null; city: string | null; country: string | null };
 
 type Filter = "todos" | "sin-abrir" | "sin-responder" | "asisten" | "no-asisten";
 
@@ -38,6 +42,52 @@ function formatDate(value: string) {
     hour: "numeric",
     minute: "2-digit",
   });
+}
+
+// "iPhone · Safari", "Android · navegador de una app"... a partir del User-Agent guardado.
+function describeBrowser(ua: string | null) {
+  if (!ua) return "Navegador desconocido";
+  const device = /iPhone/.test(ua)
+    ? "iPhone"
+    : /iPad/.test(ua)
+      ? "iPad"
+      : /Android/.test(ua)
+        ? /Mobile/.test(ua)
+          ? "Android"
+          : "Tablet Android"
+        : /Macintosh/.test(ua)
+          ? "Mac"
+          : /Windows/.test(ua)
+            ? "Windows"
+            : /Linux/.test(ua)
+              ? "Linux"
+              : "Otro dispositivo";
+  const browser = /Instagram/.test(ua)
+    ? "Instagram"
+    : /FBAN|FBAV/.test(ua)
+      ? "Facebook"
+      : /; wv\)/.test(ua)
+        ? "navegador de una app"
+        : /EdgA?\/|EdgiOS/.test(ua)
+          ? "Edge"
+          : /SamsungBrowser/.test(ua)
+            ? "Samsung Internet"
+            : /CriOS|Chrome\//.test(ua)
+              ? "Chrome"
+              : /FxiOS|Firefox\//.test(ua)
+                ? "Firefox"
+                : /Safari\//.test(ua)
+                  ? "Safari"
+                  : "otro navegador";
+  return `${device} · ${browser}`;
+}
+
+const regionNames = new Intl.DisplayNames(["es"], { type: "region" });
+
+// "Lima, Perú"; en local (sin datos de Cloudflare) no hay ubicación.
+function describePlace(visit: Visit) {
+  const country = visit.country ? regionNames.of(visit.country) : null;
+  return [visit.city, country].filter(Boolean).join(", ") || "Ubicación desconocida";
 }
 
 const inviteLink = (token: string) => `${window.location.origin}/babyshower?i=${token}`;
@@ -112,6 +162,9 @@ export function AdminPanel() {
   const [saving, setSaving] = useState(false);
   const [filter, setFilter] = useState<Filter>("todos");
   const [copied, setCopied] = useState<number | null>(null);
+  // Invitado con la lista de visitas abierta, y las visitas cargadas de cada uno.
+  const [openVisits, setOpenVisits] = useState<number | null>(null);
+  const [visits, setVisits] = useState<Record<number, Visit[]>>({});
 
   const load = useCallback(async () => {
     try {
@@ -158,6 +211,17 @@ export function AdminPanel() {
     try {
       await api(`/guests/${guest.id}`, { method: "DELETE" });
       await load();
+    } catch (e) {
+      setError((e as Error).message);
+    }
+  }
+
+  async function toggleVisits(guest: Guest) {
+    if (openVisits === guest.id) return setOpenVisits(null);
+    setOpenVisits(guest.id);
+    try {
+      const list: Visit[] = await api(`/guests/${guest.id}/visits`);
+      setVisits((current) => ({ ...current, [guest.id]: list }));
     } catch (e) {
       setError((e as Error).message);
     }
@@ -270,7 +334,18 @@ export function AdminPanel() {
                 <p className="jpa-admin__meta">
                   {guest.phone ?? "Sin teléfono"}
                   {guest.lastVisit && ` · Última visita: ${formatDate(guest.lastVisit)}`}
+                  {guest.devices > 1 && ` · Abierto en ${guest.devices} dispositivos`}
                 </p>
+                {guest.visits > 0 && (
+                  <button
+                    type="button"
+                    className="jpa-admin__visits-toggle"
+                    onClick={() => toggleVisits(guest)}
+                    aria-expanded={openVisits === guest.id}
+                  >
+                    {openVisits === guest.id ? "Ocultar visitas" : `Ver visitas (${guest.visits})`}
+                  </button>
+                )}
                 {guest.message && <p className="jpa-admin__message">“{guest.message}”</p>}
               </div>
               <span className={`jpa-admin__status jpa-admin__status--${s.tone}`}>{s.label}</span>
@@ -295,6 +370,18 @@ export function AdminPanel() {
                   Eliminar
                 </button>
               </div>
+              {openVisits === guest.id && (
+                <ol className="jpa-admin__visits">
+                  {!visits[guest.id] && <li>Cargando…</li>}
+                  {visits[guest.id]?.map((visit, index) => (
+                    <li key={index}>
+                      <span className="jpa-admin__visit-date">{formatDate(visit.visitedAt)}</span>
+                      <span>{describeBrowser(visit.userAgent)}</span>
+                      <span className="jpa-admin__visit-place">{describePlace(visit)}</span>
+                    </li>
+                  ))}
+                </ol>
+              )}
             </li>
           );
         })}

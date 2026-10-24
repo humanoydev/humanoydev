@@ -31,7 +31,7 @@ export const babyShower = {
   start: "2026-11-15T16:00:00-05:00",
   end: "2026-11-15T21:00:00-05:00",
   timeLabel: "4:00 p. m. a 9:00 p. m.",
-  rsvpByLabel: "domingo 8 de noviembre",
+  rsvpByLabel: "sábado 31 de octubre",
 };
 
 // Imagen de vista previa para WhatsApp y redes (la genera src/app/(es)/jeanpaulandre/og.png/).

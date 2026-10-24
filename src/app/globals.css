@@ -484,6 +484,7 @@ a.jpa__brand:hover { color: var(--accent); }
 .jpa__directions-list { margin-top: 14px; display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
 .jpa__directions-list .jpa__chip { justify-content: center; background: var(--ground); border: 2px solid var(--line); }
 .jpa__directions-list .jpa__chip:hover { background: var(--ink); border-color: var(--ink); color: #fff; }
+.jpa__directions-note { margin-top: 12px; font-size: 15px; line-height: 1.45; color: var(--ink-soft); }
 .jpa__directions-close { position: absolute; top: 10px; right: 10px; width: 40px; height: 40px; padding: 0; border: 0; border-radius: 50%; background: var(--ground); color: var(--ink); font-size: 24px; line-height: 1; cursor: pointer; }
 .jpa__rsvp { padding-block: 20px 140px; }
 .jpa__rsvp .jpa__card-title { margin-top: 0; }

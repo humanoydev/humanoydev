@@ -2,12 +2,14 @@
 // del Worker (worker/babyshower.ts). Con `npm run dev` no hay Worker: usa `npm run preview`.
 
 // `address` y `note` son opcionales. `lat`/`lng` ubican el mapa y los links a las apps.
-// `uberName` es el nombre con el que Uber busca el destino, si difiere de `name`.
+// `uberName` es el nombre que se le manda a Uber (aunque Uber titula el destino según las
+// coordenadas) y `uberNote`, un aviso bajo las apps para que nadie se confunda con ese título.
 export type Venue = {
   name: string;
   address?: string;
   note?: string;
   uberName?: string;
+  uberNote?: string;
   lat: number;
   lng: number;
   mapsUrl: string;

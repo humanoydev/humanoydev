@@ -167,6 +167,7 @@ export function VenueCard({ venue }: { venue: Venue }) {
               </a>
             ))}
           </div>
+          {venue.uberNote && <p className="jpa__directions-note">{venue.uberNote}</p>}
           <button type="button" className="jpa__directions-close" onClick={() => setOpen(false)} aria-label="Cerrar">
             ×
           </button>

@@ -18,7 +18,11 @@ export function VenuePhotos({ photos }: { photos: Photo[] }) {
 
   return (
     <div className="jpa__card jpa__card--peach jpa__photos">
-      <h2 className="jpa__label">Así es el lugar</h2>
+      <h2 className="jpa__label">Antes de llegar</h2>
+      <p className="jpa__card-text">
+        Te mostramos el camino hasta el SUM, un salón interior donde vamos a celebrar. Así sabrás a dónde llegas y
+        qué ponerte.
+      </p>
       <ul className="jpa__photos-strip">
         {photos.map((photo) => (
           <li key={photo.src}>

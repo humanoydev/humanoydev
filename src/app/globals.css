@@ -254,14 +254,16 @@ a.jpa__brand:hover { color: var(--accent); }
 .jpa-deco--blocks { bottom: 60px; left: 4%; width: 110px; }
 .jpa-deco--kite-left { top: 40px; left: 4%; width: 80px; }
 .jpa-deco--balloons-right { top: 45%; right: 4%; width: 100px; }
-.jpa-deco--blocks-left { bottom: 80px; left: 3%; width: 110px; }
+/* Los cubitos del final van centrados bajo la tarjeta, quietos (sin parallax) y por encima del
+   contenido (z-index 2), porque el contenedor ocupa ese espacio y se llevaría los toques. */
+.jpa-deco--blocks-left { bottom: 24px; left: calc(50% - 45px); width: 90px; z-index: 2; }
 @media (max-width: 1240px) {
   /* Con poco margen a los lados, los dibujos se achican y se asoman por el borde. */
   .jpa-deco--balloons { left: -20px; width: 76px; }
   .jpa-deco--cloud { right: -30px; width: 110px; }
   .jpa-deco--balloon-right { right: -14px; width: 64px; }
   .jpa-deco--kite { right: 8px; width: 60px; }
-  .jpa-deco--blocks, .jpa-deco--blocks-left { left: -24px; width: 76px; }
+  .jpa-deco--blocks { left: -24px; width: 76px; }
   .jpa-deco--kite-left { top: 24px; left: -10px; width: 56px; }
   .jpa-deco--balloons-right { right: -12px; width: 70px; }
 }
@@ -669,7 +671,7 @@ a.jpa__brand:hover { color: var(--accent); }
    llevaría los toques. Por eso quedan fijos en el espacio libre bajo la tarjeta, sin parallax,
    para no tapar el texto. */
 @media (max-width: 760px) {
-  .jpa-deco--blocks, .jpa-deco--blocks-left { left: calc(50% - 38px); bottom: 28px; z-index: 2; translate: none; }
+  .jpa-deco--blocks { left: calc(50% - 38px); bottom: 28px; z-index: 2; translate: none; }
   .jpa__chapters, .jpa__rsvp { padding-bottom: 150px; }
   .jpa__footer { flex-direction: column; justify-content: center; text-align: center; }
 }

@@ -159,7 +159,7 @@ export function Invitation() {
         <Toy play="float-away" dance className="jpa-deco jpa-deco--balloons-right jpa-px jpa-px--near">
           <Balloons />
         </Toy>
-        <Toy play="tumble" className="jpa-deco jpa-deco--blocks-left jpa-px jpa-px--mid">
+        <Toy play="tumble" className="jpa-deco jpa-deco--blocks-left">
           <Blocks />
         </Toy>
         <div className="container jpa__rsvp">

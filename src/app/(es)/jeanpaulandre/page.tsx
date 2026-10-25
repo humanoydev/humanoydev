@@ -55,7 +55,7 @@ export default function JeanPaulAndrePage() {
       <main>
         <section className="container jpc-cover" aria-labelledby="jpc-name">
           <div className="jpc-cover__text">
-            <p className="jpc-kicker">Una historia que empezó antes de empezar</p>
+            <p className="jpc-kicker">Te soñamos antes de conocerte</p>
             <h1 id="jpc-name" className="jpc-name">
               Jean Paul <em>André</em>
             </h1>

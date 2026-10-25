@@ -476,11 +476,12 @@ a.jpa__brand:hover { color: var(--accent); }
 .jpa__photos-strip { margin: 18px -32px 0; padding: 0 32px 6px; list-style: none; display: flex; gap: 14px; overflow-x: auto; scroll-snap-type: x mandatory; scroll-padding-inline: 32px; scrollbar-width: none; }
 .jpa__photos-strip::-webkit-scrollbar { display: none; }
 .jpa__photos-strip > li { flex: 0 0 min(80%, 440px); scroll-snap-align: start; }
-.jpa__photo { position: relative; display: block; width: 100%; aspect-ratio: 4 / 3; padding: 0; overflow: hidden; border: 4px solid #fff; border-radius: 22px; background: #fff; cursor: zoom-in; }
-.jpa__photo img { width: 100%; height: 100%; object-fit: cover; transition: scale 0.3s ease; }
+/* contain y no cover: las fotos traen su propio marco y no deben recortarse. */
+.jpa__photo { position: relative; display: block; width: 100%; aspect-ratio: 4 / 3; padding: 0; overflow: hidden; border: 0; border-radius: 18px; background: #fbf6ee; cursor: zoom-in; }
+.jpa__photo img { width: 100%; height: 100%; object-fit: contain; transition: scale 0.3s ease; }
 .jpa__photo:hover img { scale: 1.04; }
 .jpa__photo:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
-.jpa__photo-caption { position: absolute; left: 10px; bottom: 10px; max-width: calc(100% - 20px); padding: 4px 12px; border-radius: var(--radius-pill); background: #fff; font-family: var(--font-round), system-ui, sans-serif; font-size: 15px; font-weight: 600; color: var(--ink); text-align: left; }
+.jpa__photo-caption { position: absolute; left: 18px; bottom: 18px; max-width: calc(100% - 20px); padding: 4px 12px; border-radius: var(--radius-pill); background: #fff; font-family: var(--font-round), system-ui, sans-serif; font-size: 15px; font-weight: 600; color: var(--ink); text-align: left; }
 @media (max-width: 600px) {
   .jpa__photos-strip { margin-inline: -22px; padding-inline: 22px; scroll-padding-inline: 22px; }
 }

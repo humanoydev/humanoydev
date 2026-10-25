@@ -13,6 +13,7 @@ import { useEffect, useRef } from "react";
 type Bubble = { x: number; y: number; r: number; speed: number; phase: number; color: string };
 type Spark = { x: number; y: number; vx: number; vy: number; life: number; color: string };
 
+// Colores por defecto; una página puede cambiarlos con --bubbles en .jpa (lista separada por comas).
 const COLORS = ["#d6e8f5", "#fbdccb", "#dbe9d2", "#f8e6a8", "#f6c1b5"];
 const SPARK_COLORS = ["#f2c14e", "#e98a6d", "#8fb6d9", "#9cc28a"];
 const POP_EVERY = 1000;
@@ -38,6 +39,8 @@ export function BubbleField() {
     if (!canvas || !section || !ctx) return;
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
+    const custom = getComputedStyle(section).getPropertyValue("--bubbles").split(",").map((c) => c.trim()).filter(Boolean);
+    const colors = custom.length ? custom : COLORS;
     let width = 0;
     let height = 0;
     let bubbles: Bubble[] = [];
@@ -53,7 +56,7 @@ export function BubbleField() {
       r: random(10, 30),
       speed: random(0.35, 0.95),
       phase: random(0, Math.PI * 2),
-      color: COLORS[Math.floor(random(0, COLORS.length))],
+      color: colors[Math.floor(random(0, colors.length))],
     });
 
     // Revienta la burbuja en (x, y) y la vuelve a lanzar desde abajo.

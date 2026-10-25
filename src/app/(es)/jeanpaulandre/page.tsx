@@ -36,7 +36,8 @@ export const metadata: Metadata = {
 
 export default function JeanPaulAndrePage() {
   return (
-    <>
+    // .jpa-home: estilo propio de la portada (azul y lavanda), distinto del de la invitación.
+    <div className="jpa-home">
       <header className="container jpa__top">
         <p className="jpa__brand">
           <Star className="jpa__brand-star" />
@@ -140,6 +141,6 @@ export default function JeanPaulAndrePage() {
         </p>
         <a href={SITE_URL}>humanoydev.com</a>
       </footer>
-    </>
+    </div>
   );
 }

@@ -587,3 +587,36 @@ a.jpa__brand:hover { color: var(--accent); }
   .jpa-music--on svg { animation: jpa-heartbeat 1.1s ease-in-out infinite; }
   .jpa-music--waiting { animation: jpa-nudge 2.5s ease-in-out infinite; }
 }
+
+/* Portada de Jean Paul André (.jpa-home): estilo propio, en azul y lavanda, para que no se
+   parezca a la invitación. Los tokens van en .jpa para que lleguen también al fondo y a las
+   burbujas (--bubbles, BubbleField.tsx). */
+.jpa:has(.jpa-home) { --ground: #f6f5fc; --ink: #2f3a63; --ink-soft: #5d6690; --line: #dcdcf0; --accent: #5a6fc0; --accent-hover: #44559e; --sky: #d4e3f7; --peach: #e4def8; --mint: #d3def6; --butter: #f3e6b3; --star: #f0cf72; --lilac: #7466c4; --font-round: "Nunito Variable"; --font-serif: "Fraunces Variable"; --bubbles: #d4e3f7, #e4def8, #cfd8f5, #eef0fb, #c9d6f2; }
+.jpa-home .jpa__hero { background: linear-gradient(180deg, #b7c8ee, #cddbf5 35%, #e4dff8 72%, var(--ground)); }
+.jpa-home .jpa__name { font-family: var(--font-serif), Georgia, serif; font-weight: 600; font-variation-settings: "SOFT" 100; letter-spacing: -0.02em; }
+.jpa-home .jpa__name-accent { font-style: italic; font-weight: 500; color: var(--lilac); }
+.jpa-home .serif { font-variation-settings: "SOFT" 100; }
+.jpa-home .jpa__tagline { font-weight: 400; }
+.jpa-home .jpa__label { font-weight: 800; letter-spacing: 0.14em; }
+.jpa-home .jpa__prose { font-weight: 380; font-variation-settings: "SOFT" 100; line-height: 1.6; }
+.jpa-home .jpa__sign { color: var(--lilac); }
+.jpa-home .jpa__heart { color: #8fa1e3; }
+.jpa-home .jpa__photo { box-shadow: 0 24px 48px -28px rgba(47, 58, 99, 0.55); }
+/* Capítulos: tarjetas blancas con borde de color, en vez de bloques de color. */
+.jpa-home .jpa__chapter { background: #fff; border: 2px solid var(--card); box-shadow: 0 18px 40px -30px rgba(47, 58, 99, 0.5); }
+.jpa-home .jpa__chapter:nth-child(4n + 4) { --card: #e8e2f8; }
+.jpa-home .jpa__chapter--pending { background: transparent; border-style: dashed; border-color: var(--line); box-shadow: none; }
+.jpa-home .jpa__numeral { background: var(--card); font-family: var(--font-serif), Georgia, serif; font-weight: 600; color: var(--ink); }
+.jpa-home .jpa__chapter--pending .jpa__numeral { background: var(--line); }
+.jpa-home .jpa__chapter-title { font-family: var(--font-serif), Georgia, serif; font-variation-settings: "SOFT" 100; }
+.jpa-home .jpa__chapter-status { background: var(--ground); font-weight: 700; }
+/* Los dibujos (Doodles.tsx) traen sus colores fijos (la imagen og.png no admite CSS); aquí se
+   cambian a azules y lavandas: el CSS le gana a los atributos fill/stroke del SVG. */
+.jpa-home [stroke="#4a372c"] { stroke: #3a4570; }
+.jpa-home [fill="#4a372c"] { fill: #3a4570; }
+.jpa-home [fill="#fbdccb"] { fill: #ddd5f7; }
+.jpa-home [fill="#f8e6a8"] { fill: #cfe0f7; }
+.jpa-home [fill="#fffaf3"] { fill: #fafaff; }
+.jpa-home [fill="#dbe9d2"] { fill: #c8d3f2; }
+.jpa-home [fill="#c9ddbb"] { fill: #b4c2ec; }
+.jpa-home [fill="#f6c1b5"] { fill: #d6c8f3; }

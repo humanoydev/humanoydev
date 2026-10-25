@@ -41,14 +41,13 @@ function nextOffset(current: Offset, range: Offset): Offset {
 }
 
 // Juguetes en la página, para que ToyShow los haga reaccionar solos.
-type Registered = { element: HTMLElement; start: () => void; duration: number };
+type Registered = { element: HTMLElement; start: () => void };
 const registry = new Set<Registered>();
 
-// Pausas de la función automática (ms): antes de la primera ronda, entre juguete y juguete
-// de esa ronda, y después, cada cuánto reacciona uno de los que están a la vista.
-const INTRO_DELAY = 800;
-const INTRO_GAP = 250;
-const INTERVAL = 6000;
+// La función automática: al cargar reaccionan todos a la vez (bienvenida); después,
+// cada INTERVAL ms, uno de los que están a la vista, por turnos.
+const WELCOME_DELAY = 800;
+const INTERVAL = 4000;
 
 // Juguetes a la vista (los ocultos miden 0), de arriba abajo y de izquierda a derecha.
 function visibleToys() {
@@ -59,30 +58,22 @@ function visibleToys() {
     .map(({ toy }) => toy);
 }
 
-// Al cargar, los juguetes a la vista reaccionan uno tras otro. Después, cada INTERVAL,
-// reacciona uno de los que estén a la vista, por turnos.
 export function ToyShow() {
   useEffect(() => {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    let timer: number;
     let turn = 0;
-
-    const next = () => {
-      const toys = visibleToys();
-      if (toys.length) toys[turn++ % toys.length].start();
-      timer = window.setTimeout(next, INTERVAL);
+    let interval = 0;
+    const welcome = window.setTimeout(() => {
+      registry.forEach((toy) => toy.start());
+      interval = window.setInterval(() => {
+        const toys = visibleToys();
+        if (toys.length) toys[turn++ % toys.length].start();
+      }, INTERVAL);
+    }, WELCOME_DELAY);
+    return () => {
+      window.clearTimeout(welcome);
+      window.clearInterval(interval);
     };
-    const intro = (toys: Registered[]) => {
-      const [toy, ...rest] = toys;
-      if (!toy) {
-        timer = window.setTimeout(next, INTERVAL);
-        return;
-      }
-      toy.start();
-      timer = window.setTimeout(() => intro(rest), toy.duration + INTRO_GAP);
-    };
-    timer = window.setTimeout(() => intro(visibleToys()), INTRO_DELAY);
-    return () => window.clearTimeout(timer);
   }, []);
 
   return null;
@@ -121,7 +112,7 @@ export function Toy({ play, className, bubble, children }: Props) {
   });
 
   useEffect(() => {
-    const toy = { element: element.current!, start: () => startRef.current(), duration: DURATION[play] };
+    const toy = { element: element.current!, start: () => startRef.current() };
     registry.add(toy);
     return () => {
       registry.delete(toy);

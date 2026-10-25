@@ -6,13 +6,16 @@ import { useEffect, useRef } from "react";
 // que no se corten entre secciones; el encabezado las tapa con su cielo). Se apartan del
 // cursor y revientan en estrellitas al tocarlas (o al pasar el mouse muy cerca).
 // Escucha los eventos en todo su contenedor, así funciona también encima de las tarjetas.
-// Solo dibuja las burbujas que están en pantalla; con "reducir movimiento" no se dibuja.
+// Cada POP_EVERY revienta sola una burbuja al azar de las que están en pantalla, para que se
+// note que se puede. Solo dibuja las burbujas que están en pantalla; con "reducir movimiento"
+// no se dibuja.
 
 type Bubble = { x: number; y: number; r: number; speed: number; phase: number; color: string };
 type Spark = { x: number; y: number; vx: number; vy: number; life: number; color: string };
 
 const COLORS = ["#d6e8f5", "#fbdccb", "#dbe9d2", "#f8e6a8", "#f6c1b5"];
 const SPARK_COLORS = ["#f2c14e", "#e98a6d", "#8fb6d9", "#9cc28a"];
+const POP_EVERY = 3000;
 
 function star(ctx: CanvasRenderingContext2D, x: number, y: number, r: number) {
   ctx.beginPath();
@@ -169,6 +172,13 @@ export function BubbleField() {
       if (visible && !frame) frame = requestAnimationFrame(draw);
     });
     const resizer = new ResizeObserver(resize);
+    const autoPop = window.setInterval(() => {
+      if (!visible || document.hidden) return;
+      const top = -section.getBoundingClientRect().top;
+      const onScreen = bubbles.filter((b) => b.y > top + b.r && b.y < top + window.innerHeight - b.r);
+      const bubble = onScreen[Math.floor(Math.random() * onScreen.length)];
+      if (bubble) pop(bubble, bubble.x + Math.sin(performance.now() / 1400 + bubble.phase) * 14);
+    }, POP_EVERY);
 
     resize();
     observer.observe(section);
@@ -178,6 +188,7 @@ export function BubbleField() {
     section.addEventListener("pointerdown", onDown);
     return () => {
       cancelAnimationFrame(frame);
+      clearInterval(autoPop);
       observer.disconnect();
       resizer.disconnect();
       section.removeEventListener("pointermove", onMove);

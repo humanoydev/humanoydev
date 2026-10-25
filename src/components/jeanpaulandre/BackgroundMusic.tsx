@@ -2,38 +2,46 @@
 
 import { useEffect, useRef, useState } from "react";
 
-// Musiquita de fondo: una melodía original de cajita de música, sintetizada con Web Audio
+// Musiquita de fondo: una polca original de cajita de música, sintetizada con Web Audio
 // (sin archivos ni licencias). Los navegadores no dejan sonar audio hasta que la persona
 // toca la página, así que arranca con el primer toque o tecla. El botón la silencia y la
 // preferencia queda guardada en el navegador.
 
-const TEMPO = 112;
+const TEMPO = 132;
 const VOLUME = 0.5;
 const STORAGE_KEY = "jpa-music";
 
 // Melodía en corcheas: "nota:duración", "-" es silencio; un compás (8 corcheas) por bloque.
 const MELODY = `
-  E5:2 G5:2 C6:2 G5:2 | D5:2 G5:2 B5:3 A5:1 | C6:2 A5:2 E5:2 A5:2 | F5:2 A5:2 G5:4 |
-  E5:1 F5:1 G5:2 E5:2 C5:2 | F5:1 G5:1 A5:2 C6:2 A5:2 | G5:2 F5:2 D5:2 B4:2 | C5:4 -:2 G4:2 |
-  A5:2 A5:1 B5:1 C6:2 A5:2 | G5:2 E5:2 C6:4 | B5:2 A5:1 G5:1 D5:2 G5:2 | E5:2 A5:2 C6:4 |
-  A5:1 G5:1 F5:2 A5:2 C6:2 | G5:1 F5:1 E5:2 G5:2 C6:2 | D6:2 B5:2 G5:2 A5:1 B5:1 | C6:6 -:2
+  C5:1 F5:1 A5:2 C6:3 A5:1 | G5:2 E5:1 G5:1 C6:4 | D6:1 C6:1 A5:2 F5:2 A5:2 | Bb5:3 A5:1 G5:2 F5:2 |
+  A5:1 C6:1 F6:2 C6:2 A5:2 | Bb5:2 G5:1 Bb5:1 D6:2 Bb5:2 | G5:1 A5:1 Bb5:1 G5:1 E5:2 C5:2 | F5:4 -:2 C5:2 |
+  D5:1 F5:1 Bb5:2 D6:3 Bb5:1 | C6:2 A5:1 C6:1 F6:4 | G5:1 A5:1 Bb5:2 D6:2 G5:2 | E5:2 G5:2 C6:2 E6:2 |
+  F6:2 E6:1 D6:1 A5:2 D6:2 | D6:2 C6:1 Bb5:1 F5:2 Bb5:2 | A5:1 Bb5:1 C6:2 G5:2 E5:2 | F5:2 A5:2 F5:3 -:1
 `;
-const CHORDS = "C G Am F C F G C F C G Am F C G C".split(" ");
-// Fundamental grave, quinta, tercera y octava de cada acorde.
+const CHORDS = "F C Dm Bb F Gm C F Bb F Gm C Dm Bb C F".split(" ");
+// Bajo (fundamental y quinta) y las dos notas del acorde que suenan en el "pa".
 const CHORD_NOTES: Record<string, string[]> = {
-  C: ["C3", "G3", "E4", "C4"],
-  G: ["G2", "D3", "B3", "G3"],
-  Am: ["A2", "E3", "C4", "A3"],
-  F: ["F2", "C3", "A3", "F3"],
+  F: ["F2", "C3", "A3", "C4"],
+  C: ["C3", "G2", "E3", "G3"],
+  Dm: ["D3", "A2", "F3", "A3"],
+  Bb: ["Bb2", "F2", "D3", "F3"],
+  Gm: ["G2", "D3", "Bb3", "D4"],
 };
-// Acompañamiento en corcheas: bajo y luego el acorde quebrado.
-const PATTERN = [0, 1, 2, 1, 3, 1, 2, 1];
+// Acompañamiento "um-pa" de polca: [corchea del compás, notas de CHORD_NOTES].
+const PATTERN: [number, number[]][] = [
+  [0, [0]],
+  [2, [2, 3]],
+  [4, [1]],
+  [6, [2, 3]],
+];
 
 type Voice = "melody" | "bass" | "chord";
 type Note = { at: number; midi: number; voice: Voice };
 
 const SEMITONES: Record<string, number> = { C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11 };
-const midi = (name: string) => 12 * (Number(name.slice(-1)) + 1) + SEMITONES[name[0]];
+// "Bb3" → 58 (número MIDI). La alteración es opcional.
+const midi = (name: string) =>
+  12 * (Number(name.slice(-1)) + 1) + SEMITONES[name[0]] + (name[1] === "b" ? -1 : name[1] === "#" ? 1 : 0);
 
 function buildSong() {
   const notes: Note[] = [];
@@ -44,8 +52,10 @@ function buildSong() {
     at += Number(length);
   }
   CHORDS.forEach((chord, bar) =>
-    PATTERN.forEach((i, step) =>
-      notes.push({ at: bar * 8 + step, midi: midi(CHORD_NOTES[chord][i]), voice: step === 0 ? "bass" : "chord" }),
+    PATTERN.forEach(([step, indexes]) =>
+      indexes.forEach((i) =>
+        notes.push({ at: bar * 8 + step, midi: midi(CHORD_NOTES[chord][i]), voice: i < 2 ? "bass" : "chord" }),
+      ),
     ),
   );
   return { notes: notes.sort((a, b) => a.at - b.at), length: CHORDS.length * 8 };

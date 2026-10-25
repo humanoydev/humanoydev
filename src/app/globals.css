@@ -548,9 +548,23 @@ a.jpa__brand:hover { color: var(--accent); }
 .jpa__error { margin-top: 16px; font-weight: 600; color: #a2311b; }
 .jpa__rsvp .btn { margin-top: 24px; }
 .jpa__rsvp .btn:disabled { opacity: 0.6; cursor: progress; }
-.jpa__thanks { text-align: center; }
-.jpa__thanks-heart { width: 48px; height: 48px; margin-bottom: 12px; color: #e98a6d; }
-.jpa__thanks .jpa__card-text { margin-inline: auto; max-width: 46ch; }
+.jpa__status { margin-top: 16px; font-family: var(--font-round), system-ui, sans-serif; font-size: 18px; font-weight: 600; color: var(--accent); }
+.jpa__status:empty { display: none; }
+/* Segundo paso, después de responder: el mensaje para el bebé, en su propia tarjeta blanca. */
+.jpa__message { position: relative; margin-top: 24px; padding: 26px 24px 24px; border: 2px dashed var(--accent); border-radius: 24px; background: rgba(255, 255, 255, 0.6); }
+.jpa__message .jpa__field { margin-top: 0; }
+.jpa__message .jpa__field-label { font-size: 21px; }
+.jpa__message-heart { position: absolute; top: -16px; right: 22px; width: 32px; height: 32px; color: #e98a6d; }
+.jpa__rsvp .jpa__message .btn { margin-top: 18px; }
+.jpa__rsvp .jpa__message .btn:disabled { cursor: default; }
+@media (prefers-reduced-motion: no-preference) {
+  .jpa__message { animation: jpa-sheet-up 0.4s cubic-bezier(0.3, 1.3, 0.5, 1); }
+  .jpa__message-heart { animation: jpa-heartbeat 1.2s ease-in-out 3; }
+  /* El botón da dos brincos cada 2,5 s, para invitar a dejar el mensaje. */
+  .jpa__nudge:not(:disabled) { animation: jpa-nudge 2.5s ease-in-out 0.6s infinite; }
+  .jpa__nudge:not(:disabled):hover, .jpa__nudge:not(:disabled):focus-visible { animation: none; }
+}
+@keyframes jpa-nudge { 0%, 40%, 100% { transform: none; box-shadow: none; } 8% { transform: translateY(-8px) scale(1.04); box-shadow: 0 10px 20px -8px rgba(233, 138, 109, 0.7); } 16% { transform: none; } 24% { transform: translateY(-4px) scale(1.02); box-shadow: 0 6px 14px -8px rgba(233, 138, 109, 0.7); } 32% { transform: none; } }
 
 .jpa__footer { position: relative; padding-block: 28px 56px; border-top: 2px dashed var(--line); display: flex; flex-wrap: wrap; gap: 8px 32px; justify-content: space-between; align-items: center; font-size: 16px; color: var(--ink-soft); }
 .jpa__footer a { display: inline-flex; align-items: center; min-height: 44px; color: var(--ink-soft); }

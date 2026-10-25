@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useSyncExternalStore } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { DaysUntil } from "@/components/DaysUntil";
 import { BABY_NAME, babyShower } from "@/content/jeanpaulandre";
 import { Balloons, Blocks, Cloud, Heart, HeroScene, HotAirBalloon, Kite } from "./Doodles";
@@ -169,62 +169,54 @@ export function Invitation() {
   );
 }
 
+// La respuesta (Sí / No) se guarda al tocarla, sin botón aparte. Después aparece el mensaje
+// para el bebé como segundo paso, con su propio botón.
 function RsvpForm({ token, name, initial }: { token: string; name: string; initial: Rsvp | null }) {
   const [attending, setAttending] = useState<boolean | null>(initial?.attending ?? null);
   const [message, setMessage] = useState(initial?.message ?? "");
-  const [sent, setSent] = useState<Rsvp | null>(initial);
-  const [sending, setSending] = useState(false);
-  const [error, setError] = useState(false);
+  const [saved, setSaved] = useState<Rsvp | null>(initial);
+  const [saving, setSaving] = useState<"answer" | "message" | null>(null);
+  const [error, setError] = useState<"answer" | "message" | null>(null);
+  const textarea = useRef<HTMLTextAreaElement>(null);
 
-  async function submit(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    if (attending === null) return;
-    const rsvp = { attending, message: message.trim() };
-    setSending(true);
-    setError(false);
+  async function save(rsvp: Rsvp, what: "answer" | "message") {
+    setSaving(what);
+    setError(null);
     try {
       await sendRsvp(token, rsvp);
-      setSent(rsvp);
+      setSaved(rsvp);
     } catch {
-      setError(true);
+      setError(what);
     } finally {
-      setSending(false);
+      setSaving(null);
     }
   }
 
-  if (sent) {
-    return (
-      <div className="jpa__card jpa__card--mint jpa__thanks" role="status">
-        <Heart className="jpa__thanks-heart" />
-        <h2 className="jpa__card-title">
-          {sent.attending ? `¡Gracias, ${name}! Te esperamos.` : `Gracias por avisarnos, ${name}.`}
-        </h2>
-        <p className="jpa__card-text">
-          {sent.attending ? "Ya guardamos tu confirmación." : "Te vamos a extrañar. Ya guardamos tu respuesta."}
-          {sent.message && " Tu mensaje ya está en la cápsula del tiempo de Jean Paul André."}
-        </p>
-        <button type="button" className="btn btn--outline" onClick={() => setSent(null)}>
-          Cambiar mi respuesta
-        </button>
-      </div>
-    );
+  function answer(value: boolean) {
+    setAttending(value);
+    // Se guarda con el mensaje ya guardado, no con el que esté a medio escribir.
+    save({ attending: value, message: saved?.message ?? "" }, "answer");
   }
 
+  function submitMessage(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (attending === null) return;
+    // Con el mensaje vacío, el botón lleva a escribirlo.
+    if (!message.trim()) return textarea.current?.focus();
+    save({ attending, message: message.trim() }, "message");
+  }
+
+  const messageSaved = !!saved?.message && saved.message === message.trim();
+
   return (
-    <form className="jpa__card jpa__card--mint" onSubmit={submit}>
+    <div className="jpa__card jpa__card--mint">
       <h2 className="jpa__card-title">¿Nos acompañas?</h2>
-      <p className="jpa__card-text">Por favor confírmanos antes del {babyShower.rsvpByLabel}.</p>
-      <fieldset className="jpa__choices">
+      <p className="jpa__card-text">Toca tu respuesta antes del {babyShower.rsvpByLabel}.</p>
+      <fieldset className="jpa__choices" disabled={saving === "answer"}>
         <legend className="sr-only">Tu respuesta</legend>
         {/* Al elegir "Sí" el corazón late y suelta corazoncitos; al elegir "No", la nube llueve. */}
         <label className="jpa__choice jpa__choice--yes">
-          <input
-            type="radio"
-            name="attending"
-            checked={attending === true}
-            onChange={() => setAttending(true)}
-            required
-          />
+          <input type="radio" name="attending" checked={attending === true} onChange={() => answer(true)} />
           <span className="jpa__choice-icon" aria-hidden="true">
             <Heart />
             <span className="jpa__burst">
@@ -239,7 +231,7 @@ function RsvpForm({ token, name, initial }: { token: string; name: string; initi
           ¡Sí, ahí estaré!
         </label>
         <label className="jpa__choice jpa__choice--no">
-          <input type="radio" name="attending" checked={attending === false} onChange={() => setAttending(false)} />
+          <input type="radio" name="attending" checked={attending === false} onChange={() => answer(false)} />
           <span className="jpa__choice-icon" aria-hidden="true">
             <Cloud />
             <span className="jpa__rain">
@@ -251,23 +243,48 @@ function RsvpForm({ token, name, initial }: { token: string; name: string; initi
           No podré ir
         </label>
       </fieldset>
-      <label className="jpa__field">
-        <span className="jpa__field-label">
-          Un mensaje para Jean Paul André <span className="jpa__optional">(opcional)</span>
-        </span>
-        <span className="jpa__field-hint">
-          Lo guardaremos en su cápsula del tiempo para que lo lea cuando sea grande.
-        </span>
-        <textarea value={message} onChange={(e) => setMessage(e.target.value)} rows={4} maxLength={1000} />
-      </label>
-      {error && (
+      <p className="jpa__status" role="status">
+        {saving === "answer"
+          ? "Guardando…"
+          : error === "answer"
+            ? ""
+            : saved
+              ? saved.attending
+                ? `✓ ¡Gracias, ${name}! Ya guardamos tu confirmación. Te esperamos.`
+                : `✓ Gracias por avisarnos, ${name}. Te vamos a extrañar.`
+              : ""}
+      </p>
+      {error === "answer" && (
         <p className="jpa__error" role="alert">
-          No pudimos guardar tu respuesta. Inténtalo de nuevo.
+          No pudimos guardar tu respuesta. Tócala otra vez.
         </p>
       )}
-      <button type="submit" className="btn btn--primary" disabled={sending}>
-        {sending ? "Enviando…" : "Enviar respuesta"}
-      </button>
-    </form>
+
+      {saved && (
+        <form className="jpa__message" onSubmit={submitMessage}>
+          <Heart className="jpa__message-heart" />
+          <label className="jpa__field">
+            <span className="jpa__field-label">Déjale un mensaje a Jean Paul André</span>
+            <span className="jpa__field-hint">
+              Lo guardaremos en su cápsula del tiempo para que lo lea cuando sea grande.
+            </span>
+            <textarea ref={textarea} value={message} onChange={(e) => setMessage(e.target.value)} rows={4} maxLength={1000} />
+          </label>
+          {error === "message" && (
+            <p className="jpa__error" role="alert">
+              No pudimos guardar tu mensaje. Inténtalo de nuevo.
+            </p>
+          )}
+          <button
+            type="submit"
+            // Brinca de rato en rato hasta que deje su mensaje.
+            className={`btn btn--primary${messageSaved ? "" : " jpa__nudge"}`}
+            disabled={saving !== null || messageSaved}
+          >
+            {saving === "message" ? "Guardando…" : messageSaved ? "✓ Mensaje guardado" : "Guardar mensaje"}
+          </button>
+        </form>
+      )}
+    </div>
   );
 }

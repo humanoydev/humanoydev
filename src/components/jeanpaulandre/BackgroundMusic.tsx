@@ -2,37 +2,37 @@
 
 import { useEffect, useRef, useState } from "react";
 
-// Musiquita de fondo: una polca original de cajita de música, sintetizada con Web Audio
+// Musiquita de fondo: un vals original de cajita de música, sintetizada con Web Audio
 // (sin archivos ni licencias). Los navegadores no dejan sonar audio hasta que la persona
 // toca la página, así que arranca con el primer toque o tecla. El botón la silencia y la
 // preferencia queda guardada en el navegador.
 
-const TEMPO = 132;
+const TEMPO = 144;
 const VOLUME = 0.5;
 const STORAGE_KEY = "jpa-music";
 
-// Melodía en corcheas: "nota:duración", "-" es silencio; un compás (8 corcheas) por bloque.
+// Melodía en corcheas: "nota:duración", "-" es silencio; un compás de 3/4 (6 corcheas) por bloque.
+const BAR = 6;
 const MELODY = `
-  C5:1 F5:1 A5:2 C6:3 A5:1 | G5:2 E5:1 G5:1 C6:4 | D6:1 C6:1 A5:2 F5:2 A5:2 | Bb5:3 A5:1 G5:2 F5:2 |
-  A5:1 C6:1 F6:2 C6:2 A5:2 | Bb5:2 G5:1 Bb5:1 D6:2 Bb5:2 | G5:1 A5:1 Bb5:1 G5:1 E5:2 C5:2 | F5:4 -:2 C5:2 |
-  D5:1 F5:1 Bb5:2 D6:3 Bb5:1 | C6:2 A5:1 C6:1 F6:4 | G5:1 A5:1 Bb5:2 D6:2 G5:2 | E5:2 G5:2 C6:2 E6:2 |
-  F6:2 E6:1 D6:1 A5:2 D6:2 | D6:2 C6:1 Bb5:1 F5:2 Bb5:2 | A5:1 Bb5:1 C6:2 G5:2 E5:2 | F5:2 A5:2 F5:3 -:1
+  D5:2 G5:2 B5:2 | D6:3 B5:1 G5:2 | E5:2 G5:2 C6:2 | B5:4 A5:1 G5:1 |
+  G5:2 B5:2 E6:2 | C6:3 B5:1 A5:2 | F#5:2 A5:2 D6:2 | A5:4 -:2 |
+  B5:2 D6:2 G6:2 | F#6:1 G6:1 D6:2 B5:2 | C6:2 E6:2 G5:2 | A5:2 C6:2 E6:2 |
+  D6:3 B5:1 G5:2 | A5:2 C6:1 B5:1 A5:2 | G5:4 B5:1 A5:1 | G5:4 -:2
 `;
-const CHORDS = "F C Dm Bb F Gm C F Bb F Gm C Dm Bb C F".split(" ");
-// Bajo (fundamental y quinta) y las dos notas del acorde que suenan en el "pa".
+const CHORDS = "G G C G Em Am D D G G C Am G D G G".split(" ");
+// Bajo (fundamental y quinta) y las dos notas del acorde.
 const CHORD_NOTES: Record<string, string[]> = {
-  F: ["F2", "C3", "A3", "C4"],
+  G: ["G2", "D3", "B3", "D4"],
   C: ["C3", "G2", "E3", "G3"],
-  Dm: ["D3", "A2", "F3", "A3"],
-  Bb: ["Bb2", "F2", "D3", "F3"],
-  Gm: ["G2", "D3", "Bb3", "D4"],
+  D: ["D3", "A2", "F#3", "A3"],
+  Em: ["E3", "B2", "G3", "B3"],
+  Am: ["A2", "E3", "C4", "E4"],
 };
-// Acompañamiento "um-pa" de polca: [corchea del compás, notas de CHORD_NOTES].
+// Acompañamiento de vals: [corchea del compás, notas de CHORD_NOTES] (bajo, acorde, acorde).
 const PATTERN: [number, number[]][] = [
   [0, [0]],
   [2, [2, 3]],
-  [4, [1]],
-  [6, [2, 3]],
+  [4, [2, 3]],
 ];
 
 type Voice = "melody" | "bass" | "chord";
@@ -54,11 +54,11 @@ function buildSong() {
   CHORDS.forEach((chord, bar) =>
     PATTERN.forEach(([step, indexes]) =>
       indexes.forEach((i) =>
-        notes.push({ at: bar * 8 + step, midi: midi(CHORD_NOTES[chord][i]), voice: i < 2 ? "bass" : "chord" }),
+        notes.push({ at: bar * BAR + step, midi: midi(CHORD_NOTES[chord][i]), voice: i < 2 ? "bass" : "chord" }),
       ),
     ),
   );
-  return { notes: notes.sort((a, b) => a.at - b.at), length: CHORDS.length * 8 };
+  return { notes: notes.sort((a, b) => a.at - b.at), length: CHORDS.length * BAR };
 }
 
 // Sonido de cajita: senos con un parcial inarmónico (campanita) que se apagan rápido.

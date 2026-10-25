@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { BAR_EVENT } from "./BackgroundMusic";
+import { BAR_EVENT, type BarDetail } from "./BackgroundMusic";
 import { OPENED } from "./Envelope";
 
 // Juguetes de los costados: al pasar el mouse (o tocarlos en el celular) reaccionan,
@@ -35,6 +35,12 @@ type Offset = { x: number; y: number };
 // Los juguetes con `dance` (los globos) reaccionan en cada compás de la música (BAR_EVENT);
 // si su animación dura más que un compás, siguen en el siguiente que los encuentre libres.
 // Mientras suena la música no siguen las pausas de ToyShow: solo bailan con ella.
+// Arrancan antes del compás para que lo más marcado de su animación caiga en el tiempo fuerte:
+// fly se inclina al 30 % (≈ un tiempo, 1/3 de compás); float-away vuelve a su sitio al final.
+const ACCENT: Partial<Record<Play, (bar: number) => number>> = {
+  fly: (bar) => bar / 3,
+  "float-away": () => DURATION["float-away"],
+};
 let lastBar = 0;
 const dancing = () => performance.now() - lastBar < 2000;
 
@@ -120,14 +126,24 @@ export function Toy({ play, className, bubble, dance = false, children }: Props)
   useEffect(() => {
     const toy = { start: () => (dance && dancing() ? undefined : startRef.current()), duration: DURATION[play] };
     registry.add(toy);
-    const onBar = () => {
-      lastBar = performance.now();
-      startRef.current();
+    const beats = new Set<number>();
+    const onBar = (event: Event) => {
+      const { at, bar } = (event as CustomEvent<BarDetail>).detail;
+      const now = performance.now();
+      lastBar = now;
+      let when = at - (ACCENT[play]?.(bar) ?? 0);
+      while (when < now) when += bar;
+      const beat = window.setTimeout(() => {
+        beats.delete(beat);
+        startRef.current();
+      }, when - now);
+      beats.add(beat);
     };
     if (dance) window.addEventListener(BAR_EVENT, onBar);
     return () => {
       registry.delete(toy);
       window.removeEventListener(BAR_EVENT, onBar);
+      beats.forEach((beat) => window.clearTimeout(beat));
       window.clearTimeout(timer.current);
     };
   }, [play, dance]);

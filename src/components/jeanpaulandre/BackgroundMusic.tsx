@@ -186,12 +186,14 @@ export function BackgroundMusic() {
     };
 
     // El primer toque en cualquier parte (menos el botón, que tiene su propia acción) la enciende.
+    // El scroll también lo intenta, aunque hay navegadores que no lo cuentan como gesto y esperan
+    // al primer toque.
     const onGesture = (event: Event) => {
       if (!(event.target instanceof Element && event.target.closest(".jpa-music"))) start();
     };
     // Al cambiar de pestaña o de app, se calla.
     const onVisibility = () => (document.hidden ? ctx?.suspend() : ctx && start());
-    const gestures = ["pointerdown", "pointerup", "mousedown", "click", "touchend", "keydown"];
+    const gestures = ["pointerdown", "pointerup", "mousedown", "click", "touchend", "keydown", "scroll", "wheel"];
     gestures.forEach((name) => window.addEventListener(name, onGesture, true));
     document.addEventListener("visibilitychange", onVisibility);
     update();

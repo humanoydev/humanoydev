@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { BackgroundMusic } from "@/components/jeanpaulandre/BackgroundMusic";
 import { Heart, Star } from "@/components/jeanpaulandre/Doodles";
 import { Invitation } from "@/components/jeanpaulandre/Invitation";
 import { BABY_NAME, babyShower, ogImage } from "@/content/jeanpaulandre";
@@ -48,6 +49,8 @@ export default function BabyShowerPage() {
         {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
         <a href="/">Visita la web de {BABY_NAME}</a>
       </footer>
+
+      <BackgroundMusic />
     </>
   );
 }

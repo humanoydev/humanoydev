@@ -406,7 +406,7 @@ a.jpa__brand:hover { color: var(--accent); }
 .jpa__photo { position: relative; flex: 0 1 320px; margin: 0 auto; padding: 14px 14px 0; border-radius: 6px; background: #fff; box-shadow: 0 24px 48px -28px rgba(74, 55, 44, 0.5); transform: rotate(-2.5deg); }
 /* Ampliado hacia la carita para dejar fuera los datos y el marco del ecógrafo. */
 .jpa__video { position: relative; aspect-ratio: 4 / 5; overflow: hidden; border-radius: 4px; background: #000; }
-.jpa__video video { display: block; width: 100%; height: 100%; object-fit: cover; transform: scale(1.25); transform-origin: 50% 65%; }
+.jpa__video video, .jpa__video img { display: block; width: 100%; height: 100%; object-fit: cover; transform: scale(1.25); transform-origin: 50% 65%; }
 .jpa__video-toggle { position: absolute; right: 10px; bottom: 10px; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; padding: 0; border: 0; border-radius: 50%; background: rgba(255, 255, 255, 0.85); color: var(--ink); cursor: pointer; }
 .jpa__video-toggle:hover { background: #fff; }
 .jpa__video-toggle svg { width: 20px; height: 20px; fill: currentColor; }
@@ -443,7 +443,8 @@ a.jpa__brand:hover { color: var(--accent); }
 .jpa__countdown { display: block; font-weight: 600; color: var(--accent); }
 .jpa__countdown:empty { display: none; }
 
-/* Invitación: tarjetas de detalles y formulario */
+/* Invitación: ecografía (solo invitados), tarjetas de detalles y formulario */
+.jpa__invite-photo { position: relative; padding-top: 56px; display: flex; justify-content: center; }
 .jpa__details { padding-block: 72px 56px; display: flex; flex-wrap: wrap; gap: 20px; }
 .jpa__details > .jpa__card { flex: 1 1 320px; }
 .jpa__card { min-width: 0; padding: 32px; border-radius: 28px; background: var(--peach); }
@@ -576,4 +577,13 @@ a.jpa__brand:hover { color: var(--accent); }
   .jpa-deco--blocks, .jpa-deco--blocks-left { left: calc(50% - 38px); bottom: 28px; z-index: 2; translate: none; }
   .jpa__chapters, .jpa__rsvp { padding-bottom: 150px; }
   .jpa__footer { flex-direction: column; justify-content: center; text-align: center; }
+}
+
+/* Botón de la musiquita de fondo (BackgroundMusic.tsx), fijo abajo a la derecha. */
+.jpa-music { position: fixed; z-index: 10; right: 16px; bottom: 16px; width: 52px; height: 52px; display: flex; align-items: center; justify-content: center; padding: 0; border: 2px solid var(--line); border-radius: 50%; background: #fff; color: var(--accent); box-shadow: 0 10px 24px -12px rgba(74, 55, 44, 0.5); cursor: pointer; }
+.jpa-music svg { width: 24px; height: 24px; fill: currentColor; }
+.jpa-music--off { color: var(--ink-soft); }
+@media (prefers-reduced-motion: no-preference) {
+  .jpa-music--on svg { animation: jpa-heartbeat 1.1s ease-in-out infinite; }
+  .jpa-music--waiting { animation: jpa-nudge 2.5s ease-in-out infinite; }
 }

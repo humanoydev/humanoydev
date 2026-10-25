@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { DaysUntil } from "@/components/DaysUntil";
-import { BABY_NAME, babyShower } from "@/content/jeanpaulandre";
+import { BABY_NAME, babyShower, ultrasound } from "@/content/jeanpaulandre";
 import { Balloons, Blocks, Cloud, Heart, HeroScene, HotAirBalloon, Kite } from "./Doodles";
 import { Toy } from "./Toy";
 import { VenueCard } from "./VenueCard";
@@ -97,6 +97,21 @@ export function Invitation() {
           <p className="serif jpa__tagline">ven a acompañarnos mientras lo esperamos.</p>
         </HeroScene>
       </section>
+
+      {/* La ecografía, solo para invitados (link personal válido). */}
+      {invite && (
+        <section className="container jpa__invite-photo">
+          <figure className="jpa__photo">
+            <span className="jpa__tape jpa__tape--left" aria-hidden="true" />
+            <span className="jpa__tape jpa__tape--right" aria-hidden="true" />
+            <div className="jpa__video">
+              {/* eslint-disable-next-line @next/next/no-img-element -- export estático, sin optimizador */}
+              <img src={ultrasound.poster} alt={ultrasound.label} />
+            </div>
+            <figcaption className="serif jpa__photo-caption">{ultrasound.caption}</figcaption>
+          </figure>
+        </section>
+      )}
 
       <section className="jpa-scene">
         <Toy play="loop" className="jpa-deco jpa-deco--kite-left jpa-px jpa-px--near">

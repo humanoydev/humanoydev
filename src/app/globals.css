@@ -520,6 +520,10 @@ a.jpa__brand:hover { color: var(--accent); }
 .jpa__map:focus-visible { outline: 3px solid var(--accent); outline-offset: -3px; }
 .jpa__venue-text { position: relative; z-index: 1; max-width: 60%; pointer-events: none; }
 .jpa__venue-text .jpa__card-actions, .jpa__venue-text p { pointer-events: auto; }
+/* "Cómo llegar": la acción principal de la tarjeta, en el color de acento. */
+.jpa__chip.jpa__go { min-height: 52px; gap: 10px; padding: 0 24px 0 18px; background: var(--accent); color: #fff; font-size: 18px; box-shadow: 0 12px 24px -12px rgba(180, 83, 47, 0.8); }
+.jpa__chip.jpa__go:hover { background: var(--accent-hover); color: #fff; }
+.jpa__go svg { width: 20px; height: 20px; fill: currentColor; }
 .jpa__venue-note { margin-top: 10px; display: inline-block; padding: 4px 12px; border-radius: var(--radius-pill); background: #fff; font-family: var(--font-round), system-ui, sans-serif; font-size: 16px; font-weight: 600; color: var(--accent); }
 .jpa__map-credit { position: absolute; z-index: 3; right: 8px; bottom: 6px; padding: 1px 6px; border-radius: 6px; background: rgba(255, 255, 255, 0.8); font-size: 11px; color: var(--ink-soft); }
 .jpa__map-credit a { color: inherit; }

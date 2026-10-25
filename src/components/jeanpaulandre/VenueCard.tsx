@@ -59,6 +59,11 @@ function directions(venue: Venue): App[] {
 
 export function VenueCard({ venue }: { venue: Venue }) {
   const [open, setOpen] = useState(false);
+  const [asked, setAsked] = useState(false);
+  const show = () => {
+    setOpen(true);
+    setAsked(true);
+  };
   const panel = useRef<HTMLDivElement>(null);
   const mapRef = useRef<HTMLDivElement>(null);
   const pinArea = useRef<HTMLButtonElement>(null);
@@ -128,7 +133,7 @@ export function VenueCard({ venue }: { venue: Venue }) {
           ref={pinArea}
           type="button"
           className="jpa__map"
-          onClick={() => setOpen(true)}
+          onClick={show}
           aria-label="Ver el mapa y elegir cómo llegar"
           aria-expanded={open}
         >
@@ -149,7 +154,16 @@ export function VenueCard({ venue }: { venue: Venue }) {
           {venue.address && <p className="jpa__card-text">{venue.address}</p>}
           {venue.note && <p className="jpa__venue-note">{venue.note}</p>}
           <div className="jpa__card-actions">
-            <button type="button" className="jpa__chip" onClick={() => setOpen(true)} aria-expanded={open}>
+            <button
+              type="button"
+              // Botón principal: brinca de rato en rato hasta que lo abran por primera vez.
+              className={`jpa__chip jpa__go${asked ? "" : " jpa__nudge"}`}
+              onClick={show}
+              aria-expanded={open}
+            >
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M21 3 3 10.5l7.2 2.3L12.5 20z" />
+              </svg>
               Cómo llegar
             </button>
           </div>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { OPENED } from "./Envelope";
 
 // Juguetes de los costados: al pasar el mouse (o tocarlos en el celular) reaccionan,
 // y también solos (ToyShow).
@@ -44,7 +45,7 @@ function nextOffset(current: Offset, range: Offset): Offset {
 type Registered = { start: () => void; duration: number };
 const registry = new Set<Registered>();
 
-// La función automática: al cargar reaccionan todos a la vez (bienvenida) y después cada uno
+// La función automática: al abrir el sobre reaccionan todos a la vez (bienvenida) y después cada uno
 // se repite cada vez más espaciado, con pausas de Fibonacci (2, 3, 5, 8, 13… s) contadas
 // desde que termina su animación anterior.
 const WELCOME_DELAY = 800;
@@ -65,8 +66,12 @@ export function ToyShow() {
       toy.start();
       later(() => repeat(toy, [next, pause + next]), toy.duration + pause);
     };
-    later(() => registry.forEach((toy) => repeat(toy, FIRST_PAUSE)), WELCOME_DELAY);
-    return () => timers.forEach((timer) => window.clearTimeout(timer));
+    const welcome = () => later(() => registry.forEach((toy) => repeat(toy, FIRST_PAUSE)), WELCOME_DELAY);
+    window.addEventListener(OPENED, welcome, { once: true });
+    return () => {
+      window.removeEventListener(OPENED, welcome);
+      timers.forEach((timer) => window.clearTimeout(timer));
+    };
   }, []);
 
   return null;

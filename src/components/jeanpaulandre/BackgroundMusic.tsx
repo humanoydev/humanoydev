@@ -186,14 +186,13 @@ export function BackgroundMusic() {
     };
 
     // El primer toque en cualquier parte (menos el botón, que tiene su propia acción) la enciende.
-    // El scroll también lo intenta, aunque hay navegadores que no lo cuentan como gesto y esperan
-    // al primer toque.
+    // En la invitación, ese primer toque es el de abrir el sobre (Envelope).
     const onGesture = (event: Event) => {
       if (!(event.target instanceof Element && event.target.closest(".jpa-music"))) start();
     };
     // Al cambiar de pestaña o de app, se calla.
     const onVisibility = () => (document.hidden ? ctx?.suspend() : ctx && start());
-    const gestures = ["pointerdown", "pointerup", "mousedown", "click", "touchend", "keydown", "scroll", "wheel"];
+    const gestures = ["pointerdown", "pointerup", "mousedown", "click", "touchend", "keydown"];
     gestures.forEach((name) => window.addEventListener(name, onGesture, true));
     document.addEventListener("visibilitychange", onVisibility);
     update();

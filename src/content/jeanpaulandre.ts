@@ -31,6 +31,8 @@ export const babyShower = {
   start: "2026-11-15T16:00:00-05:00",
   end: "2026-11-15T21:00:00-05:00",
   timeLabel: "4:00 p. m. a 9:00 p. m.",
+  // Hoja de calendario grande de la tarjeta "Cuándo".
+  calendar: { weekday: "Domingo", day: "15", month: "Noviembre" },
   rsvpByLabel: "sábado 31 de octubre",
 };
 

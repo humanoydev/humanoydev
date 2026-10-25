@@ -3,9 +3,11 @@
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { DaysUntil } from "@/components/DaysUntil";
 import { BABY_NAME, babyShower } from "@/content/jeanpaulandre";
+import { Envelope } from "./Envelope";
 import { Balloons, Blocks, Cloud, Heart, HeroScene, HotAirBalloon, Kite } from "./Doodles";
 import { Toy } from "./Toy";
 import { VenueCard } from "./VenueCard";
+import { VenuePhotos } from "./VenuePhotos";
 import { getInvite, sendRsvp, type Invite, type Rsvp, type Venue } from "./inviteApi";
 
 const subscribe = () => () => {};
@@ -84,6 +86,7 @@ export function Invitation() {
 
   return (
     <>
+      <Envelope name={invite?.name} />
       <section aria-labelledby="jpa-invite-title">
         <HeroScene>
           <p className="jpa__pill">Baby shower</p>
@@ -106,32 +109,42 @@ export function Invitation() {
           <HotAirBalloon color="butter" />
         </Toy>
         <div className="container jpa__details">
-          <div className="jpa__card jpa__card--sky">
-            <h2 className="jpa__label">Cuándo</h2>
-            <p className="jpa__card-title">{babyShower.dateLabel}</p>
-            <p className="jpa__card-text">{babyShower.timeLabel}</p>
-            <p className="jpa__countdown-pill">
-              <DaysUntil date={babyShower.date} />
+          <div className="jpa__card jpa__card--sky jpa__when">
+            <p className="jpa__calendar" aria-hidden="true">
+              <span className="jpa__calendar-month">{babyShower.calendar.month}</span>
+              <span className="jpa__calendar-day">{babyShower.calendar.day}</span>
+              <span className="jpa__calendar-weekday">{babyShower.calendar.weekday}</span>
             </p>
-            {invite && (
-              <div className="jpa__card-actions">
-                <a
-                  href={googleCalendarUrl(invite.venue)}
-                  className="jpa__chip"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  Google Calendar
-                </a>
-                <button type="button" className="jpa__chip" onClick={() => downloadIcs(invite.venue)}>
-                  Apple / Outlook
-                </button>
-              </div>
-            )}
+            <div>
+              <h2 className="jpa__label">Cuándo</h2>
+              <p className="jpa__card-title">{babyShower.dateLabel}</p>
+              <p className="jpa__card-text">{babyShower.timeLabel}</p>
+              <p className="jpa__countdown-pill">
+                <DaysUntil date={babyShower.date} />
+              </p>
+              {invite && (
+                <div className="jpa__card-actions">
+                  <a
+                    href={googleCalendarUrl(invite.venue)}
+                    className="jpa__chip"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    Google Calendar
+                  </a>
+                  <button type="button" className="jpa__chip" onClick={() => downloadIcs(invite.venue)}>
+                    Apple / Outlook
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
 
           {invite ? (
-            <VenueCard venue={invite.venue} />
+            <>
+              <VenueCard venue={invite.venue} />
+              {invite.venue.photos?.length ? <VenuePhotos photos={invite.venue.photos} /> : null}
+            </>
           ) : (
             <div className="jpa__card jpa__card--peach">
               <h2 className="jpa__label">Dónde</h2>

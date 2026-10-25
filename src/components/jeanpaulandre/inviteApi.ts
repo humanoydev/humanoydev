@@ -4,6 +4,8 @@
 // `address` y `note` son opcionales. `lat`/`lng` ubican el mapa y los links a las apps.
 // `uberName` es el nombre que se le manda a Uber (aunque Uber titula el destino según las
 // coordenadas) y `uberNote`, un aviso bajo las apps para que nadie se confunda con ese título.
+// `photos` son fotos del lugar para que la gente sepa a dónde llega: los archivos están en
+// public/jeanpaulandre/images/lugar/ (fuera del repo), y sus rutas solo las ve quien tiene link.
 export type Venue = {
   name: string;
   address?: string;
@@ -13,6 +15,7 @@ export type Venue = {
   lat: number;
   lng: number;
   mapsUrl: string;
+  photos?: { src: string; alt: string; caption?: string }[];
 };
 export type Rsvp = { attending: boolean; message: string };
 export type Invite = { name: string; venue: Venue; rsvp: Rsvp | null };

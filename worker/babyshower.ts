@@ -13,8 +13,8 @@
  * Cada respuesta manda un aviso por correo a papá y mamá (ver notifyRsvp).
  *
  * Invitados, visitas y respuestas viven en D1 (binding DB, migrations/). El lugar está en el
- * secreto BABYSHOWER_VENUE (JSON) y no en el código: el repo es público y la dirección solo
- * la ve quien tiene un link personal.
+ * secreto BABYSHOWER_VENUE (JSON; las fotos, en BABYSHOWER_PHOTOS) y no en el código: el repo es
+ * público y la dirección solo la ve quien tiene un link personal.
  */
 
 type Guest = { id: number; name: string };
@@ -87,9 +87,11 @@ async function openInvite(request: Request, env: Env): Promise<Response> {
     ),
   ]);
   const answer = rsvp.results[0];
+  // Las fotos del lugar van en su propio secreto (opcional), para cambiarlas sin tocar la dirección.
+  const photos = env.BABYSHOWER_PHOTOS ? JSON.parse(env.BABYSHOWER_PHOTOS) : undefined;
   return json({
     name: guest.name,
-    venue: JSON.parse(env.BABYSHOWER_VENUE),
+    venue: { ...JSON.parse(env.BABYSHOWER_VENUE), photos },
     rsvp: answer ? { attending: answer.attending === 1, message: answer.message } : null,
   });
 }

@@ -8,7 +8,7 @@ import { Heart, Star } from "./Doodles";
 // página), y al abrirse avisa con el evento OPENED para que empiece la función de los juguetes.
 // Viene en el HTML estático, para que la invitación no se asome antes; sin JavaScript se esconde.
 export const OPENED = "jpa:opened";
-const OPEN_MS = 1400;
+const OPEN_MS = 1900;
 
 export function Envelope({ name }: { name?: string }) {
   const [state, setState] = useState<"closed" | "opening" | "open">("closed");

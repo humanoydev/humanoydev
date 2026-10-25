@@ -622,8 +622,10 @@ a.jpa__brand:hover { color: var(--accent); }
 }
 
 /* Sobre de la invitación (Envelope.tsx): tapa la página hasta que lo tocan. Al abrirse, se cae
-   el sello, la solapa gira, la tarjeta sale del sobre y todo se desvanece (1,4 s, OPEN_MS). */
-.jpa-envelope { position: fixed; inset: 0; z-index: 50; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 28px; padding: 24px 16px; overflow: hidden; background: linear-gradient(180deg, #c6dff1, var(--sky) 40%, #fdf3e6); text-align: center; transition: opacity 0.5s ease 0.9s; }
+   el sello, la solapa gira, la tarjeta sale del sobre y el sobre se acerca mientras todo se
+   desvanece (1,9 s, OPEN_MS). Las animaciones de reposo se pausan, no se quitan: quitarlas
+   haría saltar el sobre a su posición inicial. */
+.jpa-envelope { position: fixed; inset: 0; z-index: 50; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 28px; padding: 24px 16px; overflow: hidden; background: linear-gradient(180deg, #c6dff1, var(--sky) 40%, #fdf3e6); text-align: center; transition: opacity 0.7s ease 1.2s; }
 .jpa-envelope.is-opening { opacity: 0; pointer-events: none; }
 .jpa-envelope__title { position: relative; max-width: 16em; font-family: var(--font-round), system-ui, sans-serif; font-size: clamp(26px, 5vw, 40px); font-weight: 600; line-height: 1.2; color: var(--ink); }
 .jpa-envelope__star { position: absolute; width: 28px; color: var(--star); }
@@ -647,11 +649,15 @@ a.jpa__brand:hover { color: var(--accent); }
   .jpa-envelope__star { animation: jpa-twinkle 2.6s ease-in-out infinite; }
   .jpa-envelope__star--2 { animation-delay: -0.9s; }
   .jpa-envelope__star--3 { animation-delay: -1.7s; }
-  .jpa-envelope__seal { transition: scale 0.25s ease, opacity 0.25s ease; }
+  .jpa-envelope__title, .jpa-envelope__cta { transition: opacity 0.35s ease; }
+  .jpa-envelope__seal { transition: scale 0.3s ease, opacity 0.3s ease; }
   /* La solapa pasa detrás de la tarjeta cuando ya giró (z-index cambia a mitad del giro). */
-  .jpa-envelope__flap { transition: transform 0.5s ease 0.15s, z-index 0s linear 0.4s; }
-  .jpa-envelope__card { transition: transform 0.55s cubic-bezier(0.3, 1.3, 0.5, 1) 0.5s; }
-  .is-opening .jpa-envelope__paper, .is-opening .jpa-envelope__cta { animation: none; }
+  .jpa-envelope__flap { transition: transform 0.6s cubic-bezier(0.45, 0, 0.25, 1) 0.15s, z-index 0s linear 0.45s; }
+  .jpa-envelope__card { transition: transform 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0.6s; }
+  .jpa-envelope__button { transition: transform 0.8s cubic-bezier(0.45, 0, 0.25, 1) 1.1s; }
+  .is-opening .jpa-envelope__paper, .is-opening .jpa-envelope__cta, .is-opening .jpa-envelope__star { animation-play-state: paused; }
+  .is-opening .jpa-envelope__title, .is-opening .jpa-envelope__cta { opacity: 0; }
+  .is-opening .jpa-envelope__button { transform: scale(1.15); }
   .is-opening .jpa-envelope__seal { scale: 0.4; opacity: 0; }
   .is-opening .jpa-envelope__flap { z-index: 0; transform: rotateX(180deg); }
   .is-opening .jpa-envelope__card { transform: translateY(-58%); }

@@ -107,55 +107,71 @@ export function BackgroundMusic() {
   const toggleRef = useRef<() => void>(() => {});
 
   useEffect(() => {
-    const ctx = new AudioContext();
-    const master = ctx.createGain();
-    const bus = ctx.createGain();
-    const wet = ctx.createGain();
-    const echo = reverb(ctx);
-    master.gain.value = 0;
-    wet.gain.value = 0.3;
-    bus.connect(master);
-    bus.connect(echo).connect(wet).connect(master);
-    master.connect(ctx.destination);
-
-    const song = buildSong();
-    const step = 60 / TEMPO / 2;
-    let index = 0;
-    let loopStart = ctx.currentTime + 0.1;
-    // Programa las notas de los próximos 0,4 s (con el contexto en pausa, el reloj no avanza).
-    const scheduler = setInterval(() => {
-      while (true) {
-        const note = song.notes[index];
-        const time = loopStart + note.at * step;
-        if (time > ctx.currentTime + 0.4) break;
-        if (time >= ctx.currentTime) playNote(ctx, bus, note, time);
-        index++;
-        if (index === song.notes.length) {
-          index = 0;
-          loopStart += song.length * step;
-        }
-      }
-    }, 100);
-
     let wanted = readPreference() !== "off";
-    const update = () => setState(!wanted ? "off" : ctx.state === "running" ? "on" : "waiting");
-    ctx.onstatechange = () => {
-      if (ctx.state === "running") {
-        master.gain.cancelScheduledValues(ctx.currentTime);
-        master.gain.setValueAtTime(0, ctx.currentTime);
-        master.gain.linearRampToValueAtTime(VOLUME, ctx.currentTime + 1.5);
-      }
-      update();
-    };
+    // El contexto de audio se crea dentro del primer toque: así Safari y Chrome lo dejan sonar.
+    let ctx: AudioContext | null = null;
+    let scheduler = 0;
+    const update = () => setState(!wanted ? "off" : ctx?.state === "running" ? "on" : "waiting");
+
+    function setup() {
+      // En iPhone, Web Audio respeta el botón de silencio salvo que se declare como "playback".
+      const session = (navigator as Navigator & { audioSession?: { type: string } }).audioSession;
+      if (session) session.type = "playback";
+
+      const audio = new AudioContext();
+      const master = audio.createGain();
+      const bus = audio.createGain();
+      const wet = audio.createGain();
+      master.gain.value = 0;
+      wet.gain.value = 0.3;
+      bus.connect(master);
+      bus.connect(reverb(audio)).connect(wet).connect(master);
+      master.connect(audio.destination);
+
+      const fadeIn = () => {
+        master.gain.cancelScheduledValues(audio.currentTime);
+        master.gain.setValueAtTime(0, audio.currentTime);
+        master.gain.linearRampToValueAtTime(VOLUME, audio.currentTime + 1.5);
+      };
+      audio.onstatechange = () => {
+        if (audio.state === "running") fadeIn();
+        update();
+      };
+      if (audio.state === "running") fadeIn();
+
+      const song = buildSong();
+      const step = 60 / TEMPO / 2;
+      let index = 0;
+      let loopStart = audio.currentTime + 0.1;
+      // Programa las notas de los próximos 0,4 s (con el contexto en pausa, el reloj no avanza).
+      scheduler = window.setInterval(() => {
+        while (true) {
+          const note = song.notes[index];
+          const time = loopStart + note.at * step;
+          if (time > audio.currentTime + 0.4) break;
+          if (time >= audio.currentTime) playNote(audio, bus, note, time);
+          index++;
+          if (index === song.notes.length) {
+            index = 0;
+            loopStart += song.length * step;
+          }
+        }
+      }, 100);
+      return audio;
+    }
+
     const start = () => {
-      if (wanted && ctx.state !== "running" && !document.hidden) ctx.resume().catch(() => {});
+      if (!wanted || document.hidden) return;
+      ctx ??= setup();
+      if (ctx.state !== "running") ctx.resume().catch(() => {});
+      update();
     };
 
     toggleRef.current = () => {
-      wanted = !(wanted && ctx.state === "running");
+      wanted = !(wanted && ctx?.state === "running");
       savePreference(wanted);
       if (wanted) start();
-      else ctx.suspend();
+      else ctx?.suspend();
       update();
     };
 
@@ -164,18 +180,17 @@ export function BackgroundMusic() {
       if (!(event.target instanceof Element && event.target.closest(".jpa-music"))) start();
     };
     // Al cambiar de pestaña o de app, se calla.
-    const onVisibility = () => (document.hidden ? ctx.suspend() : start());
-    const gestures = ["pointerdown", "touchend", "keydown"];
+    const onVisibility = () => (document.hidden ? ctx?.suspend() : ctx && start());
+    const gestures = ["pointerdown", "pointerup", "mousedown", "click", "touchend", "keydown"];
     gestures.forEach((name) => window.addEventListener(name, onGesture, true));
     document.addEventListener("visibilitychange", onVisibility);
-    start();
     update();
 
     return () => {
       clearInterval(scheduler);
       gestures.forEach((name) => window.removeEventListener(name, onGesture, true));
       document.removeEventListener("visibilitychange", onVisibility);
-      ctx.close();
+      ctx?.close();
     };
   }, []);
 
@@ -186,7 +201,7 @@ export function BackgroundMusic() {
       className={`jpa-music jpa-music--${state}`}
       onClick={() => toggleRef.current()}
       aria-pressed={on}
-      aria-label={on ? "Silenciar la música" : "Poner música"}
+      aria-label={on ? "Silenciar la música" : undefined}
     >
       <svg viewBox="0 0 24 24" aria-hidden="true">
         <path d="M9 17.5V6l10-2v11.5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
@@ -194,6 +209,7 @@ export function BackgroundMusic() {
         <circle cx="16.5" cy="15.5" r="2.5" />
         {state === "off" && <path d="M3 3l18 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />}
       </svg>
+      {!on && <span className="jpa-music__label">Poner música</span>}
     </button>
   );
 }

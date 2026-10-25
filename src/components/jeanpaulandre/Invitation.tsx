@@ -5,6 +5,7 @@ import { DaysUntil } from "@/components/DaysUntil";
 import { BABY_NAME, babyShower, ultrasound } from "@/content/jeanpaulandre";
 import { Balloons, Blocks, Cloud, Heart, HeroScene, HotAirBalloon, Kite } from "./Doodles";
 import { Toy } from "./Toy";
+import { UltrasoundVideo } from "./UltrasoundVideo";
 import { VenueCard } from "./VenueCard";
 import { getInvite, sendRsvp, type Invite, type Rsvp, type Venue } from "./inviteApi";
 
@@ -104,10 +105,7 @@ export function Invitation() {
           <figure className="jpa__photo">
             <span className="jpa__tape jpa__tape--left" aria-hidden="true" />
             <span className="jpa__tape jpa__tape--right" aria-hidden="true" />
-            <div className="jpa__video">
-              {/* eslint-disable-next-line @next/next/no-img-element -- export estático, sin optimizador */}
-              <img src={ultrasound.poster} alt={ultrasound.label} />
-            </div>
+            <UltrasoundVideo src={ultrasound.video} poster={ultrasound.poster} label={ultrasound.label} />
             <figcaption className="serif jpa__photo-caption">{ultrasound.caption}</figcaption>
           </figure>
         </section>

@@ -5,9 +5,10 @@ import type { Venue } from "./inviteApi";
 
 type Photo = NonNullable<Venue["photos"]>[number];
 
-// Fotos del lugar bajo la tarjeta "Dónde", para que la gente reconozca a dónde llega.
-// Se deslizan de lado; al tocar una se ve en grande (cierra con un toque o Escape).
-export function VenuePhotos({ photos }: { photos: Photo[] }) {
+// El recorrido en fotos, debajo del mapa de la tarjeta "Dónde": pasos numerados unidos por una
+// línea punteada, para que cada quien vea cómo es el lugar antes de ir. Sin texto que lo
+// explique: las fotos hablan solas. Al tocar una se ve en grande (cierra con un toque o Escape).
+export function VenueRoute({ photos }: { photos: Photo[] }) {
   const dialog = useRef<HTMLDialogElement>(null);
   const [current, setCurrent] = useState<Photo | null>(null);
 
@@ -17,23 +18,23 @@ export function VenuePhotos({ photos }: { photos: Photo[] }) {
   }
 
   return (
-    <div className="jpa__card jpa__card--peach jpa__photos">
-      <h2 className="jpa__label">Antes de llegar</h2>
-      <p className="jpa__card-text">
-        Te mostramos el camino hasta el SUM, un salón interior donde vamos a celebrar. Así sabrás a dónde llegas y
-        qué ponerte.
-      </p>
-      <ul className="jpa__photos-strip">
-        {photos.map((photo) => (
-          <li key={photo.src}>
-            <button type="button" className="jpa__photo" onClick={() => show(photo)}>
+    <div className="jpa__route">
+      <ol className="jpa__route-list" aria-label="El lugar, paso a paso">
+        {photos.map((photo, index) => (
+          <li key={photo.src} className="jpa__route-step">
+            <p className="jpa__route-caption">
+              <span className="jpa__route-number" aria-hidden="true">
+                {index + 1}
+              </span>
+              {photo.caption}
+            </p>
+            <button type="button" className="jpa__route-photo" onClick={() => show(photo)}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={photo.src} alt={photo.alt} loading="lazy" />
-              {photo.caption && <span className="jpa__photo-caption">{photo.caption}</span>}
             </button>
           </li>
         ))}
-      </ul>
+      </ol>
       <dialog ref={dialog} className="jpa__lightbox" onClick={() => dialog.current?.close()}>
         {current && (
           <figure>

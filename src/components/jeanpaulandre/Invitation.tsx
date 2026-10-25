@@ -7,7 +7,6 @@ import { Envelope } from "./Envelope";
 import { Balloons, Blocks, Cloud, Heart, HeroScene, HotAirBalloon, Kite } from "./Doodles";
 import { Toy } from "./Toy";
 import { VenueCard } from "./VenueCard";
-import { VenuePhotos } from "./VenuePhotos";
 import { getInvite, sendRsvp, type Invite, type Rsvp, type Venue } from "./inviteApi";
 
 const subscribe = () => () => {};
@@ -141,10 +140,7 @@ export function Invitation() {
           </div>
 
           {invite ? (
-            <>
-              <VenueCard venue={invite.venue} />
-              {invite.venue.photos?.length ? <VenuePhotos photos={invite.venue.photos} /> : null}
-            </>
+            <VenueCard venue={invite.venue} />
           ) : (
             <div className="jpa__card jpa__card--peach">
               <h2 className="jpa__label">Dónde</h2>

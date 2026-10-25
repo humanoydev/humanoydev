@@ -471,19 +471,25 @@ a.jpa__brand:hover { color: var(--accent); }
   .jpa__calendar-day { font-size: 76px; }
 }
 
-/* Fotos del lugar (VenuePhotos.tsx): tira que se desliza de lado y se sale del borde de la tarjeta. */
-.jpa__photos { overflow: hidden; }
-.jpa__photos-strip { margin: 18px -32px 0; padding: 0 32px 6px; list-style: none; display: flex; gap: 14px; overflow-x: auto; scroll-snap-type: x mandatory; scroll-padding-inline: 32px; scrollbar-width: none; }
-.jpa__photos-strip::-webkit-scrollbar { display: none; }
-.jpa__photos-strip > li { flex: 0 0 min(80%, 440px); scroll-snap-align: start; }
-/* contain y no cover: las fotos traen su propio marco y no deben recortarse. */
-.jpa__photo { position: relative; display: block; width: 100%; aspect-ratio: 4 / 3; padding: 0; overflow: hidden; border: 0; border-radius: 18px; background: #fbf6ee; cursor: zoom-in; }
-.jpa__photo img { width: 100%; height: 100%; object-fit: contain; transition: scale 0.3s ease; }
-.jpa__photo:hover img { scale: 1.04; }
-.jpa__photo:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
-.jpa__photo-caption { position: absolute; left: 18px; bottom: 18px; max-width: calc(100% - 20px); padding: 4px 12px; border-radius: var(--radius-pill); background: #fff; font-family: var(--font-round), system-ui, sans-serif; font-size: 15px; font-weight: 600; color: var(--ink); text-align: left; }
+/* Recorrido en fotos bajo el mapa de "Dónde" (VenueRoute.tsx): pasos numerados unidos por una
+   línea punteada; en el celular se deslizan de lado. Las fotos traen su propio marco: contain,
+   no cover, para no recortarlo. (.jpa__route-* y no .jpa__photo, que es de la polaroid.) */
+.jpa__route { padding: 26px 32px 32px; }
+.jpa__route-list { margin: 0; padding: 0; list-style: none; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; }
+.jpa__route-step { position: relative; display: flex; flex-direction: column; gap: 12px; }
+.jpa__route-step:not(:last-child)::before { content: ""; position: absolute; top: 15px; left: 34px; right: -20px; border-top: 2px dashed rgba(180, 83, 47, 0.45); }
+.jpa__route-caption { position: relative; align-self: flex-start; display: flex; align-items: center; gap: 10px; padding-right: 10px; background: var(--peach); font-family: var(--font-round), system-ui, sans-serif; font-size: 17px; font-weight: 600; line-height: 1.2; }
+.jpa__route-number { flex: none; width: 30px; height: 30px; display: grid; place-items: center; border-radius: 50%; background: var(--accent); color: #fff; font-size: 15px; }
+.jpa__route-photo { display: block; width: 100%; aspect-ratio: 4 / 3; padding: 0; overflow: hidden; border: 0; border-radius: 16px; background: #fbf6ee; box-shadow: 0 14px 28px -18px rgba(74, 55, 44, 0.5); cursor: zoom-in; }
+.jpa__route-photo img { width: 100%; height: 100%; object-fit: contain; transition: scale 0.3s ease; }
+.jpa__route-photo:hover img { scale: 1.04; }
+.jpa__route-photo:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
 @media (max-width: 600px) {
-  .jpa__photos-strip { margin-inline: -22px; padding-inline: 22px; scroll-padding-inline: 22px; }
+  .jpa__route { padding: 22px 0 26px; }
+  .jpa__route-list { grid-template-columns: none; grid-auto-flow: column; grid-auto-columns: 78%; gap: 18px; overflow-x: auto; padding: 0 22px 6px; scroll-snap-type: x mandatory; scroll-padding-inline: 22px; scrollbar-width: none; }
+  .jpa__route-list::-webkit-scrollbar { display: none; }
+  .jpa__route-step { scroll-snap-align: start; }
+  .jpa__route-step:not(:last-child)::before { right: -18px; }
 }
 .jpa__lightbox { width: min(96vw, 1040px); max-width: none; max-height: none; padding: 0; border: 0; background: none; overflow: visible; cursor: zoom-out; }
 .jpa__lightbox::backdrop { background: rgba(43, 32, 25, 0.85); }
@@ -491,9 +497,12 @@ a.jpa__brand:hover { color: var(--accent); }
 .jpa__lightbox figcaption { margin-top: 12px; font-family: var(--font-round), system-ui, sans-serif; font-size: 18px; font-weight: 600; color: #fff; text-align: center; }
 .jpa__lightbox .jpa__directions-close { top: -52px; right: 0; background: #fff; }
 
-/* Tarjeta "Dónde" con mapa de fondo (VenueCard.tsx). El pin queda en (--pin-x, --pin-y);
-   un degradado del color de la tarjeta deja legible el texto encima del mapa. */
-.jpa__venue { --pin-x: 74%; --pin-y: 56%; position: relative; overflow: hidden; isolation: isolate; min-height: 440px; display: flex; flex-direction: column; }
+/* Tarjeta "Dónde" (VenueCard.tsx): arriba el mapa de fondo, debajo el recorrido en fotos.
+   El pin queda en (--pin-x, --pin-y); un degradado del color de la tarjeta deja legible el
+   texto encima del mapa. */
+.jpa__venue { padding: 0; overflow: hidden; }
+.jpa__venue-top { --pin-x: 74%; --pin-y: 56%; position: relative; isolation: isolate; min-height: 440px; display: flex; flex-direction: column; padding: 32px; }
+@media (max-width: 600px) { .jpa__venue-top { padding: 26px 22px; } }
 /* Mapa (MapLibre) debajo; encima, el botón transparente con el degradado y el pin. */
 /* .jpa__venue delante: MapLibre le pone position: relative (.maplibregl-map) y lo dejaría sin altura. */
 .jpa__venue .jpa__map-canvas { position: absolute; inset: 0; z-index: 0; background: #eee8dc; }
@@ -509,8 +518,7 @@ a.jpa__brand:hover { color: var(--accent); }
 .jpa__map-credit { position: absolute; z-index: 1; right: 8px; bottom: 6px; padding: 1px 6px; border-radius: 6px; background: rgba(255, 255, 255, 0.8); font-size: 11px; color: var(--ink-soft); }
 .jpa__map-credit a { color: inherit; }
 @media (max-width: 520px) {
-  .jpa__venue { min-height: 520px; }
-  .jpa__venue { --pin-x: 50%; --pin-y: 80%; }
+  .jpa__venue-top { min-height: 520px; --pin-x: 50%; --pin-y: 80%; }
   .jpa__map::after { background: linear-gradient(180deg, var(--peach) 38%, rgba(251, 220, 203, 0.7) 52%, rgba(251, 220, 203, 0) 68%); }
   .jpa__venue-text { max-width: none; }
 }
@@ -611,6 +619,10 @@ a.jpa__brand:hover { color: var(--accent); }
   .jpa__chapters, .jpa__rsvp { padding-bottom: 150px; }
   .jpa__footer { flex-direction: column; justify-content: center; text-align: center; }
 }
+
+/* Globos al pulso de la música: BackgroundMusic pone --pulse (0 a 1) en cada .jpa-beat.
+   Usan `scale` y `translate`, que no chocan con el transform de sus animaciones. */
+.jpa .jpa-beat { scale: calc(1 + var(--pulse, 0) * 0.05); translate: 0 calc(var(--pulse, 0) * -6px); transform-origin: 50% 80%; }
 
 /* Botón de la musiquita de fondo (BackgroundMusic.tsx), fijo abajo a la derecha. */
 .jpa-music { position: fixed; z-index: 10; right: 16px; bottom: 16px; min-width: 52px; height: 52px; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 0 13px; border: 2px solid var(--line); border-radius: var(--radius-pill); background: #fff; color: var(--accent); box-shadow: 0 10px 24px -12px rgba(74, 55, 44, 0.5); cursor: pointer; }

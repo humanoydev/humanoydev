@@ -3,8 +3,10 @@
 import "maplibre-gl/dist/maplibre-gl.css";
 import { useEffect, useRef, useState } from "react";
 import type { Venue } from "./inviteApi";
+import { VenueRoute } from "./VenueRoute";
 
-// Tarjeta "Dónde" con el mapa de fondo y un selector de apps para llegar.
+// Tarjeta "Dónde" con el mapa de fondo y un selector de apps para llegar; debajo, si hay fotos,
+// el recorrido por el lugar (VenueRoute).
 // El mapa es de OpenFreeMap (datos de OpenStreetMap): gratis, sin clave, con atribución.
 // MapLibre lo dibuja y se descarga solo cuando aparece esta tarjeta (invitación personal).
 // El mapa es fondo: no se arrastra; un botón encima abre el selector de apps.
@@ -114,65 +116,68 @@ export function VenueCard({ venue }: { venue: Venue }) {
 
   return (
     <div className="jpa__card jpa__card--peach jpa__venue">
-      <div ref={mapRef} className="jpa__map-canvas" aria-hidden="true" />
-      <button
-        type="button"
-        className="jpa__map"
-        onClick={() => setOpen(true)}
-        aria-label="Ver el mapa y elegir cómo llegar"
-        aria-expanded={open}
-      >
-        <svg viewBox="0 0 40 52" className="jpa__map-pin" aria-hidden="true">
-          <path
-            d="M20 50s16-17 16-29A16 16 0 0 0 4 21c0 12 16 29 16 29z"
-            fill="#b4532f"
-            stroke="#fff"
-            strokeWidth="2.5"
-          />
-          <path d="M20 29s-6.5-4-8-7.6A4.4 4.4 0 0 1 20 17.4a4.4 4.4 0 0 1 8 4c-1.5 3.6-8 7.6-8 7.6z" fill="#fff" />
-        </svg>
-      </button>
+      <div className="jpa__venue-top">
+        <div ref={mapRef} className="jpa__map-canvas" aria-hidden="true" />
+        <button
+          type="button"
+          className="jpa__map"
+          onClick={() => setOpen(true)}
+          aria-label="Ver el mapa y elegir cómo llegar"
+          aria-expanded={open}
+        >
+          <svg viewBox="0 0 40 52" className="jpa__map-pin" aria-hidden="true">
+            <path
+              d="M20 50s16-17 16-29A16 16 0 0 0 4 21c0 12 16 29 16 29z"
+              fill="#b4532f"
+              stroke="#fff"
+              strokeWidth="2.5"
+            />
+            <path d="M20 29s-6.5-4-8-7.6A4.4 4.4 0 0 1 20 17.4a4.4 4.4 0 0 1 8 4c-1.5 3.6-8 7.6-8 7.6z" fill="#fff" />
+          </svg>
+        </button>
 
-      <div className="jpa__venue-text">
-        <h2 className="jpa__label">Dónde</h2>
-        <p className="jpa__card-title">{venue.name}</p>
-        {venue.address && <p className="jpa__card-text">{venue.address}</p>}
-        {venue.note && <p className="jpa__venue-note">{venue.note}</p>}
-        <div className="jpa__card-actions">
-          <button type="button" className="jpa__chip" onClick={() => setOpen(true)} aria-expanded={open}>
-            Cómo llegar
-          </button>
-        </div>
-      </div>
-
-      <p className="jpa__map-credit">
-        <a href="https://openfreemap.org">OpenFreeMap</a> · <a href="https://www.openmaptiles.org/">© OpenMapTiles</a> ·
-        Datos de <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>
-      </p>
-
-      {open && (
-        <div ref={panel} className="jpa__directions" role="dialog" aria-label="Elige cómo llegar">
-          <p className="jpa__directions-title">¿Con qué app quieres llegar?</p>
-          <div className="jpa__directions-list">
-            {directions(venue).map((app) => (
-              <a
-                key={app.label}
-                href={app.href}
-                onClick={app.onClick}
-                className="jpa__chip"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                {app.label}
-              </a>
-            ))}
+        <div className="jpa__venue-text">
+          <h2 className="jpa__label">Dónde</h2>
+          <p className="jpa__card-title">{venue.name}</p>
+          {venue.address && <p className="jpa__card-text">{venue.address}</p>}
+          {venue.note && <p className="jpa__venue-note">{venue.note}</p>}
+          <div className="jpa__card-actions">
+            <button type="button" className="jpa__chip" onClick={() => setOpen(true)} aria-expanded={open}>
+              Cómo llegar
+            </button>
           </div>
-          {venue.uberNote && <p className="jpa__directions-note">{venue.uberNote}</p>}
-          <button type="button" className="jpa__directions-close" onClick={() => setOpen(false)} aria-label="Cerrar">
-            ×
-          </button>
         </div>
-      )}
+
+        <p className="jpa__map-credit">
+          <a href="https://openfreemap.org">OpenFreeMap</a> · <a href="https://www.openmaptiles.org/">© OpenMapTiles</a>{" "}
+          · Datos de <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>
+        </p>
+
+        {open && (
+          <div ref={panel} className="jpa__directions" role="dialog" aria-label="Elige cómo llegar">
+            <p className="jpa__directions-title">¿Con qué app quieres llegar?</p>
+            <div className="jpa__directions-list">
+              {directions(venue).map((app) => (
+                <a
+                  key={app.label}
+                  href={app.href}
+                  onClick={app.onClick}
+                  className="jpa__chip"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  {app.label}
+                </a>
+              ))}
+            </div>
+            {venue.uberNote && <p className="jpa__directions-note">{venue.uberNote}</p>}
+            <button type="button" className="jpa__directions-close" onClick={() => setOpen(false)} aria-label="Cerrar">
+              ×
+            </button>
+          </div>
+        )}
+      </div>
+      {venue.photos?.length ? <VenueRoute photos={venue.photos} /> : null}
     </div>
   );
 }

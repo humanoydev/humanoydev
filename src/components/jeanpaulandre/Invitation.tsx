@@ -173,7 +173,7 @@ export function Invitation() {
               </div>
             )
           )}
-          {!loading && <GiftList key={token ?? ""} token={invite ? token : null} initial={invite?.gifts ?? null} />}
+          {invite && token && <GiftList key={token} token={token} initial={invite.gifts} />}
         </div>
       </section>
     </>

@@ -1,10 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { getGifts, pickGift, type Gift, type GiftCategory } from "./inviteApi";
+import { useState } from "react";
+import { pickGift, type Gift, type GiftCategory } from "./inviteApi";
 
-// Lista de regalos (src/content/jeanpaulandre-gifts.ts). Con link personal se aparta un regalo
-// con "Lo llevo yo"; lo apartado sube a "Lo que vas a traer", donde se cambia la cantidad o se
+// Lista de regalos (src/content/jeanpaulandre-gifts.ts), solo en la invitación personal. Se
+// aparta un regalo con "Lo llevo yo"; lo apartado sube a "Lo que vas a traer", donde se cambia la cantidad o se
 // suelta. Los demás solo ven cuánto queda: quién lleva qué lo ven papá y mamá en el admin.
 
 const TAGS = { indispensable: "⭐ Indispensable", favorito: "💛 Favorito" };
@@ -12,26 +12,12 @@ const TAGS = { indispensable: "⭐ Indispensable", favorito: "💛 Favorito" };
 // Aviso junto a donde se tocó: en un regalo de la lista (su id) o en "Lo que vas a traer".
 type Note = { at: string; text: string; error?: boolean };
 
-export function GiftList({ token, initial }: { token: string | null; initial: GiftCategory[] | null }) {
+export function GiftList({ token, initial }: { token: string; initial: GiftCategory[] }) {
   const [list, setList] = useState(initial);
   const [busy, setBusy] = useState(false);
   const [note, setNote] = useState<Note | null>(null);
 
-  // Sin link personal, la lista se pide aparte, solo para mirarla.
-  useEffect(() => {
-    if (initial) return;
-    let active = true;
-    getGifts().then(
-      (gifts) => active && setList(gifts),
-      () => {},
-    );
-    return () => {
-      active = false;
-    };
-  }, [initial]);
-
   async function pick(gift: Gift, qty: number, at: string) {
-    if (!token) return;
     setBusy(true);
     setNote(null);
     try {
@@ -60,7 +46,7 @@ export function GiftList({ token, initial }: { token: string | null; initial: Gi
       </p>
     );
 
-  const mine = (list ?? []).flatMap(({ gifts }) => gifts).filter((gift) => gift.mine > 0);
+  const mine = list.flatMap(({ gifts }) => gifts).filter((gift) => gift.mine > 0);
 
   return (
     <div className="jpa__card jpa__card--butter jpa__gifts">
@@ -74,11 +60,7 @@ export function GiftList({ token, initial }: { token: string | null; initial: Gi
         Confesión: esta lista no la hicimos a mano, nos ayudó una inteligencia artificial (hola, IA 👋). Tómala como
         inspiración, no como encargo. Las de ⭐ son las que más nos van a salvar en las madrugadas.
       </p>
-      <p className="jpa__card-text">
-        {token
-          ? "Si eliges algo, lo apartamos a tu nombre para que no lleguen tres bañeras 🛁."
-          : "Para apartar un regalo, abre el link personal que te enviamos por WhatsApp."}
-      </p>
+      <p className="jpa__card-text">Si eliges algo, lo apartamos a tu nombre para que no lleguen tres bañeras 🛁.</p>
 
       {mine.length > 0 && (
         <div className="jpa__gifts-mine">
@@ -124,7 +106,7 @@ export function GiftList({ token, initial }: { token: string | null; initial: Gi
       )}
       {noteFor("mine")}
 
-      {list?.map(({ category, gifts }) => (
+      {list.map(({ category, gifts }) => (
         <details key={category} className="jpa__gift-group">
           <summary>
             {category}
@@ -157,7 +139,7 @@ export function GiftList({ token, initial }: { token: string | null; initial: Gi
                     <a className="jpa__chip" href={gift.url} target="_blank" rel="noopener noreferrer">
                       Ver en la tienda
                     </a>
-                    {token && gift.mine === 0 && left > 0 && (
+                    {gift.mine === 0 && left > 0 && (
                       <button
                         type="button"
                         className="jpa__chip jpa__gift-pick"

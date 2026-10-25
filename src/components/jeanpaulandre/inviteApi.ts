@@ -73,13 +73,6 @@ export async function sendRsvp(token: string, rsvp: Rsvp): Promise<void> {
   if (!response.ok) throw new Error(`No se pudo guardar la respuesta (${response.status})`);
 }
 
-// Lista de regalos para la invitación general (sin token): se ve, pero no se aparta.
-export async function getGifts(): Promise<GiftCategory[]> {
-  const response = await fetch("/api/gifts");
-  if (!response.ok) throw new Error(`No se pudo cargar la lista de regalos (${response.status})`);
-  return (await response.json()).gifts;
-}
-
 // Aparta qty unidades de un regalo (0: lo suelta). Devuelve la lista al día; `saved` es false si
 // alguien se adelantó y ya no quedaban.
 export async function pickGift(token: string, giftId: string, qty: number) {

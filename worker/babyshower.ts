@@ -3,7 +3,6 @@
  *
  *   POST /api/invite  { token, device?, model? }      → datos de la invitación; registra la visita
  *   PUT  /api/rsvp    { token, attending, message }   → guarda (o cambia) la respuesta
- *   GET  /api/gifts                                   → lista de regalos con lo ya apartado
  *   PUT  /api/gifts   { token, giftId, qty }          → aparta qty unidades de un regalo (0: lo suelta)
  *
  * Administración (protegida con Cloudflare Access, ver isAdmin):
@@ -74,12 +73,12 @@ const GIFTS = new Map(GIFT_LIST.flatMap(({ gifts }) => gifts.map((gift) => [gift
 
 // La lista de regalos con lo que ya apartaron todos (`taken`) y este invitado (`mine`). Quién
 // apartó qué solo se ve en el admin.
-async function giftList(env: Env, guestId: number | null) {
+async function giftList(env: Env, guestId: number) {
   const { results } = await env.DB.prepare(
     `SELECT gift_id AS id, SUM(qty) AS taken, SUM(CASE WHEN guest_id = ? THEN qty ELSE 0 END) AS mine
      FROM gift_picks GROUP BY gift_id`,
   )
-    .bind(guestId ?? 0)
+    .bind(guestId)
     .all<{ id: string; taken: number; mine: number }>();
   const picks = new Map(results.map((row) => [row.id, row]));
   return GIFT_LIST.map(({ category, gifts }) => ({
@@ -351,7 +350,6 @@ export async function handleBabyShowerApi(
   if (url.pathname.startsWith("/api/admin/")) return handleAdmin(request, env, url);
   if (url.pathname === "/api/invite" && request.method === "POST") return openInvite(request, env);
   if (url.pathname === "/api/rsvp" && request.method === "PUT") return saveRsvp(request, env, ctx);
-  if (url.pathname === "/api/gifts" && request.method === "GET") return json({ gifts: await giftList(env, null) });
   if (url.pathname === "/api/gifts" && request.method === "PUT") return pickGift(request, env);
   return json({ error: "not_found" }, 404);
 }

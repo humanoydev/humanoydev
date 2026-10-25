@@ -8,6 +8,8 @@ import { useEffect, useRef, useState } from "react";
 // preferencia queda guardada en el navegador.
 
 const TEMPO = 144;
+// Evento al empezar cada compás (en el tiempo fuerte, cuando suena): los globos bailan con él.
+export const BAR_EVENT = "jpa:bar";
 const VOLUME = 0.5;
 const STORAGE_KEY = "jpa-music";
 
@@ -159,7 +161,15 @@ export function BackgroundMusic() {
           const note = song.notes[index];
           const time = loopStart + note.at * step;
           if (time > audio.currentTime + 0.4) break;
-          if (time >= audio.currentTime) playNote(audio, bus, note, time);
+          if (time >= audio.currentTime) {
+            playNote(audio, bus, note, time);
+            // El bajo marca el tiempo fuerte de cada compás. Se avisa cuando de verdad suena.
+            if (note.voice === "bass" && note.at % BAR === 0) {
+              const latency = audio.outputLatency || audio.baseLatency || 0;
+              const delay = (time - audio.currentTime + latency) * 1000;
+              window.setTimeout(() => audio.state === "running" && window.dispatchEvent(new Event(BAR_EVENT)), delay);
+            }
+          }
           index++;
           if (index === song.notes.length) {
             index = 0;

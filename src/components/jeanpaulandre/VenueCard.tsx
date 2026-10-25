@@ -61,11 +61,15 @@ export function VenueCard({ venue }: { venue: Venue }) {
   const [open, setOpen] = useState(false);
   const panel = useRef<HTMLDivElement>(null);
   const mapRef = useRef<HTMLDivElement>(null);
+  const pinArea = useRef<HTMLButtonElement>(null);
 
-  // Carga MapLibre y centra el mapa para que el lugar quede bajo el pin (--pin-x, --pin-y).
+  // Carga MapLibre y centra el mapa para que el lugar quede bajo el pin. El mapa cubre toda la
+  // tarjeta (también detrás de las fotos), pero el pin está en (--pin-x, --pin-y) de la parte
+  // de arriba (.jpa__map): se mide dónde cae dentro del mapa.
   useEffect(() => {
     const container = mapRef.current;
-    if (!container) return;
+    const area = pinArea.current;
+    if (!container || !area) return;
     let map: import("maplibre-gl").Map | undefined;
     let resizer: ResizeObserver | undefined;
     let cancelled = false;
@@ -86,12 +90,14 @@ export function VenueCard({ venue }: { venue: Venue }) {
       const placePin = () => {
         if (!map) return;
         map.resize();
-        const styles = getComputedStyle(container);
-        const pinX = parseFloat(styles.getPropertyValue("--pin-x")) / 100;
-        const pinY = parseFloat(styles.getPropertyValue("--pin-y")) / 100;
+        const styles = getComputedStyle(area);
+        const box = container.getBoundingClientRect();
+        const rect = area.getBoundingClientRect();
+        const x = rect.left - box.left + (parseFloat(styles.getPropertyValue("--pin-x")) / 100) * rect.width;
+        const y = rect.top - box.top + (parseFloat(styles.getPropertyValue("--pin-y")) / 100) * rect.height;
         map.jumpTo({ center: [venue.lng, venue.lat], zoom: ZOOM });
         // panBy mueve la vista: el centro se desplaza y el lugar queda en el pin.
-        map.panBy([(0.5 - pinX) * container.clientWidth, (0.5 - pinY) * container.clientHeight], { duration: 0 });
+        map.panBy([box.width / 2 - x, box.height / 2 - y], { duration: 0 });
       };
       map.on("load", placePin);
       resizer = new ResizeObserver(placePin);
@@ -116,9 +122,10 @@ export function VenueCard({ venue }: { venue: Venue }) {
 
   return (
     <div className="jpa__card jpa__card--peach jpa__venue">
+      <div ref={mapRef} className="jpa__map-canvas" aria-hidden="true" />
       <div className="jpa__venue-top">
-        <div ref={mapRef} className="jpa__map-canvas" aria-hidden="true" />
         <button
+          ref={pinArea}
           type="button"
           className="jpa__map"
           onClick={() => setOpen(true)}
@@ -148,11 +155,6 @@ export function VenueCard({ venue }: { venue: Venue }) {
           </div>
         </div>
 
-        <p className="jpa__map-credit">
-          <a href="https://openfreemap.org">OpenFreeMap</a> · <a href="https://www.openmaptiles.org/">© OpenMapTiles</a>{" "}
-          · Datos de <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>
-        </p>
-
         {open && (
           <div ref={panel} className="jpa__directions" role="dialog" aria-label="Elige cómo llegar">
             <p className="jpa__directions-title">¿Con qué app quieres llegar?</p>
@@ -178,6 +180,10 @@ export function VenueCard({ venue }: { venue: Venue }) {
         )}
       </div>
       {venue.photos?.length ? <VenueRoute photos={venue.photos} /> : null}
+      <p className="jpa__map-credit">
+        <a href="https://openfreemap.org">OpenFreeMap</a> · <a href="https://www.openmaptiles.org/">© OpenMapTiles</a> ·
+        Datos de <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>
+      </p>
     </div>
   );
 }

@@ -104,7 +104,7 @@ export function Invitation() {
         <Toy play="loop" className="jpa-deco jpa-deco--kite-left jpa-px jpa-px--near">
           <Kite />
         </Toy>
-        <Toy play="fly" className="jpa-deco jpa-deco--balloon-right jpa-px jpa-px--mid">
+        <Toy play="fly" dance className="jpa-deco jpa-deco--balloon-right jpa-px jpa-px--mid">
           <HotAirBalloon color="butter" />
         </Toy>
         <div className="container jpa__details">
@@ -155,7 +155,7 @@ export function Invitation() {
       </section>
 
       <section className="jpa-scene">
-        <Toy play="float-away" className="jpa-deco jpa-deco--balloons-right jpa-px jpa-px--near">
+        <Toy play="float-away" dance className="jpa-deco jpa-deco--balloons-right jpa-px jpa-px--near">
           <Balloons />
         </Toy>
         <Toy play="tumble" className="jpa-deco jpa-deco--blocks-left jpa-px jpa-px--mid">

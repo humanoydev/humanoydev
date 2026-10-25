@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { BAR_EVENT } from "./BackgroundMusic";
 import { OPENED } from "./Envelope";
 
 // Juguetes de los costados: al pasar el mouse (o tocarlos en el celular) reaccionan,
@@ -30,6 +31,12 @@ const DURATION: Record<Play, number> = {
 };
 
 type Offset = { x: number; y: number };
+
+// Los juguetes con `dance` (los globos) reaccionan en cada compás de la música (BAR_EVENT);
+// si su animación dura más que un compás, siguen en el siguiente que los encuentre libres.
+// Mientras suena la música no siguen las pausas de ToyShow: solo bailan con ella.
+let lastBar = 0;
+const dancing = () => performance.now() - lastBar < 2000;
 
 // Un sitio al azar cerca del original y lejos del actual, para que se note que se mudó.
 function nextOffset(current: Offset, range: Offset): Offset {
@@ -83,10 +90,12 @@ type Props = {
   className: string;
   // Globo de diálogo que aparece mientras reacciona.
   bubble?: React.ReactNode;
+  // Reacciona en cada compás de la música.
+  dance?: boolean;
   children: React.ReactNode;
 };
 
-export function Toy({ play, className, bubble, children }: Props) {
+export function Toy({ play, className, bubble, dance = false, children }: Props) {
   const [playing, setPlaying] = useState(false);
   const [offset, setOffset] = useState<Offset>({ x: 0, y: 0 });
   const timer = useRef<number | undefined>(undefined);
@@ -109,13 +118,19 @@ export function Toy({ play, className, bubble, children }: Props) {
   });
 
   useEffect(() => {
-    const toy = { start: () => startRef.current(), duration: DURATION[play] };
+    const toy = { start: () => (dance && dancing() ? undefined : startRef.current()), duration: DURATION[play] };
     registry.add(toy);
+    const onBar = () => {
+      lastBar = performance.now();
+      startRef.current();
+    };
+    if (dance) window.addEventListener(BAR_EVENT, onBar);
     return () => {
       registry.delete(toy);
+      window.removeEventListener(BAR_EVENT, onBar);
       window.clearTimeout(timer.current);
     };
-  }, [play]);
+  }, [play, dance]);
 
   return (
     <span

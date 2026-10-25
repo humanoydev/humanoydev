@@ -349,20 +349,20 @@ export function HeroScene({ children }: { children: React.ReactNode }) {
         <Star className="jpa-sky__star jpa-sky__star--2 jpa-px jpa-px--far" />
         <Star className="jpa-sky__star jpa-sky__star--3 jpa-px jpa-px--mid" />
         <Star className="jpa-sky__star jpa-sky__star--4 jpa-px jpa-px--far" />
-        <Toy play="fly" className="jpa-sky__balloon jpa-sky__balloon--small jpa-px jpa-px--far">
+        <Toy play="fly" dance className="jpa-sky__balloon jpa-sky__balloon--small jpa-px jpa-px--far">
           <HotAirBalloon color="butter" />
         </Toy>
         <Toy play="puff" className="jpa-sky__cloud jpa-sky__cloud--2 jpa-px jpa-px--far">
           <Cloud />
         </Toy>
         <Birds className="jpa-sky__birds jpa-px jpa-px--mid" />
-        <Toy play="fly" className="jpa-sky__balloon jpa-sky__balloon--mid jpa-px jpa-px--mid">
+        <Toy play="fly" dance className="jpa-sky__balloon jpa-sky__balloon--mid jpa-px jpa-px--mid">
           <HotAirBalloon color="sky" />
         </Toy>
         <Toy play="puff" className="jpa-sky__cloud jpa-sky__cloud--1 jpa-px jpa-px--mid">
           <Cloud />
         </Toy>
-        <Toy play="fly" bubble="¡Hola!" className="jpa-sky__balloon jpa-sky__balloon--bear jpa-px jpa-px--near">
+        <Toy play="fly" dance bubble="¡Hola!" className="jpa-sky__balloon jpa-sky__balloon--bear jpa-px jpa-px--near">
           <HotAirBalloon bear />
         </Toy>
         <Toy play="puff" className="jpa-sky__cloud jpa-sky__cloud--3 jpa-px jpa-px--front">

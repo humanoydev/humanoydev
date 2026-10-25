@@ -15,7 +15,7 @@ type Spark = { x: number; y: number; vx: number; vy: number; life: number; color
 
 const COLORS = ["#d6e8f5", "#fbdccb", "#dbe9d2", "#f8e6a8", "#f6c1b5"];
 const SPARK_COLORS = ["#f2c14e", "#e98a6d", "#8fb6d9", "#9cc28a"];
-const POP_EVERY = 3000;
+const POP_EVERY = 1000;
 
 function star(ctx: CanvasRenderingContext2D, x: number, y: number, r: number) {
   ctx.beginPath();

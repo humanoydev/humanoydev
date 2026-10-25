@@ -41,12 +41,14 @@ function nextOffset(current: Offset, range: Offset): Offset {
 }
 
 // Juguetes en la página, para que ToyShow los haga reaccionar solos.
-type Registered = { element: HTMLElement; start: () => void };
+type Registered = { element: HTMLElement; start: () => void; duration: number };
 const registry = new Set<Registered>();
 
-// La función automática: al cargar reaccionan todos a la vez (bienvenida); después,
-// cada INTERVAL ms, uno de los que están a la vista, por turnos.
+// La función automática: al cargar reaccionan todos a la vez (bienvenida) y cada uno repite
+// WELCOME_AGAIN ms después de terminar; luego, cada INTERVAL ms, uno de los que están a la
+// vista, por turnos.
 const WELCOME_DELAY = 800;
+const WELCOME_AGAIN = 2000;
 const INTERVAL = 4000;
 
 // Juguetes a la vista (los ocultos miden 0), de arriba abajo y de izquierda a derecha.
@@ -63,15 +65,25 @@ export function ToyShow() {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     let turn = 0;
     let interval = 0;
-    const welcome = window.setTimeout(() => {
-      registry.forEach((toy) => toy.start());
-      interval = window.setInterval(() => {
-        const toys = visibleToys();
-        if (toys.length) toys[turn++ % toys.length].start();
-      }, INTERVAL);
+    const timers: number[] = [];
+    const later = (fn: () => void, ms: number) => timers.push(window.setTimeout(fn, ms));
+    later(() => {
+      const toys = Array.from(registry);
+      toys.forEach((toy) => {
+        toy.start();
+        later(toy.start, toy.duration + WELCOME_AGAIN);
+      });
+      // La ronda por turnos empieza cuando terminó la bienvenida.
+      const longest = Math.max(0, ...toys.map((toy) => toy.duration));
+      later(() => {
+        interval = window.setInterval(() => {
+          const visible = visibleToys();
+          if (visible.length) visible[turn++ % visible.length].start();
+        }, INTERVAL);
+      }, longest * 2 + WELCOME_AGAIN);
     }, WELCOME_DELAY);
     return () => {
-      window.clearTimeout(welcome);
+      timers.forEach((timer) => window.clearTimeout(timer));
       window.clearInterval(interval);
     };
   }, []);
@@ -112,7 +124,7 @@ export function Toy({ play, className, bubble, children }: Props) {
   });
 
   useEffect(() => {
-    const toy = { element: element.current!, start: () => startRef.current() };
+    const toy = { element: element.current!, start: () => startRef.current(), duration: DURATION[play] };
     registry.add(toy);
     return () => {
       registry.delete(toy);

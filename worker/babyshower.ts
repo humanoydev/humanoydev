@@ -71,8 +71,8 @@ async function networkHash(request: Request, env: Env): Promise<string | null> {
 
 const GIFTS = new Map(GIFT_LIST.flatMap(({ gifts }) => gifts.map((gift) => [gift.id, gift])));
 
-// La lista de regalos con lo que ya apartaron todos (`taken`) y este invitado (`mine`). Quién
-// apartó qué solo se ve en el admin.
+// La lista de regalos con lo que ya apartaron todos (`taken`, más lo cubierto por fuera de la
+// invitación, `covered`) y este invitado (`mine`). Quién apartó qué solo se ve en el admin.
 async function giftList(env: Env, guestId: number) {
   const { results } = await env.DB.prepare(
     `SELECT gift_id AS id, SUM(qty) AS taken, SUM(CASE WHEN guest_id = ? THEN qty ELSE 0 END) AS mine
@@ -85,7 +85,7 @@ async function giftList(env: Env, guestId: number) {
     category,
     gifts: gifts.map((gift) => ({
       ...gift,
-      taken: picks.get(gift.id)?.taken ?? 0,
+      taken: (picks.get(gift.id)?.taken ?? 0) + (gift.covered ?? 0),
       mine: picks.get(gift.id)?.mine ?? 0,
     })),
   }));
@@ -139,7 +139,8 @@ async function pickGift(request: Request, env: Env): Promise<Response> {
   if (qty === 0) {
     await env.DB.prepare("DELETE FROM gift_picks WHERE guest_id = ? AND gift_id = ?").bind(guest.id, gift.id).run();
   } else {
-    // Una sola consulta: solo se guarda si, con lo que apartaron los demás, no pasa del máximo.
+    // Una sola consulta: solo se guarda si, con lo que apartaron los demás, no pasa del máximo
+    // (sin contar lo ya cubierto por fuera).
     // Así, si dos personas piden la última unidad a la vez, solo una se la lleva.
     const { meta } = await env.DB.prepare(
       `INSERT INTO gift_picks (guest_id, gift_id, qty, updated_at)
@@ -147,7 +148,7 @@ async function pickGift(request: Request, env: Env): Promise<Response> {
        WHERE ?3 + (SELECT COALESCE(SUM(qty), 0) FROM gift_picks WHERE gift_id = ?2 AND guest_id <> ?1) <= ?4
        ON CONFLICT (guest_id, gift_id) DO UPDATE SET qty = excluded.qty, updated_at = excluded.updated_at`,
     )
-      .bind(guest.id, gift.id, qty, gift.max)
+      .bind(guest.id, gift.id, qty, gift.max - (gift.covered ?? 0))
       .run();
     saved = meta.changes > 0;
   }

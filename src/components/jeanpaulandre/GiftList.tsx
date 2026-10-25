@@ -46,7 +46,10 @@ export function GiftList({ token, initial }: { token: string; initial: GiftCateg
       </p>
     );
 
-  const mine = list.flatMap(({ gifts }) => gifts).filter((gift) => gift.mine > 0);
+  const all = list.flatMap(({ gifts }) => gifts);
+  const mine = all.filter((gift) => gift.mine > 0);
+  // Unidades ya tomadas entre todos: que se note que la lista se va llenando.
+  const taken = all.reduce((sum, gift) => sum + gift.taken, 0);
 
   return (
     <div className="jpa__card jpa__card--butter jpa__gifts">
@@ -57,10 +60,15 @@ export function GiftList({ token, initial }: { token: string; initial: GiftCateg
         ideas.
       </p>
       <p className="jpa__card-text">
-        Confesión: esta lista no la hicimos a mano, nos ayudó una inteligencia artificial (hola, IA 👋). Tómala como
-        inspiración, no como encargo. Las de ⭐ son las que más nos van a salvar en las madrugadas.
+        Confesión: esta lista no la hicimos a mano (hola, IA 👋) Tómala como inspiración, no como encargo. Las de ⭐ son
+        las que más nos van a salvar en las madrugadas.
       </p>
       <p className="jpa__card-text">Si eliges algo, lo apartamos a tu nombre para que no lleguen tres bañeras 🛁.</p>
+      {taken > 0 && (
+        <p className="jpa__gifts-taken">
+          🎉 Ya {taken === 1 ? "hay 1 regalo apartado" : `hay ${taken} regalos apartados`}: los vas a ver marcados.
+        </p>
+      )}
 
       {mine.length > 0 && (
         <div className="jpa__gifts-mine">
@@ -106,56 +114,63 @@ export function GiftList({ token, initial }: { token: string; initial: GiftCateg
       )}
       {noteFor("mine")}
 
-      {list.map(({ category, gifts }) => (
-        <details key={category} className="jpa__gift-group">
-          <summary>
-            {category}
-            <span className="jpa__gift-count">{gifts.length} ideas</span>
-          </summary>
-          <ul className="jpa__gift-list">
-            {gifts.map((gift) => {
-              const left = gift.max - gift.taken;
-              return (
-                <li key={gift.id} className={`jpa__gift${left === 0 && !gift.mine ? " is-covered" : ""}`}>
-                  <div className="jpa__gift-info">
-                    <p className="jpa__gift-name">{gift.name}</p>
-                    <p className="jpa__gift-meta">
-                      {gift.tag && <span className="jpa__gift-tag">{TAGS[gift.tag]}</span>}
-                      {gift.mine > 0 ? (
-                        <span className="jpa__gift-yours">✓ Lo llevas tú{gift.mine > 1 && ` (${gift.mine})`}</span>
-                      ) : left === 0 ? (
-                        <span>¡Ya está cubierto!</span>
-                      ) : (
-                        gift.max > 1 && (
-                          <span>
-                            Quedan {left} de {gift.max}
-                          </span>
-                        )
+      {list.map(({ category, gifts }) => {
+        // Regalos de esta categoría que alguien ya tomó (aunque queden unidades).
+        const takenHere = gifts.filter((gift) => gift.taken > 0).length;
+        return (
+          <details key={category} className="jpa__gift-group">
+            <summary>
+              {category}
+              <span className="jpa__gift-count">
+                {gifts.length} ideas
+                {takenHere > 0 && ` · ${takenHere} ya ${takenHere === 1 ? "tomado" : "tomados"}`}
+              </span>
+            </summary>
+            <ul className="jpa__gift-list">
+              {gifts.map((gift) => {
+                const left = gift.max - gift.taken;
+                return (
+                  <li key={gift.id} className={`jpa__gift${left === 0 && !gift.mine ? " is-covered" : ""}`}>
+                    <div className="jpa__gift-info">
+                      <p className="jpa__gift-name">{gift.name}</p>
+                      <p className="jpa__gift-meta">
+                        {gift.tag && <span className="jpa__gift-tag">{TAGS[gift.tag]}</span>}
+                        {gift.mine > 0 ? (
+                          <span className="jpa__gift-yours">✓ Lo llevas tú{gift.mine > 1 && ` (${gift.mine})`}</span>
+                        ) : left === 0 ? (
+                          <span className="jpa__gift-covered">✓ ¡Ya está cubierto!</span>
+                        ) : (
+                          gift.max > 1 && (
+                            <span>
+                              Quedan {left} de {gift.max}
+                            </span>
+                          )
+                        )}
+                      </p>
+                      {noteFor(gift.id)}
+                    </div>
+                    <div className="jpa__gift-actions">
+                      <a className="jpa__chip" href={gift.url} target="_blank" rel="noopener noreferrer">
+                        Ver en la tienda
+                      </a>
+                      {gift.mine === 0 && left > 0 && (
+                        <button
+                          type="button"
+                          className="jpa__chip jpa__gift-pick"
+                          onClick={() => pick(gift, 1, gift.id)}
+                          disabled={busy}
+                        >
+                          Lo llevo yo
+                        </button>
                       )}
-                    </p>
-                    {noteFor(gift.id)}
-                  </div>
-                  <div className="jpa__gift-actions">
-                    <a className="jpa__chip" href={gift.url} target="_blank" rel="noopener noreferrer">
-                      Ver en la tienda
-                    </a>
-                    {gift.mine === 0 && left > 0 && (
-                      <button
-                        type="button"
-                        className="jpa__chip jpa__gift-pick"
-                        onClick={() => pick(gift, 1, gift.id)}
-                        disabled={busy}
-                      >
-                        Lo llevo yo
-                      </button>
-                    )}
-                  </div>
-                </li>
-              );
-            })}
-          </ul>
-        </details>
-      ))}
+                    </div>
+                  </li>
+                );
+              })}
+            </ul>
+          </details>
+        );
+      })}
 
       <p className="jpa__gifts-end">¿Prefieres sorprendernos con otra cosa? ¡Felices de la vida!</p>
     </div>

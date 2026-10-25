@@ -185,11 +185,11 @@ body:has(.jpa) { background: #fdf8ef; }
 a.jpa__brand:hover { color: var(--accent); }
 .jpa__brand-star { width: 20px; height: 20px; color: var(--star); }
 
-/* Parallax: Parallax.tsx pone --scene-offset en cada .jpa-scene (distancia de su centro
-   al centro de la pantalla). Lo lejano (negativo) se queda atrás y lo cercano (positivo)
+/* Parallax: Parallax.tsx pone --px-offset en cada .jpa-px (distancia de su centro al centro
+   de la pantalla). Lo lejano (negativo) se queda atrás y lo cercano (positivo)
    pasa más rápido. Usa `translate` para no chocar con las animaciones de `transform`. */
 .jpa-scene { position: relative; }
-.jpa-px { translate: 0 calc(var(--scene-offset, 0) * var(--depth) * 1px); will-change: translate; }
+.jpa-px { translate: 0 calc(var(--px-offset, 0) * var(--depth) * 1px); will-change: translate; }
 .jpa-px--far { --depth: -0.45; }
 .jpa-px--mid { --depth: -0.25; }
 .jpa-px--near { --depth: 0.2; }
@@ -636,7 +636,7 @@ a.jpa__brand:hover { color: var(--accent); }
 .jpa__stepper button:disabled { opacity: 0.4; cursor: default; }
 .jpa__gift-release { min-height: 44px; padding: 0 6px; border: 0; background: none; color: var(--ink-soft); font: inherit; font-size: 15px; text-decoration: underline; cursor: pointer; }
 .jpa__gift-group { margin-top: 12px; border-radius: 20px; background: rgba(255, 255, 255, 0.55); }
-.jpa__gifts-mine + .jpa__gift-group, .jpa__card-text + .jpa__gift-group, .jpa__status + .jpa__gift-group, .jpa__error + .jpa__gift-group { margin-top: 22px; }
+.jpa__gifts-mine + .jpa__gift-group, .jpa__card-text + .jpa__gift-group, .jpa__gifts-taken + .jpa__gift-group, .jpa__status + .jpa__gift-group, .jpa__error + .jpa__gift-group { margin-top: 22px; }
 .jpa__gift-group summary { display: flex; align-items: center; gap: 10px; min-height: 56px; padding: 0 20px; font-family: var(--font-round), system-ui, sans-serif; font-size: 19px; font-weight: 600; cursor: pointer; list-style: none; }
 .jpa__gift-group summary::-webkit-details-marker { display: none; }
 .jpa__gift-group summary::after { content: "+"; margin-left: 4px; font-size: 24px; font-weight: 500; color: var(--accent); }
@@ -656,7 +656,10 @@ a.jpa__brand:hover { color: var(--accent); }
 .jpa__gift-actions .jpa__gift-pick { background: var(--accent); color: #fff; }
 .jpa__gift-actions .jpa__chip:hover { background: var(--ink); color: #fff; }
 .jpa__gift-actions .jpa__chip:disabled { opacity: 0.6; cursor: progress; }
+.jpa__gift.is-covered { background: rgba(255, 255, 255, 0.6); }
 .jpa__gift.is-covered .jpa__gift-name { color: var(--ink-soft); text-decoration: line-through; }
+.jpa__gift-covered { padding: 1px 10px; border-radius: var(--radius-pill); background: var(--mint); font-weight: 600; color: #3f7a3a; }
+.jpa__gifts-taken { margin-top: 14px; display: inline-block; padding: 6px 16px; border-radius: var(--radius-pill); background: #fff; font-family: var(--font-round), system-ui, sans-serif; font-size: 16px; font-weight: 600; color: var(--accent); }
 .jpa__gifts-end { margin-top: 20px; font-family: var(--font-serif), Georgia, serif; font-style: italic; font-size: 19px; color: var(--ink-soft); }
 
 .jpa__footer { position: relative; padding-block: 28px 56px; border-top: 2px dashed var(--line); display: flex; flex-wrap: wrap; gap: 8px 32px; justify-content: space-between; align-items: center; font-size: 16px; color: var(--ink-soft); }

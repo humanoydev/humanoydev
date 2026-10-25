@@ -443,8 +443,7 @@ a.jpa__brand:hover { color: var(--accent); }
 .jpa__countdown { display: block; font-weight: 600; color: var(--accent); }
 .jpa__countdown:empty { display: none; }
 
-/* Invitación: ecografía (solo invitados), tarjetas de detalles y formulario */
-.jpa__invite-photo { position: relative; padding-top: 56px; display: flex; justify-content: center; }
+/* Invitación: tarjetas de detalles y formulario */
 .jpa__details { padding-block: 72px 56px; display: flex; flex-wrap: wrap; gap: 20px; }
 .jpa__details > .jpa__card { flex: 1 1 320px; }
 .jpa__card { min-width: 0; padding: 32px; border-radius: 28px; background: var(--peach); }

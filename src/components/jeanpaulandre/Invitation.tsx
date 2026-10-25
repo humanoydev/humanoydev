@@ -4,6 +4,7 @@ import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { DaysUntil } from "@/components/DaysUntil";
 import { BABY_NAME, babyShower } from "@/content/jeanpaulandre";
 import { Envelope } from "./Envelope";
+import { GiftList } from "./GiftList";
 import { Balloons, Blocks, Cloud, Heart, HeroScene, HotAirBalloon, Kite } from "./Doodles";
 import { Toy } from "./Toy";
 import { VenueCard } from "./VenueCard";
@@ -172,6 +173,7 @@ export function Invitation() {
               </div>
             )
           )}
+          {!loading && <GiftList key={token ?? ""} token={invite ? token : null} initial={invite?.gifts ?? null} />}
         </div>
       </section>
     </>

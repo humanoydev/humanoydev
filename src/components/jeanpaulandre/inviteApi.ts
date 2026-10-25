@@ -1,3 +1,5 @@
+import type { Gift as BaseGift } from "@/content/jeanpaulandre-gifts";
+
 // Datos de cada invitado: los pide la invitación con el token de su link (?i=...) a la API
 // del Worker (worker/babyshower.ts). Con `npm run dev` no hay Worker: usa `npm run preview`.
 
@@ -18,7 +20,12 @@ export type Venue = {
   photos?: { src: string; alt: string; caption?: string }[];
 };
 export type Rsvp = { attending: boolean; message: string };
-export type Invite = { name: string; venue: Venue; rsvp: Rsvp | null };
+export type Invite = { name: string; venue: Venue; rsvp: Rsvp | null; gifts: GiftCategory[] };
+
+// Regalo de la lista (src/content/jeanpaulandre-gifts.ts) con lo ya apartado por todos
+// (`taken`) y por quien abre la invitación (`mine`).
+export type Gift = BaseGift & { taken: number; mine: number };
+export type GiftCategory = { category: string; gifts: Gift[] };
 
 const jsonBody = (data: unknown) => ({
   headers: { "Content-Type": "application/json" },
@@ -64,4 +71,20 @@ export async function getInvite(token: string): Promise<Invite | null> {
 export async function sendRsvp(token: string, rsvp: Rsvp): Promise<void> {
   const response = await fetch("/api/rsvp", { method: "PUT", ...jsonBody({ token, ...rsvp }) });
   if (!response.ok) throw new Error(`No se pudo guardar la respuesta (${response.status})`);
+}
+
+// Lista de regalos para la invitación general (sin token): se ve, pero no se aparta.
+export async function getGifts(): Promise<GiftCategory[]> {
+  const response = await fetch("/api/gifts");
+  if (!response.ok) throw new Error(`No se pudo cargar la lista de regalos (${response.status})`);
+  return (await response.json()).gifts;
+}
+
+// Aparta qty unidades de un regalo (0: lo suelta). Devuelve la lista al día; `saved` es false si
+// alguien se adelantó y ya no quedaban.
+export async function pickGift(token: string, giftId: string, qty: number) {
+  const response = await fetch("/api/gifts", { method: "PUT", ...jsonBody({ token, giftId, qty }) });
+  if (!response.ok && response.status !== 409) throw new Error(`No se pudo apartar el regalo (${response.status})`);
+  const { gifts }: { gifts: GiftCategory[] } = await response.json();
+  return { gifts, saved: response.ok };
 }

@@ -21,6 +21,8 @@ type Guest = {
   attending: boolean | null;
   message: string | null;
   answeredAt: string | null;
+  // Regalos que apartó (max: null si el regalo ya no está en la lista).
+  gifts: { id: string; name: string; qty: number; max: number | null }[];
 };
 
 type Visit = {
@@ -163,14 +165,39 @@ function status(guest: Guest) {
   return { label: "Sin abrir", tone: "new" };
 }
 
+const describeGifts = (guest: Guest) =>
+  guest.gifts.map((gift) => (gift.qty > 1 ? `${gift.name} ×${gift.qty}` : gift.name)).join(" · ");
+
+// Resumen por regalo: cuántas unidades se apartaron, de cuántas, y quiénes.
+function giftSummary(guests: Guest[]) {
+  const gifts = new Map<string, { name: string; max: number | null; taken: number; who: string[] }>();
+  for (const guest of guests)
+    for (const gift of guest.gifts) {
+      const row = gifts.get(gift.id) ?? { name: gift.name, max: gift.max, taken: 0, who: [] };
+      row.taken += gift.qty;
+      row.who.push(gift.qty > 1 ? `${guest.name} (${gift.qty})` : guest.name);
+      gifts.set(gift.id, row);
+    }
+  return [...gifts.values()].sort((a, b) => a.name.localeCompare(b.name, "es"));
+}
+
 function toCsv(guests: Guest[]) {
   const cell = (value: unknown) => `"${String(value ?? "").replace(/"/g, '""')}"`;
   const rows = guests.map((g) =>
-    [g.name, g.phone, status(g).label, g.visits, g.lastVisit && formatDate(g.lastVisit), g.message, inviteLink(g.token)]
+    [
+      g.name,
+      g.phone,
+      status(g).label,
+      g.visits,
+      g.lastVisit && formatDate(g.lastVisit),
+      g.message,
+      describeGifts(g),
+      inviteLink(g.token),
+    ]
       .map(cell)
       .join(","),
   );
-  return ["Nombre,Teléfono,Estado,Visitas,Última visita,Mensaje,Link", ...rows].join("\n");
+  return ["Nombre,Teléfono,Estado,Visitas,Última visita,Mensaje,Regalos,Link", ...rows].join("\n");
 }
 
 async function api(path: string, init?: RequestInit) {
@@ -216,6 +243,7 @@ export function AdminPanel() {
   }, []);
 
   const parsed = useMemo(() => parseList(list), [list]);
+  const gifts = useMemo(() => giftSummary(guests ?? []), [guests]);
   const shown = (guests ?? []).filter(FILTERS.find((f) => f.id === filter)!.match);
   const count = (id: Filter) => (guests ?? []).filter(FILTERS.find((f) => f.id === id)!.match).length;
 
@@ -235,7 +263,8 @@ export function AdminPanel() {
   }
 
   async function remove(guest: Guest) {
-    if (!window.confirm(`¿Eliminar a ${guest.name}? Su link dejará de funcionar y se borra su respuesta.`)) return;
+    const question = `¿Eliminar a ${guest.name}? Su link dejará de funcionar y se borran su respuesta y los regalos que apartó.`;
+    if (!window.confirm(question)) return;
     try {
       await api(`/guests/${guest.id}`, { method: "DELETE" });
       await load();
@@ -302,7 +331,25 @@ export function AdminPanel() {
           <dt>Sin respuesta</dt>
           <dd>{guests ? guests.filter((g) => g.attending === null).length : "–"}</dd>
         </div>
+        <div>
+          <dt>Regalos apartados</dt>
+          <dd>{guests ? gifts.reduce((sum, gift) => sum + gift.taken, 0) : "–"}</dd>
+        </div>
       </dl>
+
+      {gifts.length > 0 && (
+        <details className="jpa-admin__gifts">
+          <summary>Ver regalos apartados ({gifts.length})</summary>
+          <ul>
+            {gifts.map((gift) => (
+              <li key={gift.name}>
+                <strong>{gift.name}</strong> {gift.max ? `${gift.taken} de ${gift.max}` : `×${gift.taken}`}
+                <span className="jpa-admin__meta"> · {gift.who.join(", ")}</span>
+              </li>
+            ))}
+          </ul>
+        </details>
+      )}
 
       <form className="jpa__card jpa__card--mint jpa-admin__add" onSubmit={add}>
         <label className="jpa__field">
@@ -385,6 +432,7 @@ export function AdminPanel() {
                   </button>
                 )}
                 {guest.message && <p className="jpa-admin__message">“{guest.message}”</p>}
+                {guest.gifts.length > 0 && <p className="jpa-admin__meta">🎁 Trae: {describeGifts(guest)}</p>}
               </div>
               <span className={`jpa-admin__status jpa-admin__status--${s.tone}`}>{s.label}</span>
               <div className="jpa-admin__actions">

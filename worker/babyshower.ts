@@ -3,19 +3,25 @@
  *
  *   POST /api/invite  { token, device?, model? }      → datos de la invitación; registra la visita
  *   PUT  /api/rsvp    { token, attending, message }   → guarda (o cambia) la respuesta
+ *   GET  /api/gifts                                   → lista de regalos con lo ya apartado
+ *   PUT  /api/gifts   { token, giftId, qty }          → aparta qty unidades de un regalo (0: lo suelta)
  *
  * Administración (protegida con Cloudflare Access, ver isAdmin):
  *   GET    /api/admin/guests                      → invitados con visitas y respuesta
  *   POST   /api/admin/guests  { guests: [{ name, phone? }] } → agrega invitados con su token
  *   GET    /api/admin/guests/:id/visits           → cada visita: fecha, navegador, ciudad y país
- *   DELETE /api/admin/guests/:id                  → elimina un invitado (y sus visitas y respuesta)
+ *   DELETE /api/admin/guests/:id                  → elimina un invitado (y sus visitas, respuesta y regalos)
  *
- * Cada respuesta manda un aviso por correo a papá y mamá (ver notifyRsvp).
+ * Cada respuesta (no los regalos) manda un aviso por correo a papá y mamá (ver notifyRsvp).
+ *
+ * La lista de regalos está en src/content/jeanpaulandre-gifts.ts; lo que aparta cada invitado, en D1.
  *
  * Invitados, visitas y respuestas viven en D1 (binding DB, migrations/). El lugar está en el
  * secreto BABYSHOWER_VENUE (JSON; las fotos, en BABYSHOWER_PHOTOS) y no en el código: el repo es
  * público y la dirección solo la ve quien tiene un link personal.
  */
+
+import { GIFT_LIST } from "../src/content/jeanpaulandre-gifts";
 
 type Guest = { id: number; name: string };
 type Body = Record<string, unknown>;
@@ -64,6 +70,28 @@ async function networkHash(request: Request, env: Env): Promise<string | null> {
   return Array.from(new Uint8Array(digest).slice(0, 6), (byte) => byte.toString(16).padStart(2, "0")).join("");
 }
 
+const GIFTS = new Map(GIFT_LIST.flatMap(({ gifts }) => gifts.map((gift) => [gift.id, gift])));
+
+// La lista de regalos con lo que ya apartaron todos (`taken`) y este invitado (`mine`). Quién
+// apartó qué solo se ve en el admin.
+async function giftList(env: Env, guestId: number | null) {
+  const { results } = await env.DB.prepare(
+    `SELECT gift_id AS id, SUM(qty) AS taken, SUM(CASE WHEN guest_id = ? THEN qty ELSE 0 END) AS mine
+     FROM gift_picks GROUP BY gift_id`,
+  )
+    .bind(guestId ?? 0)
+    .all<{ id: string; taken: number; mine: number }>();
+  const picks = new Map(results.map((row) => [row.id, row]));
+  return GIFT_LIST.map(({ category, gifts }) => ({
+    category,
+    gifts: gifts.map((gift) => ({
+      ...gift,
+      taken: picks.get(gift.id)?.taken ?? 0,
+      mine: picks.get(gift.id)?.mine ?? 0,
+    })),
+  }));
+}
+
 async function openInvite(request: Request, env: Env): Promise<Response> {
   const body = await readBody(request);
   const guest = await findGuest(env, body?.token);
@@ -93,7 +121,38 @@ async function openInvite(request: Request, env: Env): Promise<Response> {
     name: guest.name,
     venue: { ...JSON.parse(env.BABYSHOWER_VENUE), photos },
     rsvp: answer ? { attending: answer.attending === 1, message: answer.message } : null,
+    gifts: await giftList(env, guest.id),
   });
+}
+
+// Aparta (o cambia, o suelta con qty 0) un regalo. Responde con la lista al día; 409 si ya no
+// quedan suficientes unidades porque alguien se adelantó.
+async function pickGift(request: Request, env: Env): Promise<Response> {
+  const body = await readBody(request);
+  const guest = await findGuest(env, body?.token);
+  if (!guest) return json({ error: "not_found" }, 404);
+  const gift = typeof body?.giftId === "string" ? GIFTS.get(body.giftId) : undefined;
+  const qty = body?.qty;
+  if (!gift || typeof qty !== "number" || !Number.isInteger(qty) || qty < 0 || qty > gift.max)
+    return json({ error: "invalid" }, 400);
+
+  let saved = true;
+  if (qty === 0) {
+    await env.DB.prepare("DELETE FROM gift_picks WHERE guest_id = ? AND gift_id = ?").bind(guest.id, gift.id).run();
+  } else {
+    // Una sola consulta: solo se guarda si, con lo que apartaron los demás, no pasa del máximo.
+    // Así, si dos personas piden la última unidad a la vez, solo una se la lleva.
+    const { meta } = await env.DB.prepare(
+      `INSERT INTO gift_picks (guest_id, gift_id, qty, updated_at)
+       SELECT ?1, ?2, ?3, datetime('now')
+       WHERE ?3 + (SELECT COALESCE(SUM(qty), 0) FROM gift_picks WHERE gift_id = ?2 AND guest_id <> ?1) <= ?4
+       ON CONFLICT (guest_id, gift_id) DO UPDATE SET qty = excluded.qty, updated_at = excluded.updated_at`,
+    )
+      .bind(guest.id, gift.id, qty, gift.max)
+      .run();
+    saved = meta.changes > 0;
+  }
+  return json({ gifts: await giftList(env, guest.id) }, saved ? 200 : 409);
 }
 
 // Aviso por correo a papá y mamá cuando alguien responde. Usa el envío de correo de Cloudflare
@@ -203,16 +262,25 @@ async function listGuests(env: Env): Promise<Response> {
             COUNT(v.id) AS visits, MAX(v.visited_at) AS lastVisit,
             COUNT(DISTINCT COALESCE(v.device_id, v.user_agent)) AS devices,
             COUNT(DISTINCT v.network) AS networks, COUNT(DISTINCT v.city) AS cities,
-            r.attending, r.message, r.updated_at AS answeredAt
+            r.attending, r.message, r.updated_at AS answeredAt,
+            (SELECT json_group_array(json_object('id', gift_id, 'qty', qty))
+             FROM gift_picks WHERE guest_id = g.id) AS gifts
      FROM guests g
      LEFT JOIN visits v ON v.guest_id = g.id
      LEFT JOIN rsvps r ON r.guest_id = g.id
      GROUP BY g.id
      ORDER BY g.id DESC`,
-  ).all<{ attending: number | null; devices: number; networks: number; cities: number }>();
+  ).all<{ attending: number | null; devices: number; networks: number; cities: number; gifts: string }>();
   return json(
-    results.map(({ networks, cities, ...row }) => ({
+    results.map(({ networks, cities, gifts, ...row }) => ({
       ...row,
+      // Si un regalo ya no está en la lista (se editó), se muestra con su id.
+      gifts: (JSON.parse(gifts) as { id: string; qty: number }[]).map(({ id, qty }) => ({
+        id,
+        qty,
+        name: GIFTS.get(id)?.name ?? `${id} (fuera de la lista)`,
+        max: GIFTS.get(id)?.max ?? null,
+      })),
       attending: row.attending === null ? null : row.attending === 1,
       // Pista, no prueba: más de un dispositivo y además otra red u otra ciudad. La misma persona
       // en WhatsApp y en Chrome, en la misma red, no cuenta.
@@ -258,6 +326,7 @@ async function deleteGuest(env: Env, id: string): Promise<Response> {
   await env.DB.batch([
     env.DB.prepare("DELETE FROM visits WHERE guest_id = ?").bind(id),
     env.DB.prepare("DELETE FROM rsvps WHERE guest_id = ?").bind(id),
+    env.DB.prepare("DELETE FROM gift_picks WHERE guest_id = ?").bind(id),
     env.DB.prepare("DELETE FROM guests WHERE id = ?").bind(id),
   ]);
   return new Response(null, { status: 204, headers: NO_STORE });
@@ -282,5 +351,7 @@ export async function handleBabyShowerApi(
   if (url.pathname.startsWith("/api/admin/")) return handleAdmin(request, env, url);
   if (url.pathname === "/api/invite" && request.method === "POST") return openInvite(request, env);
   if (url.pathname === "/api/rsvp" && request.method === "PUT") return saveRsvp(request, env, ctx);
+  if (url.pathname === "/api/gifts" && request.method === "GET") return json({ gifts: await giftList(env, null) });
+  if (url.pathname === "/api/gifts" && request.method === "PUT") return pickGift(request, env);
   return json({ error: "not_found" }, 404);
 }

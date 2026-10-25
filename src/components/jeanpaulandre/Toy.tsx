@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { BAR_EVENT, type BarDetail } from "./BackgroundMusic";
-import { OPENED } from "./Envelope";
+import { OPENED, openedAt } from "./Envelope";
 
 // Juguetes de los costados: al pasar el mouse (o tocarlos en el celular) reaccionan,
 // y también solos (ToyShow).
@@ -32,15 +32,12 @@ const DURATION: Record<Play, number> = {
 
 type Offset = { x: number; y: number };
 
-// Los juguetes con `dance` (los globos) reaccionan en cada compás de la música (BAR_EVENT);
-// si su animación dura más que un compás, siguen en el siguiente que los encuentre libres.
-// Mientras suena la música no siguen las pausas de ToyShow: solo bailan con ella.
-// Arrancan antes del compás para que lo más marcado de su animación caiga en el tiempo fuerte:
-// fly se inclina al 30 % (≈ un tiempo, 1/3 de compás); float-away vuelve a su sitio al final.
-const ACCENT: Partial<Record<Play, (bar: number) => number>> = {
-  fly: (bar) => bar / 3,
-  "float-away": () => DURATION["float-away"],
-};
+// Los juguetes con `dance` (los globos) bailan con la música (BAR_EVENT): su reacción empieza
+// en un tiempo fuerte y dura justo DANCE_BARS compases, así que cada movimiento sale y llega
+// en el tiempo fuerte (fly: cada compás; float-away: cada dos). Empiezan en el segundo compás,
+// cuando el sobre ya se está abriendo y se ven. Mientras suena la música no siguen las pausas
+// de ToyShow: solo bailan con ella.
+const DANCE_BARS: Partial<Record<Play, number>> = { fly: 1, "float-away": 2 };
 let lastBar = 0;
 const dancing = () => performance.now() - lastBar < 2000;
 
@@ -106,17 +103,24 @@ export function Toy({ play, className, bubble, dance = false, children }: Props)
   const [offset, setOffset] = useState<Offset>({ x: 0, y: 0 });
   const timer = useRef<number | undefined>(undefined);
   const busy = useRef(false);
+  // Duración del baile (ms) mientras baila con la música; null en sus reacciones de siempre.
+  const [danceMs, setDanceMs] = useState<number | null>(null);
 
-  function start() {
+  function start(dancing?: number) {
     if (busy.current || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     const range = MOVES[play];
     if (range) setOffset((current) => nextOffset(current, range));
     busy.current = true;
     setPlaying(true);
-    timer.current = window.setTimeout(() => {
-      busy.current = false;
-      setPlaying(false);
-    }, DURATION[play]);
+    setDanceMs(dancing ?? null);
+    // Bailando, se libera un poco antes del final para no perderse el siguiente tiempo fuerte.
+    timer.current = window.setTimeout(
+      () => {
+        busy.current = false;
+        setPlaying(false);
+      },
+      dancing ? dancing - 60 : DURATION[play],
+    );
   }
   const startRef = useRef(start);
   useEffect(() => {
@@ -131,12 +135,15 @@ export function Toy({ play, className, bubble, dance = false, children }: Props)
       const { at, bar } = (event as CustomEvent<BarDetail>).detail;
       const now = performance.now();
       lastBar = now;
-      let when = at - (ACCENT[play]?.(bar) ?? 0);
-      while (when < now) when += bar;
-      const beat = window.setTimeout(() => {
-        beats.delete(beat);
-        startRef.current();
-      }, when - now);
+      // El primer compás suena con el sobre todavía cerrado: se baila desde el segundo.
+      if (!openedAt() || at < openedAt() + bar * 0.8) return;
+      const beat = window.setTimeout(
+        () => {
+          beats.delete(beat);
+          startRef.current(bar * (DANCE_BARS[play] ?? 1));
+        },
+        Math.max(0, at - now),
+      );
       beats.add(beat);
     };
     if (dance) window.addEventListener(BAR_EVENT, onBar);
@@ -150,11 +157,17 @@ export function Toy({ play, className, bubble, dance = false, children }: Props)
 
   return (
     <span
-      className={`jpa-toy jpa-toy--${play}${playing ? " is-playing" : ""} ${className}`}
-      style={{ "--toy-x": `${offset.x}px`, "--toy-y": `${offset.y}px` } as React.CSSProperties}
+      className={`jpa-toy jpa-toy--${play}${playing ? " is-playing" : ""}${danceMs ? " is-dancing" : ""} ${className}`}
+      style={
+        {
+          "--toy-x": `${offset.x}px`,
+          "--toy-y": `${offset.y}px`,
+          ...(danceMs && { "--dance-ms": `${danceMs}ms` }),
+        } as React.CSSProperties
+      }
       // Mouse: al pasar por encima. Dedo o lápiz: al tocar (el click llega después del pointerenter).
       onPointerEnter={(event) => event.pointerType === "mouse" && start()}
-      onClick={start}
+      onClick={() => start()}
       aria-hidden="true"
     >
       <span className="jpa-toy__move">

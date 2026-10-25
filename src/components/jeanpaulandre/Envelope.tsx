@@ -8,6 +8,10 @@ import { Heart, Star } from "./Doodles";
 // página), y al abrirse avisa con el evento OPENED para que empiece la función de los juguetes.
 // Viene en el HTML estático, para que la invitación no se asome antes; sin JavaScript se esconde.
 export const OPENED = "jpa:opened";
+// Cuándo se tocó el sobre (performance.now), para que los globos empiecen a bailar en el
+// segundo compás de la música, que arranca con ese toque. 0: todavía cerrado.
+let touchedAt = 0;
+export const openedAt = () => touchedAt;
 const OPEN_MS = 1650;
 
 export function Envelope({ name }: { name?: string }) {
@@ -26,6 +30,7 @@ export function Envelope({ name }: { name?: string }) {
 
   function open() {
     if (state !== "closed") return;
+    touchedAt = performance.now();
     setState("opening");
     window.scrollTo(0, 0);
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;

@@ -313,6 +313,12 @@ a.jpa__brand:hover { color: var(--accent); }
 /* La nube se muda de golpe mientras es invisible. */
 .jpa-toy--puff .jpa-toy__move { transition: transform 0s 0.65s; }
 .jpa-toy--fly.is-playing .jpa-toy__react { animation: jpa-toy-fly 1.4s ease-in-out; }
+/* Bailando con la música (Toy, `dance`): la reacción y la mudanza duran justo lo que dura el
+   baile (--dance-ms, compases enteros), para salir y llegar en el tiempo fuerte. */
+.jpa-toy.is-dancing .jpa-toy__move { transition-duration: var(--dance-ms); }
+.jpa-toy.is-dancing.is-playing .jpa-toy__react { animation-duration: var(--dance-ms); }
+/* Bailando cada compás, el "¡Hola!" del osito no se quitaría nunca: solo sale al tocarlo. */
+.jpa-toy.is-dancing.is-playing .jpa-toy__bubble { opacity: 0; scale: 0.5; }
 .jpa-toy--float-away.is-playing .jpa-toy__react { animation: jpa-toy-away 2.6s ease-in-out; }
 .jpa-toy--loop.is-playing .jpa-toy__react { transform-origin: 50% 30%; animation: jpa-toy-loop 1.2s ease-in-out; }
 .jpa-toy--hop.is-playing .jpa-toy__react { transform-origin: 50% 100%; animation: jpa-toy-hop 0.9s ease-out; }

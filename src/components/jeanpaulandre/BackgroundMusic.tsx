@@ -121,7 +121,6 @@ export function BackgroundMusic() {
     // El contexto de audio se crea dentro del primer toque: así Safari y Chrome lo dejan sonar.
     let ctx: AudioContext | null = null;
     let scheduler = 0;
-    let beatFrame = 0;
     const update = () => setState(!wanted ? "off" : ctx?.state === "running" ? "on" : "waiting");
 
     function setup() {
@@ -144,39 +143,16 @@ export function BackgroundMusic() {
         master.gain.setValueAtTime(0, audio.currentTime);
         master.gain.linearRampToValueAtTime(VOLUME, audio.currentTime + 1.5);
       };
+      audio.onstatechange = () => {
+        if (audio.state === "running") fadeIn();
+        update();
+      };
+      if (audio.state === "running") fadeIn();
+
       const song = buildSong();
       const step = 60 / TEMPO / 2;
       let index = 0;
       let loopStart = audio.currentTime + 0.1;
-      const songStart = loopStart;
-
-      // Los globos (.jpa-beat) laten con cada pulso: --pulse salta a 1 en el tiempo fuerte del
-      // compás (0,6 en los otros dos) y se apaga antes del siguiente. Se calcula con el reloj del
-      // audio, no con timers, para que no se desfase; solo mientras suena.
-      const balloons = window.matchMedia("(prefers-reduced-motion: reduce)").matches
-        ? []
-        : Array.from(document.querySelectorAll<HTMLElement>(".jpa-beat"));
-      const pulse = () => {
-        const latency = audio.outputLatency || audio.baseLatency || 0;
-        const beats = (audio.currentTime - latency - songStart) / (step * 2);
-        const beat = Math.floor(beats);
-        const value = beats < 0 ? 0 : Math.exp(-(beats - beat) * 5) * (beat % 3 === 0 ? 1 : 0.6);
-        balloons.forEach((balloon) => balloon.style.setProperty("--pulse", value.toFixed(3)));
-        beatFrame = requestAnimationFrame(pulse);
-      };
-      const syncBeat = () => {
-        cancelAnimationFrame(beatFrame);
-        if (audio.state === "running" && balloons.length) beatFrame = requestAnimationFrame(pulse);
-        else balloons.forEach((balloon) => balloon.style.removeProperty("--pulse"));
-      };
-
-      audio.onstatechange = () => {
-        if (audio.state === "running") fadeIn();
-        syncBeat();
-        update();
-      };
-      if (audio.state === "running") fadeIn();
-      syncBeat();
       // Programa las notas de los próximos 0,4 s (con el contexto en pausa, el reloj no avanza).
       scheduler = window.setInterval(() => {
         while (true) {
@@ -223,7 +199,6 @@ export function BackgroundMusic() {
 
     return () => {
       clearInterval(scheduler);
-      cancelAnimationFrame(beatFrame);
       gestures.forEach((name) => window.removeEventListener(name, onGesture, true));
       document.removeEventListener("visibilitychange", onVisibility);
       ctx?.close();

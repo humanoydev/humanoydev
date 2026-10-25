@@ -620,10 +620,6 @@ a.jpa__brand:hover { color: var(--accent); }
   .jpa__footer { flex-direction: column; justify-content: center; text-align: center; }
 }
 
-/* Globos al pulso de la música: BackgroundMusic pone --pulse (0 a 1) en cada .jpa-beat.
-   Usan `scale` y `translate`, que no chocan con el transform de sus animaciones. */
-.jpa .jpa-beat { scale: calc(1 + var(--pulse, 0) * 0.05); translate: 0 calc(var(--pulse, 0) * -6px); transform-origin: 50% 80%; }
-
 /* Botón de la musiquita de fondo (BackgroundMusic.tsx), fijo abajo a la derecha. */
 .jpa-music { position: fixed; z-index: 10; right: 16px; bottom: 16px; min-width: 52px; height: 52px; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 0 13px; border: 2px solid var(--line); border-radius: var(--radius-pill); background: #fff; color: var(--accent); box-shadow: 0 10px 24px -12px rgba(74, 55, 44, 0.5); cursor: pointer; }
 .jpa-music svg { width: 24px; height: 24px; fill: currentColor; }

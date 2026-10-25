@@ -107,8 +107,7 @@ const BALLOON_COLORS = {
   butter: { main: "#f8e6a8", stripe: "#fbdccb", side: "#fffaf3" },
 };
 
-// Globo aerostático; `bear` pone un osito en la canasta. Los globos llevan .jpa-beat: laten
-// con la música (BackgroundMusic).
+// Globo aerostático; `bear` pone un osito en la canasta.
 export function HotAirBalloon({
   className,
   style,
@@ -117,7 +116,7 @@ export function HotAirBalloon({
 }: Props & { color?: keyof typeof BALLOON_COLORS; bear?: boolean }) {
   const c = BALLOON_COLORS[color];
   return (
-    <svg viewBox="0 0 120 200" className={`jpa-beat ${className ?? ""}`} style={style} aria-hidden="true">
+    <svg viewBox="0 0 120 200" className={className} style={style} aria-hidden="true">
       <path d="M60 6C22 6 8 40 14 70c6 28 30 42 36 54h20c6-12 30-26 36-54C112 40 98 6 60 6z" fill={c.main} {...line} />
       <path
         d="M60 6C30 20 22 70 36 106l14 18h4C40 96 40 34 60 6zM60 6c30 14 38 64 24 100l-14 18h-4c14-28 14-90-6-118z"
@@ -283,7 +282,7 @@ export function Blocks({ className, style, letters = true }: Props & { letters?:
 // Tres globos atados.
 export function Balloons({ className, style }: Props) {
   return (
-    <svg viewBox="0 0 100 172" className={`jpa-beat ${className ?? ""}`} style={style} aria-hidden="true">
+    <svg viewBox="0 0 100 172" className={className} style={style} aria-hidden="true">
       <path d="M30 66q6 40 22 104M64 60q-4 50-12 110M48 90q8 40 4 80" fill="none" stroke="#6f5a4c" strokeWidth="1.4" />
       <ellipse cx="30" cy="40" rx="20" ry="25" fill="#fbdccb" {...line} />
       <path d="M27 65l3 5 3-5z" fill="#fbdccb" {...line} />

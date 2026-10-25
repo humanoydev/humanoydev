@@ -16,6 +16,8 @@ export function GiftList({ token, initial }: { token: string; initial: GiftCateg
   const [list, setList] = useState(initial);
   const [busy, setBusy] = useState(false);
   const [note, setNote] = useState<Note | null>(null);
+  // Si ya abrió alguna categoría: hasta entonces, el botón de la primera brinca para que se note.
+  const [explored, setExplored] = useState(false);
 
   async function pick(gift: Gift, qty: number, at: string) {
     setBusy(true);
@@ -114,16 +116,28 @@ export function GiftList({ token, initial }: { token: string; initial: GiftCateg
       )}
       {noteFor("mine")}
 
-      {list.map(({ category, gifts }) => {
+      <p className="jpa__gifts-hint">👇 Toca cada categoría para ver sus regalos.</p>
+      {list.map(({ category, gifts }, index) => {
         // Regalos de esta categoría que alguien ya tomó (aunque queden unidades).
         const takenHere = gifts.filter((gift) => gift.taken > 0).length;
         return (
-          <details key={category} className="jpa__gift-group">
+          <details
+            key={category}
+            className="jpa__gift-group"
+            onToggle={(event) => event.currentTarget.open && setExplored(true)}
+          >
+            {/* Parece un botón (con "Ver regalos") para que se entienda que se abre. */}
             <summary>
-              {category}
-              <span className="jpa__gift-count">
-                {gifts.length} ideas
-                {takenHere > 0 && ` · ${takenHere} ya ${takenHere === 1 ? "tomado" : "tomados"}`}
+              <span className="jpa__gift-group-name">
+                {category}
+                <span className="jpa__gift-count">
+                  {gifts.length} ideas
+                  {takenHere > 0 && ` · ${takenHere} ya ${takenHere === 1 ? "tomado" : "tomados"}`}
+                </span>
+              </span>
+              <span className={`jpa__gift-open${!explored && index === 0 ? " jpa__nudge" : ""}`} aria-hidden="true">
+                <span className="jpa__gift-open-closed">Ver regalos ▾</span>
+                <span className="jpa__gift-open-opened">Cerrar ▴</span>
               </span>
             </summary>
             <ul className="jpa__gift-list">

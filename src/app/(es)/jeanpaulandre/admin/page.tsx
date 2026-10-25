@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { AdminPanel } from "@/components/jeanpaulandre/AdminPanel";
+import { BubbleField } from "@/components/jeanpaulandre/BubbleField";
 import { Star } from "@/components/jeanpaulandre/Doodles";
 import { BABY_NAME } from "@/content/jeanpaulandre";
 
@@ -12,6 +13,7 @@ export const metadata: Metadata = {
 export default function AdminPage() {
   return (
     <>
+      <BubbleField />
       <header className="container jpa__top">
         {/* <a> y no <Link>: en el subdominio "/" es la portada del bebé (la reescribe el Worker). */}
         {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}

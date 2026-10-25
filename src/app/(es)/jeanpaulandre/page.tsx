@@ -1,16 +1,7 @@
 import type { Metadata } from "next";
 import { DaysUntil } from "@/components/DaysUntil";
-import { Toy } from "@/components/jeanpaulandre/Toy";
-import {
-  Balloons,
-  Blocks,
-  Cloud,
-  Heart,
-  HeroScene,
-  HotAirBalloon,
-  Kite,
-  Star,
-} from "@/components/jeanpaulandre/Doodles";
+import { Star } from "@/components/jeanpaulandre/Doodles";
+import { Reveal } from "@/components/jeanpaulandre/Reveal";
 import { UltrasoundVideo } from "@/components/jeanpaulandre/UltrasoundVideo";
 import { BABY_NAME, chapters, letter, ogImage, ultrasound } from "@/content/jeanpaulandre";
 import { JEANPAULANDRE_URL, SITE_URL } from "@/content/site";
@@ -34,111 +25,144 @@ export const metadata: Metadata = {
   },
 };
 
-export default function JeanPaulAndrePage() {
+function Lock() {
   return (
-    // .jpa-home: estilo propio de la portada (azul y lavanda), distinto del de la invitación.
-    <div className="jpa-home">
-      <header className="container jpa__top">
-        <p className="jpa__brand">
-          <Star className="jpa__brand-star" />
+    <svg viewBox="0 0 24 24" className="jpc-lock" aria-hidden="true">
+      <rect x="5" y="10.5" width="14" height="10" rx="3" />
+      <path d="M8.5 10.5V8a3.5 3.5 0 0 1 7 0v2.5" fill="none" />
+    </svg>
+  );
+}
+
+// Portada: la cápsula del tiempo. Tiene su propia línea gráfica (.jpc, estilo álbum de
+// recuerdos en azul y lavanda), distinta de la invitación del baby shower.
+export default function JeanPaulAndrePage() {
+  const next = chapters.find((chapter) => chapter.countdownTo);
+
+  return (
+    <div className="jpc">
+      <Reveal />
+      <header className="container jpc-top">
+        <p className="jpc-brand">
+          <span className="jpc-monogram" aria-hidden="true">
+            JPA
+          </span>
           Cápsula del tiempo
         </p>
         <p>Abierta en 2026</p>
       </header>
 
       <main>
-        <section aria-labelledby="jpa-name">
-          <HeroScene>
-            <h1 id="jpa-name" className="jpa__name">
-              Jean Paul <span className="jpa__name-accent">André</span>
+        <section className="container jpc-cover" aria-labelledby="jpc-name">
+          <div className="jpc-cover__text">
+            <p className="jpc-kicker">Una historia que empezó antes de empezar</p>
+            <h1 id="jpc-name" className="jpc-name">
+              Jean Paul <em>André</em>
             </h1>
-            <p className="serif jpa__tagline">te estamos esperando.</p>
-          </HeroScene>
-        </section>
-
-        <section aria-labelledby="jpa-letter" className="jpa-scene">
-          <Toy play="float-away" className="jpa-deco jpa-deco--balloons jpa-px jpa-px--near">
-            <Balloons />
-          </Toy>
-          <Toy play="puff" className="jpa-deco jpa-deco--cloud jpa-px jpa-px--far">
-            <Cloud />
-          </Toy>
-          <Toy play="fly" className="jpa-deco jpa-deco--balloon-right jpa-px jpa-px--mid">
-            <HotAirBalloon color="sky" />
-          </Toy>
-          <div className="container jpa__letter">
-            <figure className="jpa__photo">
-              <span className="jpa__tape jpa__tape--left" aria-hidden="true" />
-              <span className="jpa__tape jpa__tape--right" aria-hidden="true" />
+            <p className="jpc-tagline">te estamos esperando.</p>
+          </div>
+          <figure className="jpc-arch">
+            <Star className="jpc-star jpc-star--1" />
+            <Star className="jpc-star jpc-star--2" />
+            <Star className="jpc-star jpc-star--3" />
+            <div className="jpc-arch__frame">
               <UltrasoundVideo src={ultrasound.video} poster={ultrasound.poster} label={ultrasound.label} />
-              <figcaption className="serif jpa__photo-caption">{ultrasound.caption}</figcaption>
-            </figure>
-            <div className="jpa__letter-text">
-              <h2 id="jpa-letter" className="jpa__label">
-                Una carta para ti
-              </h2>
-              {letter.paragraphs.map((p) => (
-                <p key={p} className="jpa__prose">
-                  {p}
-                </p>
-              ))}
-              <p className="serif jpa__sign">
-                {letter.signature}
-                <Heart className="jpa__heart" />
-              </p>
             </div>
-          </div>
+            <figcaption className="jpc-hand jpc-arch__note">aquí estás tú · {ultrasound.caption}</figcaption>
+          </figure>
         </section>
 
-        <section aria-labelledby="jpa-chapters" className="jpa-scene">
-          <Toy play="loop" className="jpa-deco jpa-deco--kite jpa-px jpa-px--near">
-            <Kite />
-          </Toy>
-          <Toy play="puff" className="jpa-deco jpa-deco--cloud-left jpa-px jpa-px--far">
-            <Cloud />
-          </Toy>
-          <Toy play="tumble" className="jpa-deco jpa-deco--blocks jpa-px jpa-px--mid">
-            <Blocks />
-          </Toy>
-          <div className="container jpa__chapters">
-            <h2 id="jpa-chapters" className="jpa__label">
-              Capítulos
+        <section className="container" aria-label="Datos de la cápsula">
+          <dl className="jpc-facts jpc-reveal">
+            <div>
+              <dt>Abierta</dt>
+              <dd>2026</dd>
+            </div>
+            <div>
+              <dt>Capítulos</dt>
+              <dd>{chapters.length}</dd>
+            </div>
+            {next && (
+              <div>
+                <dt>Próximo momento</dt>
+                <dd>
+                  {next.title}
+                  {next.countdownTo && (
+                    <span className="jpc-hand jpc-facts__count">
+                      <DaysUntil date={next.countdownTo} />
+                    </span>
+                  )}
+                </dd>
+              </div>
+            )}
+            <div>
+              <dt>Hecha por</dt>
+              <dd>Papá y mamá</dd>
+            </div>
+          </dl>
+        </section>
+
+        <section className="container jpc-letter-wrap" aria-labelledby="jpc-letter">
+          <article className="jpc-letter jpc-reveal">
+            <span className="jpc-stamp" aria-hidden="true">
+              <Star />
+            </span>
+            <p className="jpc-kicker">Para Jean Paul André</p>
+            <h2 id="jpc-letter" className="jpc-title">
+              Una carta para ti
             </h2>
-            <ol className="jpa__chapter-list">
-              {chapters.map((chapter) => (
-                <li
-                  key={chapter.numeral}
-                  className={`jpa__chapter${chapter.href || chapter.countdownTo ? "" : " jpa__chapter--pending"}`}
-                >
-                  <p className="jpa__numeral" aria-hidden="true">
+            {letter.paragraphs.map((p) => (
+              <p key={p} className="jpc-letter__p">
+                {p}
+              </p>
+            ))}
+            <p className="jpc-hand jpc-letter__sign">{letter.signature}</p>
+          </article>
+        </section>
+
+        <section className="container jpc-chapters" aria-labelledby="jpc-chapters">
+          <p className="jpc-kicker">Índice</p>
+          <h2 id="jpc-chapters" className="jpc-title">
+            Capítulos
+          </h2>
+          <ol className="jpc-timeline">
+            {chapters.map((chapter) => {
+              const open = Boolean(chapter.href || chapter.countdownTo);
+              return (
+                <li key={chapter.numeral} className={`jpc-chapter${open ? "" : " is-locked"}`}>
+                  <span className="jpc-chapter__dot" aria-hidden="true">
                     {chapter.numeral}
-                  </p>
-                  <div className="jpa__chapter-body">
-                    <h3 className="jpa__chapter-title">
-                      <span className="sr-only">Capítulo {chapter.numeral}: </span>
-                      {chapter.href ? <a href={chapter.href}>{chapter.title}</a> : chapter.title}
-                    </h3>
-                    <p className="jpa__chapter-sub">{chapter.subtitle}</p>
-                  </div>
-                  <p className="jpa__chapter-status">
+                  </span>
+                  <div className="jpc-chapter__card jpc-reveal">
+                    <p className="jpc-kicker">Capítulo {chapter.numeral}</p>
+                    <h3 className="jpc-chapter__title">{chapter.title}</h3>
+                    <p className="jpc-chapter__sub">{chapter.subtitle}</p>
                     {chapter.countdownTo && (
-                      <span className="jpa__countdown">
+                      <p className="jpc-hand jpc-chapter__count">
                         <DaysUntil date={chapter.countdownTo} />
-                      </span>
+                      </p>
                     )}
-                    {chapter.status}
-                  </p>
+                    {chapter.href ? (
+                      <a href={chapter.href} className="jpc-button">
+                        {chapter.status} <span aria-hidden="true">→</span>
+                      </a>
+                    ) : (
+                      <p className="jpc-chapter__lock">
+                        <Lock />
+                        {chapter.status}
+                      </p>
+                    )}
+                  </div>
                 </li>
-              ))}
-            </ol>
-          </div>
+              );
+            })}
+          </ol>
+          <p className="jpc-hand jpc-continue">continuará…</p>
         </section>
       </main>
 
-      <footer className="container jpa__footer">
-        <p>
-          Hecha con amor por papá y mamá, 2026 <Heart className="jpa__heart" />
-        </p>
+      <footer className="container jpc-footer">
+        <p>Hecha con amor por papá y mamá, 2026</p>
         <a href={SITE_URL}>humanoydev.com</a>
       </footer>
     </div>

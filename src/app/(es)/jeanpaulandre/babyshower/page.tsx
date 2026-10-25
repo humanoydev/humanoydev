@@ -1,7 +1,10 @@
 import type { Metadata } from "next";
 import { BackgroundMusic } from "@/components/jeanpaulandre/BackgroundMusic";
+import { BubbleField } from "@/components/jeanpaulandre/BubbleField";
 import { Heart, Star } from "@/components/jeanpaulandre/Doodles";
 import { Invitation } from "@/components/jeanpaulandre/Invitation";
+import { Parallax } from "@/components/jeanpaulandre/Parallax";
+import { ToyShow } from "@/components/jeanpaulandre/Toy";
 import { BABY_NAME, babyShower, ogImage } from "@/content/jeanpaulandre";
 import { JEANPAULANDRE_URL } from "@/content/site";
 
@@ -27,6 +30,9 @@ export const metadata: Metadata = {
 export default function BabyShowerPage() {
   return (
     <>
+      <BubbleField />
+      <Parallax />
+      <ToyShow />
       <header className="container jpa__top">
         {/* <a> y no <Link>: en el subdominio "/" es la portada del bebé (la reescribe el Worker),
             y <Link> navegaría en el cliente a la portada de humanoydev. */}

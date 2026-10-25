@@ -5,10 +5,11 @@ import "@fontsource-variable/newsreader/opsz-italic.css";
 // Newsreader recta y Fredoka (redondeada): las usa la web de Jean Paul André.
 import "@fontsource-variable/newsreader/opsz.css";
 import "@fontsource-variable/fredoka/index.css";
-// Fraunces (serif suave, eje SOFT) y Nunito: la portada de Jean Paul André.
+// Fraunces (serif suave, eje SOFT), Nunito y Caveat (manuscrita): la portada de Jean Paul André.
 import "@fontsource-variable/fraunces/soft.css";
 import "@fontsource-variable/fraunces/soft-italic.css";
 import "@fontsource-variable/nunito/index.css";
+import "@fontsource-variable/caveat/index.css";
 import "@fontsource-variable/schibsted-grotesk/index.css";
 import "@fontsource-variable/jetbrains-mono/index.css";
 import "./globals.css";

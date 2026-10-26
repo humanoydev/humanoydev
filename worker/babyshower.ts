@@ -7,13 +7,14 @@
  *
  * Administración (protegida con Cloudflare Access, ver isAdmin):
  *   GET    /api/admin/guests                      → invitados con visitas y respuesta
- *   POST   /api/admin/guests  { guests: [{ name, phone?, alias? }] } → agrega invitados con su token
- *   PATCH  /api/admin/guests/:id  { name, phone?, alias? } → corrige sus datos (el link no cambia)
+ *   POST   /api/admin/guests  { guests: [{ name, phone?, alias?, side? }] } → agrega invitados con su token
+ *   PATCH  /api/admin/guests/:id  { name, phone?, alias?, side? } → corrige sus datos (el link no cambia)
  *   GET    /api/admin/guests/:id/visits           → cada visita: fecha, navegador, ciudad y país
  *   DELETE /api/admin/guests/:id                  → elimina un invitado (y sus visitas, respuesta y regalos)
  *
  * El nombre es el del saludo y puede ir vacío; el alias es solo para papá y mamá (nunca sale en
- * la invitación). Un invitado necesita al menos uno de los dos.
+ * la invitación). Un invitado necesita al menos uno de los dos. `side` dice si es invitado de papá,
+ * de mamá o de los dos ("papa", "mama", "ambos"); también es solo para el admin.
  *
  * Cada respuesta (no los regalos) manda un aviso por correo a papá y mamá (ver notifyRsvp).
  *
@@ -266,7 +267,7 @@ function newToken(): string {
 
 async function listGuests(env: Env): Promise<Response> {
   const { results } = await env.DB.prepare(
-    `SELECT g.id, g.token, g.name, g.alias, g.phone, g.created_at AS createdAt,
+    `SELECT g.id, g.token, g.name, g.alias, g.side, g.phone, g.created_at AS createdAt,
             COUNT(v.id) AS visits, MAX(v.visited_at) AS lastVisit,
             COUNT(DISTINCT COALESCE(v.device_id, v.user_agent)) AS devices,
             COUNT(DISTINCT v.network) AS networks, COUNT(DISTINCT v.city) AS cities,
@@ -302,6 +303,7 @@ async function listGuests(env: Env): Promise<Response> {
 const cleanGuest = (item: Body | null | undefined) => ({
   name: typeof item?.name === "string" ? item.name.trim().slice(0, 80) : "",
   alias: typeof item?.alias === "string" ? item.alias.trim().slice(0, 80) || null : null,
+  side: item?.side === "papa" || item?.side === "mama" || item?.side === "ambos" ? item.side : null,
   phone: typeof item?.phone === "string" ? item.phone.replace(/[^\d+]/g, "").slice(0, 20) || null : null,
 });
 
@@ -313,10 +315,11 @@ async function addGuests(request: Request, env: Env): Promise<Response> {
 
   await env.DB.batch(
     guests.map((guest) =>
-      env.DB.prepare("INSERT INTO guests (token, name, alias, phone) VALUES (?, ?, ?, ?)").bind(
+      env.DB.prepare("INSERT INTO guests (token, name, alias, side, phone) VALUES (?, ?, ?, ?, ?)").bind(
         newToken(),
         guest.name,
         guest.alias,
+        guest.side,
         guest.phone,
       ),
     ),
@@ -327,8 +330,8 @@ async function addGuests(request: Request, env: Env): Promise<Response> {
 async function updateGuest(request: Request, env: Env, id: string): Promise<Response> {
   const guest = cleanGuest(await readBody(request));
   if (!guest.name && !guest.alias) return json({ error: "invalid" }, 400);
-  const { meta } = await env.DB.prepare("UPDATE guests SET name = ?, alias = ?, phone = ? WHERE id = ?")
-    .bind(guest.name, guest.alias, guest.phone, id)
+  const { meta } = await env.DB.prepare("UPDATE guests SET name = ?, alias = ?, side = ?, phone = ? WHERE id = ?")
+    .bind(guest.name, guest.alias, guest.side, guest.phone, id)
     .run();
   if (!meta.changes) return json({ error: "not_found" }, 404);
   return new Response(null, { status: 204, headers: NO_STORE });

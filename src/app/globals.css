@@ -374,8 +374,8 @@ a.jpa__brand:hover { color: var(--accent); }
 .jpa-admin__meta { margin-top: 2px; font-size: 15px; color: var(--ink-soft); }
 .jpa-admin__edit { display: flex; flex-direction: column; gap: 10px; }
 .jpa-admin__edit label { display: flex; flex-direction: column; gap: 4px; font-size: 14px; color: var(--ink-soft); }
-.jpa-admin__edit input { padding: 10px 14px; border: 2px solid transparent; border-radius: 14px; background: #fff; color: var(--ink); font: inherit; font-size: 17px; }
-.jpa-admin__edit input:focus { outline: none; border-color: var(--accent); }
+.jpa-admin__edit input, .jpa-admin__edit select { padding: 10px 14px; border: 2px solid transparent; border-radius: 14px; background: #fff; color: var(--ink); font: inherit; font-size: 17px; }
+.jpa-admin__edit input:focus, .jpa-admin__edit select:focus { outline: none; border-color: var(--accent); }
 .jpa-admin__message { margin-top: 8px; font-family: var(--font-serif), Georgia, serif; font-style: italic; font-size: 17px; }
 .jpa-admin__status { padding: 6px 14px; border-radius: var(--radius-pill); font-family: var(--font-round), system-ui, sans-serif; font-size: 15px; font-weight: 600; white-space: nowrap; }
 .jpa-admin__status--new { background: var(--line); color: var(--ink-soft); }
@@ -392,6 +392,12 @@ a.jpa__brand:hover { color: var(--accent); }
 .jpa-admin__visit-place { color: var(--ink-soft); }
 .jpa-admin__visit-device { padding: 0 8px; border-radius: var(--radius-pill); background: #fff; font-weight: 600; }
 .jpa-admin__alias { margin-left: 10px; padding: 2px 10px; border-radius: var(--radius-pill); background: #e6e1f7; font-size: 14px; font-weight: 600; vertical-align: middle; }
+.jpa-admin__side-tag { margin-left: 10px; padding: 2px 10px; border-radius: var(--radius-pill); font-size: 14px; font-weight: 600; vertical-align: middle; }
+.jpa-admin__side-tag--papa { background: #d8eafb; }
+.jpa-admin__side-tag--mama { background: #fbdbe4; }
+.jpa-admin__side-tag--ambos { background: #dff3e4; }
+.jpa-admin__side { margin-top: 16px; display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.jpa-admin__side .jpa__field-label { margin-right: 4px; }
 .jpa-admin__noname { color: var(--ink-soft); font-style: italic; }
 .jpa-admin__share { margin-left: 10px; padding: 2px 10px; border-radius: var(--radius-pill); background: #fff1c2; font-size: 14px; font-weight: 600; vertical-align: middle; }
 .jpa-admin .jpa-admin__delete { color: #a2311b; }

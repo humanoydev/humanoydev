@@ -12,6 +12,7 @@ type Guest = {
   // El del saludo; vacío si no sabemos su nombre. El alias solo lo ven papá y mamá.
   name: string;
   alias: string | null;
+  side: Side | null;
   phone: string | null;
   createdAt: string;
   visits: number;
@@ -37,10 +38,23 @@ type Visit = {
   network: string | null;
 };
 
-type Filter = "reenvio" | "todos" | "sin-abrir" | "sin-responder" | "asisten" | "no-asisten";
+// De quién es el invitado. Los de "ambos" aparecen en los dos filtros.
+type Side = "papa" | "mama" | "ambos";
+
+const SIDES: { id: Side; label: string }[] = [
+  { id: "papa", label: "Papá" },
+  { id: "mama", label: "Mamá" },
+  { id: "ambos", label: "Los dos" },
+];
+
+const sideLabel = (side: Side) => SIDES.find((s) => s.id === side)!.label;
+
+type Filter = "papa" | "mama" | "reenvio" | "todos" | "sin-abrir" | "sin-responder" | "asisten" | "no-asisten";
 
 const FILTERS: { id: Filter; label: string; match: (guest: Guest) => boolean }[] = [
   { id: "todos", label: "Todos", match: () => true },
+  { id: "papa", label: "De papá", match: (g) => g.side === "papa" || g.side === "ambos" },
+  { id: "mama", label: "De mamá", match: (g) => g.side === "mama" || g.side === "ambos" },
   { id: "sin-abrir", label: "Sin abrir", match: (g) => g.visits === 0 },
   { id: "sin-responder", label: "Abrieron, sin responder", match: (g) => g.visits > 0 && g.attending === null },
   { id: "asisten", label: "Asisten", match: (g) => g.attending === true },
@@ -211,6 +225,7 @@ function toCsv(guests: Guest[]) {
     [
       g.name,
       g.alias,
+      g.side && sideLabel(g.side),
       g.phone,
       status(g).label,
       g.visits,
@@ -222,7 +237,7 @@ function toCsv(guests: Guest[]) {
       .map(cell)
       .join(","),
   );
-  return ["Nombre,Alias,Teléfono,Estado,Visitas,Última visita,Mensaje,Regalos,Link", ...rows].join("\n");
+  return ["Nombre,Alias,De,Teléfono,Estado,Visitas,Última visita,Mensaje,Regalos,Link", ...rows].join("\n");
 }
 
 async function api(path: string, init?: RequestInit) {
@@ -239,6 +254,8 @@ export function AdminPanel() {
   const [guests, setGuests] = useState<Guest[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [list, setList] = useState("");
+  // De quién son los invitados que se van a agregar: se elige antes de agregarlos.
+  const [side, setSide] = useState<Side | null>(null);
   const [saving, setSaving] = useState(false);
   const [filter, setFilter] = useState<Filter>("todos");
   const [search, setSearch] = useState("");
@@ -247,7 +264,13 @@ export function AdminPanel() {
   const [openVisits, setOpenVisits] = useState<number | null>(null);
   const [visits, setVisits] = useState<Record<number, Visit[]>>({});
   // Invitado que se está editando, con lo que va escribiendo.
-  const [editing, setEditing] = useState<{ id: number; name: string; alias: string; phone: string } | null>(null);
+  const [editing, setEditing] = useState<{
+    id: number;
+    name: string;
+    alias: string;
+    side: Side | null;
+    phone: string;
+  } | null>(null);
 
   const load = useCallback(async () => {
     try {
@@ -279,10 +302,13 @@ export function AdminPanel() {
 
   async function add(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (parsed.length === 0) return;
+    if (parsed.length === 0 || !side) return;
     setSaving(true);
     try {
-      await api("/guests", { method: "POST", body: JSON.stringify({ guests: parsed }) });
+      await api("/guests", {
+        method: "POST",
+        body: JSON.stringify({ guests: parsed.map((guest) => ({ ...guest, side })) }),
+      });
       setList("");
       await load();
     } catch (e) {
@@ -310,7 +336,7 @@ export function AdminPanel() {
     try {
       await api(`/guests/${editing.id}`, {
         method: "PATCH",
-        body: JSON.stringify({ name: editing.name, alias: editing.alias, phone: editing.phone }),
+        body: JSON.stringify({ name: editing.name, alias: editing.alias, side: editing.side, phone: editing.phone }),
       });
       setEditing(null);
       await load();
@@ -415,12 +441,28 @@ export function AdminPanel() {
             placeholder={"Tía Carmen\nRocío, Mamá Rocío\n, Vecina del 502\nJorge, Abuelo Jorge, 912345678"}
           />
         </label>
-        <button type="submit" className="btn btn--primary" disabled={saving || parsed.length === 0}>
+        <div className="jpa-admin__side" role="group" aria-label="De quién son estos invitados">
+          <span className="jpa__field-label">¿De quién son?</span>
+          {SIDES.map((s) => (
+            <button
+              key={s.id}
+              type="button"
+              className="jpa__chip"
+              aria-pressed={side === s.id}
+              onClick={() => setSide(s.id)}
+            >
+              {s.label}
+            </button>
+          ))}
+        </div>
+        <button type="submit" className="btn btn--primary" disabled={saving || parsed.length === 0 || !side}>
           {saving
             ? "Agregando…"
-            : parsed.length > 0
-              ? `Agregar ${parsed.length === 1 ? "1 invitado" : `${parsed.length} invitados`}`
-              : "Agregar invitados"}
+            : parsed.length > 0 && !side
+              ? "Elige de quién son"
+              : parsed.length > 0
+                ? `Agregar ${parsed.length === 1 ? "1 invitado" : `${parsed.length} invitados`}`
+                : "Agregar invitados"}
         </button>
       </form>
 
@@ -488,6 +530,20 @@ export function AdminPanel() {
                     />
                   </label>
                   <label>
+                    <span>De quién es</span>
+                    <select
+                      value={editing.side ?? ""}
+                      onChange={(e) => setEditing({ ...editing, side: (e.target.value || null) as Side | null })}
+                    >
+                      <option value="">Sin elegir</option>
+                      {SIDES.map((s) => (
+                        <option key={s.id} value={s.id}>
+                          {s.label}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                  <label>
                     <span>Teléfono (opcional)</span>
                     <input
                       value={editing.phone}
@@ -514,6 +570,11 @@ export function AdminPanel() {
                   <p className="jpa-admin__name">
                     {guest.name || <span className="jpa-admin__noname">Sin nombre</span>}
                     {extraAlias(guest) && <span className="jpa-admin__alias">{guest.alias}</span>}
+                    {guest.side && (
+                      <span className={`jpa-admin__side-tag jpa-admin__side-tag--${guest.side}`}>
+                        {sideLabel(guest.side)}
+                      </span>
+                    )}
                     {guest.possibleShare && (
                       <span
                         className="jpa-admin__share"
@@ -564,7 +625,13 @@ export function AdminPanel() {
                   type="button"
                   className="jpa__chip"
                   onClick={() =>
-                    setEditing({ id: guest.id, name: guest.name, alias: guest.alias ?? "", phone: guest.phone ?? "" })
+                    setEditing({
+                      id: guest.id,
+                      name: guest.name,
+                      alias: guest.alias ?? "",
+                      side: guest.side,
+                      phone: guest.phone ?? "",
+                    })
                   }
                 >
                   Editar

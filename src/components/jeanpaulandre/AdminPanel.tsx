@@ -15,6 +15,8 @@ type Guest = {
   side: Side | null;
   phone: string | null;
   createdAt: string;
+  // Primera vez que se tocó WhatsApp o "Copiar link": la invitación ya salió.
+  sentAt: string | null;
   visits: number;
   // Navegadores distintos que abrieron el link: más de uno sugiere que se reenvió.
   devices: number;
@@ -49,12 +51,14 @@ const SIDES: { id: Side; label: string }[] = [
 
 const sideLabel = (side: Side) => SIDES.find((s) => s.id === side)!.label;
 
-type Filter = "papa" | "mama" | "reenvio" | "todos" | "sin-abrir" | "sin-responder" | "asisten" | "no-asisten";
+type Filter =
+  "papa" | "mama" | "reenvio" | "todos" | "sin-enviar" | "sin-abrir" | "sin-responder" | "asisten" | "no-asisten";
 
 const FILTERS: { id: Filter; label: string; match: (guest: Guest) => boolean }[] = [
   { id: "todos", label: "Todos", match: () => true },
   { id: "papa", label: "De papá", match: (g) => g.side === "papa" || g.side === "ambos" },
   { id: "mama", label: "De mamá", match: (g) => g.side === "mama" || g.side === "ambos" },
+  { id: "sin-enviar", label: "Sin enviar", match: (g) => !g.sentAt },
   { id: "sin-abrir", label: "Sin abrir", match: (g) => g.visits === 0 },
   { id: "sin-responder", label: "Abrieron, sin responder", match: (g) => g.visits > 0 && g.attending === null },
   { id: "asisten", label: "Asisten", match: (g) => g.attending === true },
@@ -227,6 +231,7 @@ function toCsv(guests: Guest[]) {
       g.alias,
       g.side && sideLabel(g.side),
       g.phone,
+      g.sentAt && formatDate(g.sentAt),
       status(g).label,
       g.visits,
       g.lastVisit && formatDate(g.lastVisit),
@@ -237,7 +242,7 @@ function toCsv(guests: Guest[]) {
       .map(cell)
       .join(","),
   );
-  return ["Nombre,Alias,De,Teléfono,Estado,Visitas,Última visita,Mensaje,Regalos,Link", ...rows].join("\n");
+  return ["Nombre,Alias,De,Teléfono,Enviada,Estado,Visitas,Última visita,Mensaje,Regalos,Link", ...rows].join("\n");
 }
 
 async function api(path: string, init?: RequestInit) {
@@ -358,8 +363,22 @@ export function AdminPanel() {
     }
   }
 
+  // Al tocar WhatsApp o "Copiar link" se da por enviada. Se marca al toque, sin esperar a la API
+  // (WhatsApp ya se está abriendo); la API guarda solo la primera vez.
+  async function markSent(guest: Guest) {
+    if (guest.sentAt) return;
+    const now = new Date().toISOString().slice(0, 19).replace("T", " ");
+    setGuests((list) => list?.map((g) => (g.id === guest.id ? { ...g, sentAt: now } : g)) ?? null);
+    try {
+      await api(`/guests/${guest.id}/sent`, { method: "POST" });
+    } catch (e) {
+      setError((e as Error).message);
+    }
+  }
+
   async function copy(guest: Guest) {
     await navigator.clipboard.writeText(inviteLink(guest.token));
+    markSent(guest);
     setCopied(guest.id);
     window.setTimeout(() => setCopied((current) => (current === guest.id ? null : current)), 1500);
   }
@@ -575,6 +594,11 @@ export function AdminPanel() {
                         {sideLabel(guest.side)}
                       </span>
                     )}
+                    {guest.sentAt && (
+                      <span className="jpa-admin__sent" title={`Enviada el ${formatDate(guest.sentAt)}`}>
+                        ✓ Enviada
+                      </span>
+                    )}
                     {guest.possibleShare && (
                       <span
                         className="jpa-admin__share"
@@ -605,7 +629,13 @@ export function AdminPanel() {
               )}
               <span className={`jpa-admin__status jpa-admin__status--${s.tone}`}>{s.label}</span>
               <div className="jpa-admin__actions">
-                <a className="jpa__chip" href={whatsappLink(guest)} target="_blank" rel="noopener noreferrer">
+                <a
+                  className="jpa__chip"
+                  href={whatsappLink(guest)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={() => markSent(guest)}
+                >
                   WhatsApp
                 </a>
                 {guest.attending === null && (

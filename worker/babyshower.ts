@@ -9,6 +9,7 @@
  *   GET    /api/admin/guests                      → invitados con visitas y respuesta
  *   POST   /api/admin/guests  { guests: [{ name, phone?, alias?, side? }] } → agrega invitados con su token
  *   PATCH  /api/admin/guests/:id  { name, phone?, alias?, side? } → corrige sus datos (el link no cambia)
+ *   POST   /api/admin/guests/:id/sent             → marca la invitación como enviada (guarda la primera vez)
  *   GET    /api/admin/guests/:id/visits           → cada visita: fecha, navegador, ciudad y país
  *   DELETE /api/admin/guests/:id                  → elimina un invitado (y sus visitas, respuesta y regalos)
  *
@@ -267,7 +268,7 @@ function newToken(): string {
 
 async function listGuests(env: Env): Promise<Response> {
   const { results } = await env.DB.prepare(
-    `SELECT g.id, g.token, g.name, g.alias, g.side, g.phone, g.created_at AS createdAt,
+    `SELECT g.id, g.token, g.name, g.alias, g.side, g.phone, g.created_at AS createdAt, g.sent_at AS sentAt,
             COUNT(v.id) AS visits, MAX(v.visited_at) AS lastVisit,
             COUNT(DISTINCT COALESCE(v.device_id, v.user_agent)) AS devices,
             COUNT(DISTINCT v.network) AS networks, COUNT(DISTINCT v.city) AS cities,
@@ -337,6 +338,14 @@ async function updateGuest(request: Request, env: Env, id: string): Promise<Resp
   return new Response(null, { status: 204, headers: NO_STORE });
 }
 
+async function markSent(env: Env, id: string): Promise<Response> {
+  const { meta } = await env.DB.prepare("UPDATE guests SET sent_at = COALESCE(sent_at, datetime('now')) WHERE id = ?")
+    .bind(id)
+    .run();
+  if (!meta.changes) return json({ error: "not_found" }, 404);
+  return new Response(null, { status: 204, headers: NO_STORE });
+}
+
 async function listVisits(env: Env, id: string): Promise<Response> {
   const { results } = await env.DB.prepare(
     `SELECT visited_at AS visitedAt, user_agent AS userAgent, city, country,
@@ -363,8 +372,9 @@ async function handleAdmin(request: Request, env: Env, url: URL): Promise<Respon
   if (!(await isAdmin(request, env, url))) return json({ error: "forbidden" }, 403);
   if (url.pathname === "/api/admin/guests" && request.method === "GET") return listGuests(env);
   if (url.pathname === "/api/admin/guests" && request.method === "POST") return addGuests(request, env);
-  const match = /^\/api\/admin\/guests\/(\d+)(\/visits)?$/.exec(url.pathname);
-  if (match?.[2] && request.method === "GET") return listVisits(env, match[1]);
+  const match = /^\/api\/admin\/guests\/(\d+)(\/visits|\/sent)?$/.exec(url.pathname);
+  if (match?.[2] === "/visits" && request.method === "GET") return listVisits(env, match[1]);
+  if (match?.[2] === "/sent" && request.method === "POST") return markSent(env, match[1]);
   if (match && !match[2] && request.method === "PATCH") return updateGuest(request, env, match[1]);
   if (match && !match[2] && request.method === "DELETE") return deleteGuest(env, match[1]);
   return json({ error: "not_found" }, 404);

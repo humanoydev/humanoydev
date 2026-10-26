@@ -367,17 +367,20 @@ a.jpa__brand:hover { color: var(--accent); }
 .jpa-admin__count { margin-left: 8px; min-width: 24px; padding: 1px 8px; border-radius: var(--radius-pill); background: var(--line); font-size: 14px; font-weight: 600; text-align: center; }
 .jpa-admin .jpa__chip[aria-pressed="true"] .jpa-admin__count { background: rgba(255, 255, 255, 0.2); }
 .jpa-admin__count:empty { display: none; }
-.jpa-admin__list { list-style: none; margin: 20px 0 0; padding: 0; display: flex; flex-direction: column; gap: 12px; }
-.jpa-admin__guest { display: flex; flex-wrap: wrap; gap: 12px 20px; align-items: center; padding: 18px 22px; border-radius: 22px; background: #fff; }
+.jpa-admin__list { list-style: none; margin: 16px 0 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.jpa-admin__guest { display: flex; flex-wrap: wrap; gap: 6px 14px; align-items: center; padding: 10px 16px; border-radius: 16px; background: #fff; }
+.jpa-admin__guest .jpa__chip { min-height: 34px; padding: 0 12px; font-size: 14px; }
+.jpa-admin__guest .jpa-admin__actions { gap: 6px; }
 .jpa-admin__who { flex: 1 1 260px; min-width: 0; }
-.jpa-admin__name { font-family: var(--font-round), system-ui, sans-serif; font-size: 20px; font-weight: 600; }
+.jpa-admin__name { font-family: var(--font-round), system-ui, sans-serif; font-size: 17px; font-weight: 600; }
 .jpa-admin__meta { margin-top: 2px; font-size: 15px; color: var(--ink-soft); }
+.jpa-admin__guest .jpa-admin__meta { margin-top: 0; font-size: 14px; }
 .jpa-admin__edit { display: flex; flex-direction: column; gap: 10px; }
 .jpa-admin__edit label { display: flex; flex-direction: column; gap: 4px; font-size: 14px; color: var(--ink-soft); }
 .jpa-admin__edit input, .jpa-admin__edit select { padding: 10px 14px; border: 2px solid transparent; border-radius: 14px; background: #fff; color: var(--ink); font: inherit; font-size: 17px; }
 .jpa-admin__edit input:focus, .jpa-admin__edit select:focus { outline: none; border-color: var(--accent); }
-.jpa-admin__message { margin-top: 8px; font-family: var(--font-serif), Georgia, serif; font-style: italic; font-size: 17px; }
-.jpa-admin__status { padding: 6px 14px; border-radius: var(--radius-pill); font-family: var(--font-round), system-ui, sans-serif; font-size: 15px; font-weight: 600; white-space: nowrap; }
+.jpa-admin__message { margin-top: 4px; font-family: var(--font-serif), Georgia, serif; font-style: italic; font-size: 16px; }
+.jpa-admin__status { padding: 4px 12px; border-radius: var(--radius-pill); font-family: var(--font-round), system-ui, sans-serif; font-size: 14px; font-weight: 600; white-space: nowrap; }
 .jpa-admin__status--new { background: var(--line); color: var(--ink-soft); }
 .jpa-admin__status--seen { background: var(--sky); }
 .jpa-admin__status--yes { background: var(--mint); color: #2f5a22; }
@@ -385,21 +388,22 @@ a.jpa__brand:hover { color: var(--accent); }
 .jpa-admin__actions { display: flex; flex-wrap: wrap; gap: 8px; }
 .jpa-admin .jpa-admin__remind { border-color: var(--butter); background: #fff8dc; }
 .jpa-admin .jpa-admin__remind:hover { background: var(--ink); border-color: var(--ink); color: #fff; }
-.jpa-admin__visits-toggle { margin-top: 6px; min-height: 32px; padding: 0; border: 0; background: none; color: var(--accent); font: inherit; font-size: 15px; font-weight: 600; text-decoration: underline; cursor: pointer; }
+.jpa-admin__visits-toggle { margin-top: 0; min-height: 26px; padding: 0; border: 0; background: none; color: var(--accent); font: inherit; font-size: 14px; font-weight: 600; text-decoration: underline; cursor: pointer; }
 .jpa-admin__visits { flex-basis: 100%; list-style: none; margin: 4px 0 0; padding: 12px 16px; border-radius: 16px; background: var(--ground); display: flex; flex-direction: column; gap: 6px; font-size: 15px; }
 .jpa-admin__visits li { display: flex; flex-wrap: wrap; gap: 4px 14px; }
 .jpa-admin__visit-date { min-width: 130px; font-weight: 600; }
 .jpa-admin__visit-place { color: var(--ink-soft); }
 .jpa-admin__visit-device { padding: 0 8px; border-radius: var(--radius-pill); background: #fff; font-weight: 600; }
-.jpa-admin__alias { margin-left: 10px; padding: 2px 10px; border-radius: var(--radius-pill); background: #e6e1f7; font-size: 14px; font-weight: 600; vertical-align: middle; }
-.jpa-admin__side-tag { margin-left: 10px; padding: 2px 10px; border-radius: var(--radius-pill); font-size: 14px; font-weight: 600; vertical-align: middle; }
+.jpa-admin__alias { margin-left: 6px; padding: 1px 8px; border-radius: var(--radius-pill); background: #e6e1f7; font-size: 13px; font-weight: 600; vertical-align: middle; }
+.jpa-admin__side-tag { margin-left: 6px; padding: 1px 8px; border-radius: var(--radius-pill); font-size: 13px; font-weight: 600; vertical-align: middle; }
 .jpa-admin__side-tag--papa { background: #d8eafb; }
 .jpa-admin__side-tag--mama { background: #fbdbe4; }
 .jpa-admin__side-tag--ambos { background: #dff3e4; }
 .jpa-admin__side { margin-top: 16px; display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
 .jpa-admin__side .jpa__field-label { margin-right: 4px; }
 .jpa-admin__noname { color: var(--ink-soft); font-style: italic; }
-.jpa-admin__share { margin-left: 10px; padding: 2px 10px; border-radius: var(--radius-pill); background: #fff1c2; font-size: 14px; font-weight: 600; vertical-align: middle; }
+.jpa-admin__share { margin-left: 6px; padding: 1px 8px; border-radius: var(--radius-pill); background: #fff1c2; font-size: 13px; font-weight: 600; vertical-align: middle; }
+.jpa-admin__sent { margin-left: 6px; padding: 1px 8px; border-radius: var(--radius-pill); border: 1.5px solid #8cc79a; color: #2f6a3c; font-size: 13px; font-weight: 600; vertical-align: middle; }
 .jpa-admin .jpa-admin__delete { color: #a2311b; }
 .jpa-admin .jpa-admin__delete:hover { background: #a2311b; border-color: #a2311b; color: #fff; }
 

@@ -171,6 +171,16 @@ function parseList(text: string) {
     .map(([name, alias, phone]) => ({ name, alias: alias || name, phone: phone || undefined }));
 }
 
+// Para buscar sin importar mayúsculas ni tildes: "Rocío" se encuentra con "rocio".
+const plain = (text: string) =>
+  text
+    .normalize("NFD")
+    .replace(/\p{Diacritic}/gu, "")
+    .toLowerCase();
+
+const matchesSearch = (guest: Guest, search: string) =>
+  plain([guest.name, guest.alias, guest.phone].filter(Boolean).join(" ")).includes(plain(search.trim()));
+
 function status(guest: Guest) {
   if (guest.attending === true) return { label: "Asiste", tone: "yes" };
   if (guest.attending === false) return { label: "No asiste", tone: "no" };
@@ -231,6 +241,7 @@ export function AdminPanel() {
   const [list, setList] = useState("");
   const [saving, setSaving] = useState(false);
   const [filter, setFilter] = useState<Filter>("todos");
+  const [search, setSearch] = useState("");
   const [copied, setCopied] = useState<number | null>(null);
   // Invitado con la lista de visitas abierta, y las visitas cargadas de cada uno.
   const [openVisits, setOpenVisits] = useState<number | null>(null);
@@ -261,7 +272,9 @@ export function AdminPanel() {
 
   const parsed = useMemo(() => parseList(list), [list]);
   const gifts = useMemo(() => giftSummary(guests ?? []), [guests]);
-  const shown = (guests ?? []).filter(FILTERS.find((f) => f.id === filter)!.match);
+  const shown = (guests ?? [])
+    .filter(FILTERS.find((f) => f.id === filter)!.match)
+    .filter((guest) => matchesSearch(guest, search));
   const count = (id: Filter) => (guests ?? []).filter(FILTERS.find((f) => f.id === id)!.match).length;
 
   async function add(event: React.FormEvent<HTMLFormElement>) {
@@ -430,9 +443,22 @@ export function AdminPanel() {
         </button>
       </div>
 
+      <input
+        type="search"
+        className="jpa-admin__search"
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+        placeholder="Buscar por nombre, alias o teléfono"
+        aria-label="Buscar invitados"
+      />
+
       {guests && shown.length === 0 && (
         <p className="jpa__card-text">
-          {guests.length === 0 ? "Todavía no hay invitados. Agrega la lista arriba." : "Nadie en este filtro."}
+          {guests.length === 0
+            ? "Todavía no hay invitados. Agrega la lista arriba."
+            : search.trim()
+              ? `Nadie coincide con “${search.trim()}”${filter === "todos" ? "" : " en este filtro"}.`
+              : "Nadie en este filtro."}
         </p>
       )}
 

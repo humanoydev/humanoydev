@@ -359,6 +359,8 @@ a.jpa__brand:hover { color: var(--accent); }
 .jpa-admin__add .btn:disabled { opacity: 0.6; cursor: not-allowed; }
 .jpa-admin__toolbar { margin-top: 36px; display: flex; flex-wrap: wrap; gap: 12px; justify-content: space-between; align-items: center; }
 .jpa-admin__filters { display: flex; flex-wrap: wrap; gap: 8px; }
+.jpa-admin__search { margin-top: 16px; width: 100%; padding: 12px 18px; border: 2px solid transparent; border-radius: var(--radius-pill); background: #fff; color: var(--ink); font: inherit; font-size: 17px; }
+.jpa-admin__search:focus { outline: none; border-color: var(--accent); }
 .jpa-admin .jpa__chip { border: 2px solid var(--line); }
 .jpa-admin .jpa__chip[aria-pressed="true"] { background: var(--ink); border-color: var(--ink); color: #fff; }
 .jpa-admin .jpa__chip:disabled { opacity: 0.5; cursor: not-allowed; }

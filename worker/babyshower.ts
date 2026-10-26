@@ -8,6 +8,7 @@
  * Administración (protegida con Cloudflare Access, ver isAdmin):
  *   GET    /api/admin/guests                      → invitados con visitas y respuesta
  *   POST   /api/admin/guests  { guests: [{ name, phone? }] } → agrega invitados con su token
+ *   PATCH  /api/admin/guests/:id  { name, phone? } → corrige el nombre y el teléfono (el link no cambia)
  *   GET    /api/admin/guests/:id/visits           → cada visita: fecha, navegador, ciudad y país
  *   DELETE /api/admin/guests/:id                  → elimina un invitado (y sus visitas, respuesta y regalos)
  *
@@ -289,13 +290,16 @@ async function listGuests(env: Env): Promise<Response> {
   );
 }
 
+// Nombre (el del saludo) y teléfono como se guardan; sin nombre, el invitado no es válido.
+const cleanGuest = (item: Body | null | undefined) => ({
+  name: typeof item?.name === "string" ? item.name.trim().slice(0, 80) : "",
+  phone: typeof item?.phone === "string" ? item.phone.replace(/[^\d+]/g, "").slice(0, 20) || null : null,
+});
+
 async function addGuests(request: Request, env: Env): Promise<Response> {
   const list = (await readBody(request))?.guests;
   if (!Array.isArray(list) || list.length === 0 || list.length > 300) return json({ error: "invalid" }, 400);
-  const guests = list.map((item) => ({
-    name: typeof item?.name === "string" ? item.name.trim().slice(0, 80) : "",
-    phone: typeof item?.phone === "string" ? item.phone.replace(/[^\d+]/g, "").slice(0, 20) || null : null,
-  }));
+  const guests = list.map(cleanGuest);
   if (guests.some((guest) => !guest.name)) return json({ error: "invalid" }, 400);
 
   await env.DB.batch(
@@ -308,6 +312,16 @@ async function addGuests(request: Request, env: Env): Promise<Response> {
     ),
   );
   return json({ added: guests.length }, 201);
+}
+
+async function updateGuest(request: Request, env: Env, id: string): Promise<Response> {
+  const guest = cleanGuest(await readBody(request));
+  if (!guest.name) return json({ error: "invalid" }, 400);
+  const { meta } = await env.DB.prepare("UPDATE guests SET name = ?, phone = ? WHERE id = ?")
+    .bind(guest.name, guest.phone, id)
+    .run();
+  if (!meta.changes) return json({ error: "not_found" }, 404);
+  return new Response(null, { status: 204, headers: NO_STORE });
 }
 
 async function listVisits(env: Env, id: string): Promise<Response> {
@@ -338,6 +352,7 @@ async function handleAdmin(request: Request, env: Env, url: URL): Promise<Respon
   if (url.pathname === "/api/admin/guests" && request.method === "POST") return addGuests(request, env);
   const match = /^\/api\/admin\/guests\/(\d+)(\/visits)?$/.exec(url.pathname);
   if (match?.[2] && request.method === "GET") return listVisits(env, match[1]);
+  if (match && !match[2] && request.method === "PATCH") return updateGuest(request, env, match[1]);
   if (match && !match[2] && request.method === "DELETE") return deleteGuest(env, match[1]);
   return json({ error: "not_found" }, 404);
 }

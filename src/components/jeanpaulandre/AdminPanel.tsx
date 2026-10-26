@@ -220,6 +220,8 @@ export function AdminPanel() {
   // Invitado con la lista de visitas abierta, y las visitas cargadas de cada uno.
   const [openVisits, setOpenVisits] = useState<number | null>(null);
   const [visits, setVisits] = useState<Record<number, Visit[]>>({});
+  // Invitado que se está editando, con lo que va escribiendo.
+  const [editing, setEditing] = useState<{ id: number; name: string; phone: string } | null>(null);
 
   const load = useCallback(async () => {
     try {
@@ -270,6 +272,24 @@ export function AdminPanel() {
       await load();
     } catch (e) {
       setError((e as Error).message);
+    }
+  }
+
+  async function saveEdit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!editing?.name.trim()) return;
+    setSaving(true);
+    try {
+      await api(`/guests/${editing.id}`, {
+        method: "PATCH",
+        body: JSON.stringify({ name: editing.name, phone: editing.phone }),
+      });
+      setEditing(null);
+      await load();
+    } catch (e) {
+      setError((e as Error).message);
+    } finally {
+      setSaving(false);
     }
   }
 
@@ -404,36 +424,68 @@ export function AdminPanel() {
           const s = status(guest);
           return (
             <li key={guest.id} className="jpa-admin__guest">
-              <div className="jpa-admin__who">
-                <p className="jpa-admin__name">
-                  {guest.name}
-                  {guest.possibleShare && (
-                    <span
-                      className="jpa-admin__share"
-                      title="Se abrió en varios dispositivos y desde otra red u otra ciudad"
+              {editing?.id === guest.id ? (
+                <form className="jpa-admin__who jpa-admin__edit" onSubmit={saveEdit}>
+                  <label>
+                    <span>Nombre (sale en el saludo)</span>
+                    <input
+                      value={editing.name}
+                      onChange={(e) => setEditing({ ...editing, name: e.target.value })}
+                      maxLength={80}
+                      required
+                      autoFocus
+                    />
+                  </label>
+                  <label>
+                    <span>Teléfono (opcional)</span>
+                    <input
+                      value={editing.phone}
+                      onChange={(e) => setEditing({ ...editing, phone: e.target.value })}
+                      inputMode="tel"
+                      maxLength={20}
+                    />
+                  </label>
+                  <div className="jpa-admin__actions">
+                    <button type="submit" className="jpa__chip" disabled={saving || !editing.name.trim()}>
+                      {saving ? "Guardando…" : "Guardar"}
+                    </button>
+                    <button type="button" className="jpa__chip" onClick={() => setEditing(null)}>
+                      Cancelar
+                    </button>
+                  </div>
+                </form>
+              ) : (
+                <div className="jpa-admin__who">
+                  <p className="jpa-admin__name">
+                    {guest.name}
+                    {guest.possibleShare && (
+                      <span
+                        className="jpa-admin__share"
+                        title="Se abrió en varios dispositivos y desde otra red u otra ciudad"
+                      >
+                        ⚠️ Posible reenvío
+                      </span>
+                    )}
+                  </p>
+                  <p className="jpa-admin__meta">
+                    {guest.phone ?? "Sin teléfono"}
+                    {guest.lastVisit && ` · Última visita: ${formatDate(guest.lastVisit)}`}
+                    {guest.devices > 1 && ` · Abierto en ${guest.devices} dispositivos`}
+                  </p>
+                  {guest.visits > 0 && (
+                    <button
+                      type="button"
+                      className="jpa-admin__visits-toggle"
+                      onClick={() => toggleVisits(guest)}
+                      aria-expanded={openVisits === guest.id}
                     >
-                      ⚠️ Posible reenvío
-                    </span>
+                      {openVisits === guest.id ? "Ocultar visitas" : `Ver visitas (${guest.visits})`}
+                    </button>
                   )}
-                </p>
-                <p className="jpa-admin__meta">
-                  {guest.phone ?? "Sin teléfono"}
-                  {guest.lastVisit && ` · Última visita: ${formatDate(guest.lastVisit)}`}
-                  {guest.devices > 1 && ` · Abierto en ${guest.devices} dispositivos`}
-                </p>
-                {guest.visits > 0 && (
-                  <button
-                    type="button"
-                    className="jpa-admin__visits-toggle"
-                    onClick={() => toggleVisits(guest)}
-                    aria-expanded={openVisits === guest.id}
-                  >
-                    {openVisits === guest.id ? "Ocultar visitas" : `Ver visitas (${guest.visits})`}
-                  </button>
-                )}
-                {guest.message && <p className="jpa-admin__message">“{guest.message}”</p>}
-                {guest.gifts.length > 0 && <p className="jpa-admin__meta">🎁 Trae: {describeGifts(guest)}</p>}
-              </div>
+                  {guest.message && <p className="jpa-admin__message">“{guest.message}”</p>}
+                  {guest.gifts.length > 0 && <p className="jpa-admin__meta">🎁 Trae: {describeGifts(guest)}</p>}
+                </div>
+              )}
               <span className={`jpa-admin__status jpa-admin__status--${s.tone}`}>{s.label}</span>
               <div className="jpa-admin__actions">
                 <a className="jpa__chip" href={whatsappLink(guest)} target="_blank" rel="noopener noreferrer">
@@ -451,6 +503,13 @@ export function AdminPanel() {
                 )}
                 <button type="button" className="jpa__chip" onClick={() => copy(guest)}>
                   {copied === guest.id ? "¡Copiado!" : "Copiar link"}
+                </button>
+                <button
+                  type="button"
+                  className="jpa__chip"
+                  onClick={() => setEditing({ id: guest.id, name: guest.name, phone: guest.phone ?? "" })}
+                >
+                  Editar
                 </button>
                 <button type="button" className="jpa__chip jpa-admin__delete" onClick={() => remove(guest)}>
                   Eliminar

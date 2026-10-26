@@ -370,6 +370,10 @@ a.jpa__brand:hover { color: var(--accent); }
 .jpa-admin__who { flex: 1 1 260px; min-width: 0; }
 .jpa-admin__name { font-family: var(--font-round), system-ui, sans-serif; font-size: 20px; font-weight: 600; }
 .jpa-admin__meta { margin-top: 2px; font-size: 15px; color: var(--ink-soft); }
+.jpa-admin__edit { display: flex; flex-direction: column; gap: 10px; }
+.jpa-admin__edit label { display: flex; flex-direction: column; gap: 4px; font-size: 14px; color: var(--ink-soft); }
+.jpa-admin__edit input { padding: 10px 14px; border: 2px solid transparent; border-radius: 14px; background: #fff; color: var(--ink); font: inherit; font-size: 17px; }
+.jpa-admin__edit input:focus { outline: none; border-color: var(--accent); }
 .jpa-admin__message { margin-top: 8px; font-family: var(--font-serif), Georgia, serif; font-style: italic; font-size: 17px; }
 .jpa-admin__status { padding: 6px 14px; border-radius: var(--radius-pill); font-family: var(--font-round), system-ui, sans-serif; font-size: 15px; font-weight: 600; white-space: nowrap; }
 .jpa-admin__status--new { background: var(--line); color: var(--ink-soft); }

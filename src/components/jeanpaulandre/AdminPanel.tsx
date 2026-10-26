@@ -130,9 +130,12 @@ function waPhone(phone: string) {
   return digits.length === 9 && digits.startsWith("9") ? `51${digits}` : digits;
 }
 
+// El alias, si dice algo más que el nombre (al cargar en lote, sin alias se copia el nombre).
+const extraAlias = (guest: Guest) => (guest.alias && guest.alias !== guest.name ? guest.alias : null);
+
 // Cómo se ve en el admin: "Rocío (Mamá Rocío)", o solo el nombre o el alias.
 const label = (guest: Guest) =>
-  guest.name && guest.alias ? `${guest.name} (${guest.alias})` : guest.name || guest.alias || "";
+  guest.name && extraAlias(guest) ? `${guest.name} (${guest.alias})` : guest.name || guest.alias || "";
 
 // "¡Hola, Rocío!" o, sin nombre, "¡Hola!".
 const hola = (guest: Guest) => (guest.name ? `¡Hola, ${guest.name}!` : "¡Hola!");
@@ -157,14 +160,15 @@ function whatsappLink(guest: Guest, message: keyof typeof MESSAGES = "invite") {
   return `https://api.whatsapp.com/send?${params}`;
 }
 
-// "Nombre, teléfono, alias" (o separado por tab, al pegar desde una hoja de cálculo); una persona
-// por línea. El nombre puede ir vacío si hay alias: ", 987654321, Vecina del 502".
+// "Nombre, alias, teléfono" (o separado por tab, al pegar desde una hoja de cálculo); una persona
+// por línea. Sin alias, el alias es el nombre; sin nombre (", Vecina del 502"), queda solo el alias.
+// El teléfono es opcional.
 function parseList(text: string) {
   return text
     .split("\n")
     .map((line) => line.split(/[,\t;]/).map((part) => part.trim()))
-    .filter(([name, , alias]) => name || alias)
-    .map(([name, phone, alias]) => ({ name, phone: phone || undefined, alias: alias || undefined }));
+    .filter(([name, alias]) => name || alias)
+    .map(([name, alias, phone]) => ({ name, alias: alias || name, phone: phone || undefined }));
 }
 
 function status(guest: Guest) {
@@ -386,18 +390,16 @@ export function AdminPanel() {
         <label className="jpa__field">
           <span className="jpa__field-label">Agregar invitados</span>
           <span className="jpa__field-hint">
-            Una persona por línea: <strong>Nombre, teléfono, alias</strong>. El nombre es el del saludo; si no lo sabes,
-            déjalo vacío y la invitación dirá “¡Hola!”. El alias es solo para ti (no sale en la invitación). El teléfono
-            es opcional; sin él, WhatsApp te deja elegir el chat. También puedes pegar columnas desde Excel o Google
-            Sheets.
+            Una persona por línea: <strong>Nombre, alias, teléfono</strong>. El nombre es el del saludo; si no lo sabes,
+            déjalo vacío (empieza la línea con una coma) y la invitación dirá “¡Hola!”. El alias es solo para ti (no
+            sale en la invitación); si no lo pones, es el mismo nombre. El teléfono es opcional; sin él, WhatsApp te
+            deja elegir el chat. También puedes pegar columnas desde Excel o Google Sheets.
           </span>
           <textarea
             value={list}
             onChange={(e) => setList(e.target.value)}
             rows={5}
-            placeholder={
-              "Tía Carmen, 987654321\nRocío, 912345678, Mamá Rocío\n, 998877665, Vecina del 502\nPrima Lucía"
-            }
+            placeholder={"Tía Carmen\nRocío, Mamá Rocío\n, Vecina del 502\nJorge, Abuelo Jorge, 912345678"}
           />
         </label>
         <button type="submit" className="btn btn--primary" disabled={saving || parsed.length === 0}>
@@ -485,7 +487,7 @@ export function AdminPanel() {
                 <div className="jpa-admin__who">
                   <p className="jpa-admin__name">
                     {guest.name || <span className="jpa-admin__noname">Sin nombre</span>}
-                    {guest.alias && <span className="jpa-admin__alias">{guest.alias}</span>}
+                    {extraAlias(guest) && <span className="jpa-admin__alias">{guest.alias}</span>}
                     {guest.possibleShare && (
                       <span
                         className="jpa-admin__share"

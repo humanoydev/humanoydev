@@ -45,7 +45,8 @@ async function readBody(request: Request): Promise<Body | null> {
 }
 
 // Cómo lo ven papá y mamá en los correos: "Rocío (Mamá Rocío)", o solo el nombre o el alias.
-const guestLabel = ({ name, alias }: Guest) => (name && alias ? `${name} (${alias})` : name || alias || "");
+const guestLabel = ({ name, alias }: Guest) =>
+  name && alias && alias !== name ? `${name} (${alias})` : name || alias || "";
 
 // Los tokens son alfanuméricos; cualquier otra cosa ni se consulta.
 async function findGuest(env: Env, token: unknown): Promise<Guest | null> {

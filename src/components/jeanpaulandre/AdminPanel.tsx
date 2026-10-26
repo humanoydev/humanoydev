@@ -9,7 +9,9 @@ import { BABY_NAME, babyShower } from "@/content/jeanpaulandre";
 type Guest = {
   id: number;
   token: string;
+  // El del saludo; vacío si no sabemos su nombre. El alias solo lo ven papá y mamá.
   name: string;
+  alias: string | null;
   phone: string | null;
   createdAt: string;
   visits: number;
@@ -128,15 +130,22 @@ function waPhone(phone: string) {
   return digits.length === 9 && digits.startsWith("9") ? `51${digits}` : digits;
 }
 
+// Cómo se ve en el admin: "Rocío (Mamá Rocío)", o solo el nombre o el alias.
+const label = (guest: Guest) =>
+  guest.name && guest.alias ? `${guest.name} (${guest.alias})` : guest.name || guest.alias || "";
+
+// "¡Hola, Rocío!" o, sin nombre, "¡Hola!".
+const hola = (guest: Guest) => (guest.name ? `¡Hola, ${guest.name}!` : "¡Hola!");
+
 const fecha = babyShower.dateLabel.toLowerCase();
 
 // Mensajes de WhatsApp: la invitación y el recordatorio para quien aún no confirma.
 const MESSAGES = {
   invite: (guest: Guest) =>
-    `¡Hola, ${guest.name}! 🥳 Te invitamos al baby shower de ${BABY_NAME}, el ${fecha}. ` +
+    `${hola(guest)} 🥳 Te invitamos al baby shower de ${BABY_NAME}, el ${fecha}. ` +
     `Aquí está tu invitación: ${inviteLink(guest.token)}`,
   reminder: (guest: Guest) =>
-    `¡Hola, ${guest.name}! 💛 Te recordamos el baby shower de ${BABY_NAME}, el ${fecha}. ` +
+    `${hola(guest)} 💛 Te recordamos el baby shower de ${BABY_NAME}, el ${fecha}. ` +
     `¿Nos acompañas? Confírmanos antes del ${babyShower.rsvpByLabel} aquí: ${inviteLink(guest.token)}`,
 };
 
@@ -148,13 +157,14 @@ function whatsappLink(guest: Guest, message: keyof typeof MESSAGES = "invite") {
   return `https://api.whatsapp.com/send?${params}`;
 }
 
-// "Nombre, teléfono" (o separado por tab, al pegar desde una hoja de cálculo); una persona por línea.
+// "Nombre, teléfono, alias" (o separado por tab, al pegar desde una hoja de cálculo); una persona
+// por línea. El nombre puede ir vacío si hay alias: ", 987654321, Vecina del 502".
 function parseList(text: string) {
   return text
     .split("\n")
     .map((line) => line.split(/[,\t;]/).map((part) => part.trim()))
-    .filter(([name]) => name)
-    .map(([name, phone]) => ({ name, phone: phone || undefined }));
+    .filter(([name, , alias]) => name || alias)
+    .map(([name, phone, alias]) => ({ name, phone: phone || undefined, alias: alias || undefined }));
 }
 
 function status(guest: Guest) {
@@ -175,7 +185,7 @@ function giftSummary(guests: Guest[]) {
     for (const gift of guest.gifts) {
       const row = gifts.get(gift.id) ?? { name: gift.name, max: gift.max, taken: 0, who: [] };
       row.taken += gift.qty;
-      row.who.push(gift.qty > 1 ? `${guest.name} (${gift.qty})` : guest.name);
+      row.who.push(gift.qty > 1 ? `${label(guest)} ×${gift.qty}` : label(guest));
       gifts.set(gift.id, row);
     }
   return [...gifts.values()].sort((a, b) => a.name.localeCompare(b.name, "es"));
@@ -186,6 +196,7 @@ function toCsv(guests: Guest[]) {
   const rows = guests.map((g) =>
     [
       g.name,
+      g.alias,
       g.phone,
       status(g).label,
       g.visits,
@@ -197,7 +208,7 @@ function toCsv(guests: Guest[]) {
       .map(cell)
       .join(","),
   );
-  return ["Nombre,Teléfono,Estado,Visitas,Última visita,Mensaje,Regalos,Link", ...rows].join("\n");
+  return ["Nombre,Alias,Teléfono,Estado,Visitas,Última visita,Mensaje,Regalos,Link", ...rows].join("\n");
 }
 
 async function api(path: string, init?: RequestInit) {
@@ -221,7 +232,7 @@ export function AdminPanel() {
   const [openVisits, setOpenVisits] = useState<number | null>(null);
   const [visits, setVisits] = useState<Record<number, Visit[]>>({});
   // Invitado que se está editando, con lo que va escribiendo.
-  const [editing, setEditing] = useState<{ id: number; name: string; phone: string } | null>(null);
+  const [editing, setEditing] = useState<{ id: number; name: string; alias: string; phone: string } | null>(null);
 
   const load = useCallback(async () => {
     try {
@@ -265,7 +276,7 @@ export function AdminPanel() {
   }
 
   async function remove(guest: Guest) {
-    const question = `¿Eliminar a ${guest.name}? Su link dejará de funcionar y se borran su respuesta y los regalos que apartó.`;
+    const question = `¿Eliminar a ${label(guest)}? Su link dejará de funcionar y se borran su respuesta y los regalos que apartó.`;
     if (!window.confirm(question)) return;
     try {
       await api(`/guests/${guest.id}`, { method: "DELETE" });
@@ -277,12 +288,12 @@ export function AdminPanel() {
 
   async function saveEdit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (!editing?.name.trim()) return;
+    if (!editing?.name.trim() && !editing?.alias.trim()) return;
     setSaving(true);
     try {
       await api(`/guests/${editing.id}`, {
         method: "PATCH",
-        body: JSON.stringify({ name: editing.name, phone: editing.phone }),
+        body: JSON.stringify({ name: editing.name, alias: editing.alias, phone: editing.phone }),
       });
       setEditing(null);
       await load();
@@ -375,14 +386,18 @@ export function AdminPanel() {
         <label className="jpa__field">
           <span className="jpa__field-label">Agregar invitados</span>
           <span className="jpa__field-hint">
-            Una persona por línea: <strong>Nombre, teléfono</strong>. El teléfono es opcional; sin él, WhatsApp te deja
-            elegir el chat. También puedes pegar dos columnas desde Excel o Google Sheets.
+            Una persona por línea: <strong>Nombre, teléfono, alias</strong>. El nombre es el del saludo; si no lo sabes,
+            déjalo vacío y la invitación dirá “¡Hola!”. El alias es solo para ti (no sale en la invitación). El teléfono
+            es opcional; sin él, WhatsApp te deja elegir el chat. También puedes pegar columnas desde Excel o Google
+            Sheets.
           </span>
           <textarea
             value={list}
             onChange={(e) => setList(e.target.value)}
             rows={5}
-            placeholder={"Tía Carmen, 987654321\nAbuelo Jorge, 912345678\nPrima Lucía"}
+            placeholder={
+              "Tía Carmen, 987654321\nRocío, 912345678, Mamá Rocío\n, 998877665, Vecina del 502\nPrima Lucía"
+            }
           />
         </label>
         <button type="submit" className="btn btn--primary" disabled={saving || parsed.length === 0}>
@@ -432,8 +447,16 @@ export function AdminPanel() {
                       value={editing.name}
                       onChange={(e) => setEditing({ ...editing, name: e.target.value })}
                       maxLength={80}
-                      required
+                      placeholder="Vacío: la invitación dice “¡Hola!”"
                       autoFocus
+                    />
+                  </label>
+                  <label>
+                    <span>Alias (solo lo ves tú)</span>
+                    <input
+                      value={editing.alias}
+                      onChange={(e) => setEditing({ ...editing, alias: e.target.value })}
+                      maxLength={80}
                     />
                   </label>
                   <label>
@@ -446,7 +469,11 @@ export function AdminPanel() {
                     />
                   </label>
                   <div className="jpa-admin__actions">
-                    <button type="submit" className="jpa__chip" disabled={saving || !editing.name.trim()}>
+                    <button
+                      type="submit"
+                      className="jpa__chip"
+                      disabled={saving || (!editing.name.trim() && !editing.alias.trim())}
+                    >
                       {saving ? "Guardando…" : "Guardar"}
                     </button>
                     <button type="button" className="jpa__chip" onClick={() => setEditing(null)}>
@@ -457,7 +484,8 @@ export function AdminPanel() {
               ) : (
                 <div className="jpa-admin__who">
                   <p className="jpa-admin__name">
-                    {guest.name}
+                    {guest.name || <span className="jpa-admin__noname">Sin nombre</span>}
+                    {guest.alias && <span className="jpa-admin__alias">{guest.alias}</span>}
                     {guest.possibleShare && (
                       <span
                         className="jpa-admin__share"
@@ -507,7 +535,9 @@ export function AdminPanel() {
                 <button
                   type="button"
                   className="jpa__chip"
-                  onClick={() => setEditing({ id: guest.id, name: guest.name, phone: guest.phone ?? "" })}
+                  onClick={() =>
+                    setEditing({ id: guest.id, name: guest.name, alias: guest.alias ?? "", phone: guest.phone ?? "" })
+                  }
                 >
                   Editar
                 </button>

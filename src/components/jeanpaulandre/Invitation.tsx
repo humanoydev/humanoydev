@@ -90,7 +90,7 @@ export function Invitation() {
       <section aria-labelledby="jpa-invite-title">
         <HeroScene>
           <p className="jpa__pill">Baby shower</p>
-          <p className="jpa__hello">{loading ? " " : invite ? `¡Hola, ${invite.name}!` : "¡Hola!"}</p>
+          <p className="jpa__hello">{loading ? " " : invite?.name ? `¡Hola, ${invite.name}!` : "¡Hola!"}</p>
           <h1 id="jpa-invite-title" className="jpa__invite-title">
             Te invitamos a celebrar la llegada de
             <span className="jpa__name">
@@ -261,8 +261,8 @@ function RsvpForm({ token, name, initial }: { token: string; name: string; initi
             ? ""
             : saved
               ? saved.attending
-                ? `✓ ¡Gracias, ${name}! Ya guardamos tu confirmación. Te esperamos.`
-                : `✓ Gracias por avisarnos, ${name}. Te vamos a extrañar.`
+                ? `✓ ¡Gracias${name && `, ${name}`}! Ya guardamos tu confirmación. Te esperamos.`
+                : `✓ Gracias por avisarnos${name && `, ${name}`}. Te vamos a extrañar.`
               : ""}
       </p>
       {error === "answer" && (

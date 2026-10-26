@@ -20,6 +20,7 @@ export type Venue = {
   photos?: { src: string; alt: string; caption?: string }[];
 };
 export type Rsvp = { attending: boolean; message: string };
+// name: el del saludo; vacío si no sabemos su nombre.
 export type Invite = { name: string; venue: Venue; rsvp: Rsvp | null; gifts: GiftCategory[] };
 
 // Regalo de la lista (src/content/jeanpaulandre-gifts.ts) con lo ya apartado por todos

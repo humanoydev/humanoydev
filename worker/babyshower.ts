@@ -7,10 +7,13 @@
  *
  * Administración (protegida con Cloudflare Access, ver isAdmin):
  *   GET    /api/admin/guests                      → invitados con visitas y respuesta
- *   POST   /api/admin/guests  { guests: [{ name, phone? }] } → agrega invitados con su token
- *   PATCH  /api/admin/guests/:id  { name, phone? } → corrige el nombre y el teléfono (el link no cambia)
+ *   POST   /api/admin/guests  { guests: [{ name, phone?, alias? }] } → agrega invitados con su token
+ *   PATCH  /api/admin/guests/:id  { name, phone?, alias? } → corrige sus datos (el link no cambia)
  *   GET    /api/admin/guests/:id/visits           → cada visita: fecha, navegador, ciudad y país
  *   DELETE /api/admin/guests/:id                  → elimina un invitado (y sus visitas, respuesta y regalos)
+ *
+ * El nombre es el del saludo y puede ir vacío; el alias es solo para papá y mamá (nunca sale en
+ * la invitación). Un invitado necesita al menos uno de los dos.
  *
  * Cada respuesta (no los regalos) manda un aviso por correo a papá y mamá (ver notifyRsvp).
  *
@@ -23,7 +26,7 @@
 
 import { GIFT_LIST } from "../src/content/jeanpaulandre-gifts";
 
-type Guest = { id: number; name: string };
+type Guest = { id: number; name: string; alias: string | null };
 type Body = Record<string, unknown>;
 
 const NO_STORE = { "Cache-Control": "no-store" };
@@ -41,10 +44,13 @@ async function readBody(request: Request): Promise<Body | null> {
   }
 }
 
+// Cómo lo ven papá y mamá en los correos: "Rocío (Mamá Rocío)", o solo el nombre o el alias.
+const guestLabel = ({ name, alias }: Guest) => (name && alias ? `${name} (${alias})` : name || alias || "");
+
 // Los tokens son alfanuméricos; cualquier otra cosa ni se consulta.
 async function findGuest(env: Env, token: unknown): Promise<Guest | null> {
   if (typeof token !== "string" || !/^[A-Za-z0-9]{6,32}$/.test(token)) return null;
-  return env.DB.prepare("SELECT id, name FROM guests WHERE token = ?").bind(token).first<Guest>();
+  return env.DB.prepare("SELECT id, name, alias FROM guests WHERE token = ?").bind(token).first<Guest>();
 }
 
 // Texto corto y simple que manda el navegador (identificador o modelo); si no, null.
@@ -202,7 +208,7 @@ async function saveRsvp(request: Request, env: Env, ctx: ExecutionContext): Prom
     .run();
   // El aviso sale después de responder, sin hacer esperar al invitado.
   ctx.waitUntil(
-    notifyRsvp(env, new URL(request.url).origin, guest.name, body.attending, message.trim().slice(0, 1000)),
+    notifyRsvp(env, new URL(request.url).origin, guestLabel(guest), body.attending, message.trim().slice(0, 1000)),
   );
   return new Response(null, { status: 204, headers: NO_STORE });
 }
@@ -259,7 +265,7 @@ function newToken(): string {
 
 async function listGuests(env: Env): Promise<Response> {
   const { results } = await env.DB.prepare(
-    `SELECT g.id, g.token, g.name, g.phone, g.created_at AS createdAt,
+    `SELECT g.id, g.token, g.name, g.alias, g.phone, g.created_at AS createdAt,
             COUNT(v.id) AS visits, MAX(v.visited_at) AS lastVisit,
             COUNT(DISTINCT COALESCE(v.device_id, v.user_agent)) AS devices,
             COUNT(DISTINCT v.network) AS networks, COUNT(DISTINCT v.city) AS cities,
@@ -290,9 +296,11 @@ async function listGuests(env: Env): Promise<Response> {
   );
 }
 
-// Nombre (el del saludo) y teléfono como se guardan; sin nombre, el invitado no es válido.
+// Nombre (el del saludo, puede ir vacío), alias y teléfono como se guardan. Sin nombre ni alias,
+// el invitado no es válido.
 const cleanGuest = (item: Body | null | undefined) => ({
   name: typeof item?.name === "string" ? item.name.trim().slice(0, 80) : "",
+  alias: typeof item?.alias === "string" ? item.alias.trim().slice(0, 80) || null : null,
   phone: typeof item?.phone === "string" ? item.phone.replace(/[^\d+]/g, "").slice(0, 20) || null : null,
 });
 
@@ -300,13 +308,14 @@ async function addGuests(request: Request, env: Env): Promise<Response> {
   const list = (await readBody(request))?.guests;
   if (!Array.isArray(list) || list.length === 0 || list.length > 300) return json({ error: "invalid" }, 400);
   const guests = list.map(cleanGuest);
-  if (guests.some((guest) => !guest.name)) return json({ error: "invalid" }, 400);
+  if (guests.some((guest) => !guest.name && !guest.alias)) return json({ error: "invalid" }, 400);
 
   await env.DB.batch(
     guests.map((guest) =>
-      env.DB.prepare("INSERT INTO guests (token, name, phone) VALUES (?, ?, ?)").bind(
+      env.DB.prepare("INSERT INTO guests (token, name, alias, phone) VALUES (?, ?, ?, ?)").bind(
         newToken(),
         guest.name,
+        guest.alias,
         guest.phone,
       ),
     ),
@@ -316,9 +325,9 @@ async function addGuests(request: Request, env: Env): Promise<Response> {
 
 async function updateGuest(request: Request, env: Env, id: string): Promise<Response> {
   const guest = cleanGuest(await readBody(request));
-  if (!guest.name) return json({ error: "invalid" }, 400);
-  const { meta } = await env.DB.prepare("UPDATE guests SET name = ?, phone = ? WHERE id = ?")
-    .bind(guest.name, guest.phone, id)
+  if (!guest.name && !guest.alias) return json({ error: "invalid" }, 400);
+  const { meta } = await env.DB.prepare("UPDATE guests SET name = ?, alias = ?, phone = ? WHERE id = ?")
+    .bind(guest.name, guest.alias, guest.phone, id)
     .run();
   if (!meta.changes) return json({ error: "not_found" }, 404);
   return new Response(null, { status: 204, headers: NO_STORE });

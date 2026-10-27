@@ -117,7 +117,20 @@ export function Invitation() {
             </p>
             <div>
               <h2 className="jpa__label">Cuándo</h2>
-              <p className="jpa__card-title">{babyShower.dateLabel}</p>
+              <p className="jpa__card-title">
+                {/* El día y el mes van resaltados: que nadie piense que es sábado. */}
+                {babyShower.dateLabel
+                  .split(new RegExp(`(${babyShower.calendar.weekday}|${babyShower.calendar.month})`, "i"))
+                  .map((part, index) =>
+                    index % 2 ? (
+                      <span key={index} className="jpa__date-mark">
+                        {part}
+                      </span>
+                    ) : (
+                      part
+                    ),
+                  )}
+              </p>
               <p className="jpa__card-text">{babyShower.timeLabel}</p>
               <p className="jpa__countdown-pill">
                 <DaysUntil date={babyShower.date} />

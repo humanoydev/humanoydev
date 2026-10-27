@@ -54,17 +54,36 @@ const sideLabel = (side: Side) => SIDES.find((s) => s.id === side)!.label;
 type Filter =
   "papa" | "mama" | "reenvio" | "todos" | "sin-enviar" | "sin-abrir" | "sin-responder" | "asisten" | "no-asisten";
 
-const FILTERS: { id: Filter; label: string; match: (guest: Guest) => boolean }[] = [
-  { id: "todos", label: "Todos", match: () => true },
-  { id: "papa", label: "De papá", match: (g) => g.side === "papa" || g.side === "ambos" },
-  { id: "mama", label: "De mamá", match: (g) => g.side === "mama" || g.side === "ambos" },
-  { id: "sin-enviar", label: "Sin enviar", match: (g) => !g.sentAt },
-  { id: "sin-abrir", label: "Sin abrir", match: (g) => g.visits === 0 },
-  { id: "sin-responder", label: "Abrieron, sin responder", match: (g) => g.visits > 0 && g.attending === null },
-  { id: "asisten", label: "Asisten", match: (g) => g.attending === true },
-  { id: "no-asisten", label: "No asisten", match: (g) => g.attending === false },
-  { id: "reenvio", label: "Posible reenvío", match: (g) => g.possibleShare },
+// Los filtros se combinan: dentro de un mismo grupo basta con uno ("Asisten" o "No asisten") y
+// entre grupos tienen que cumplirse todos ("De papá" y "Sin enviar"). "Todos" los quita.
+const FILTERS: { id: Filter; label: string; group: string; match: (guest: Guest) => boolean }[] = [
+  { id: "todos", label: "Todos", group: "", match: () => true },
+  { id: "papa", label: "De papá", group: "side", match: (g) => g.side === "papa" || g.side === "ambos" },
+  { id: "mama", label: "De mamá", group: "side", match: (g) => g.side === "mama" || g.side === "ambos" },
+  { id: "sin-enviar", label: "Sin enviar", group: "sent", match: (g) => !g.sentAt },
+  { id: "sin-abrir", label: "Sin abrir", group: "status", match: (g) => g.visits === 0 },
+  {
+    id: "sin-responder",
+    label: "Abrieron, sin responder",
+    group: "status",
+    match: (g) => g.visits > 0 && g.attending === null,
+  },
+  { id: "asisten", label: "Asisten", group: "status", match: (g) => g.attending === true },
+  { id: "no-asisten", label: "No asisten", group: "status", match: (g) => g.attending === false },
+  { id: "reenvio", label: "Posible reenvío", group: "share", match: (g) => g.possibleShare },
 ];
+
+const filterById = (id: Filter) => FILTERS.find((f) => f.id === id)!;
+
+// Si el invitado pasa los filtros elegidos; `skip` deja fuera un grupo (para los contadores).
+const matchesFilters = (guest: Guest, active: Filter[], skip?: string) => {
+  const groups = new Map<string, Filter[]>();
+  for (const id of active) {
+    const { group } = filterById(id);
+    if (group !== skip) groups.set(group, [...(groups.get(group) ?? []), id]);
+  }
+  return [...groups.values()].every((ids) => ids.some((id) => filterById(id).match(guest)));
+};
 
 // D1 guarda las fechas en UTC sin zona ("2026-11-01 18:30:00"); se muestran en hora de Lima.
 function formatDate(value: string) {
@@ -262,7 +281,8 @@ export function AdminPanel() {
   // De quién son los invitados que se van a agregar: se elige antes de agregarlos.
   const [side, setSide] = useState<Side | null>(null);
   const [saving, setSaving] = useState(false);
-  const [filter, setFilter] = useState<Filter>("todos");
+  // Filtros elegidos; vacío es "Todos".
+  const [filters, setFilters] = useState<Filter[]>([]);
   const [search, setSearch] = useState("");
   const [copied, setCopied] = useState<number | null>(null);
   // Invitado con la lista de visitas abierta, y las visitas cargadas de cada uno.
@@ -301,9 +321,21 @@ export function AdminPanel() {
   const parsed = useMemo(() => parseList(list), [list]);
   const gifts = useMemo(() => giftSummary(guests ?? []), [guests]);
   const shown = (guests ?? [])
-    .filter(FILTERS.find((f) => f.id === filter)!.match)
+    .filter((guest) => matchesFilters(guest, filters))
     .filter((guest) => matchesSearch(guest, search));
-  const count = (id: Filter) => (guests ?? []).filter(FILTERS.find((f) => f.id === id)!.match).length;
+  // Totales, sin filtros (para los números de arriba).
+  const count = (id: Filter) => (guests ?? []).filter(filterById(id).match).length;
+  // Cuántos verías con este filtro, junto con los que ya elegiste de los otros grupos.
+  const countWith = (id: Filter) => {
+    if (id === "todos") return guests?.length ?? 0;
+    const { group, match } = filterById(id);
+    return (guests ?? []).filter((g) => match(g) && matchesFilters(g, filters, group)).length;
+  };
+
+  function toggleFilter(id: Filter) {
+    if (id === "todos") return setFilters([]);
+    setFilters((current) => (current.includes(id) ? current.filter((f) => f !== id) : [...current, id]));
+  }
 
   async function add(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -363,7 +395,7 @@ export function AdminPanel() {
     }
   }
 
-  // Al tocar WhatsApp o "Copiar link" se da por enviada. Se marca al toque, sin esperar a la API
+  // Al tocar WhatsApp, "Recordar" o "Copiar link" se da por enviada. Se marca al toque, sin esperar a la API
   // (WhatsApp ya se está abriendo); la API guarda solo la primera vez.
   async function markSent(guest: Guest) {
     if (guest.sentAt) return;
@@ -492,10 +524,10 @@ export function AdminPanel() {
               key={f.id}
               type="button"
               className="jpa__chip"
-              aria-pressed={filter === f.id}
-              onClick={() => setFilter(f.id)}
+              aria-pressed={f.id === "todos" ? filters.length === 0 : filters.includes(f.id)}
+              onClick={() => toggleFilter(f.id)}
             >
-              {f.label} <span className="jpa-admin__count">{guests ? count(f.id) : ""}</span>
+              {f.label} <span className="jpa-admin__count">{guests ? countWith(f.id) : ""}</span>
             </button>
           ))}
         </div>
@@ -518,8 +550,8 @@ export function AdminPanel() {
           {guests.length === 0
             ? "Todavía no hay invitados. Agrega la lista arriba."
             : search.trim()
-              ? `Nadie coincide con “${search.trim()}”${filter === "todos" ? "" : " en este filtro"}.`
-              : "Nadie en este filtro."}
+              ? `Nadie coincide con “${search.trim()}”${filters.length ? " con estos filtros" : ""}.`
+              : "Nadie con estos filtros."}
         </p>
       )}
 
@@ -644,6 +676,7 @@ export function AdminPanel() {
                     href={whatsappLink(guest, "reminder")}
                     target="_blank"
                     rel="noopener noreferrer"
+                    onClick={() => markSent(guest)}
                   >
                     Recordar
                   </a>

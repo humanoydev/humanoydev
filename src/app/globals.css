@@ -493,7 +493,9 @@ a.jpa__brand:hover { color: var(--accent); }
 .jpa__calendar > span { display: block; }
 .jpa__calendar-month { padding: 10px 8px; background: var(--accent); color: #fff; font-size: 17px; letter-spacing: 0.08em; text-transform: uppercase; }
 .jpa__calendar-day { padding-top: 6px; font-size: 92px; line-height: 1; color: var(--accent); }
-.jpa__calendar-weekday { padding: 4px 8px 16px; font-size: 18px; color: var(--ink-soft); }
+.jpa__calendar-weekday { margin: 4px auto 14px; padding: 2px 12px; width: fit-content; border-radius: 8px; background: #f8d64e; font-size: 20px; color: var(--accent); }
+/* Resaltador amarillo, como de plumón, detrás de "Domingo" y "noviembre". */
+.jpa__date-mark { padding: 0 6px; border-radius: 8px; background: #f8d64e; color: var(--accent); box-decoration-break: clone; -webkit-box-decoration-break: clone; }
 @media (max-width: 600px) {
   .jpa__when { grid-template-columns: 1fr; gap: 24px; padding: 30px 22px; }
   .jpa__calendar { width: 140px; }

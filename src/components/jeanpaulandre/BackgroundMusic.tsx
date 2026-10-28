@@ -1,9 +1,11 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { midi, type Note, type Song, type Voice } from "./music";
 
-// Musiquita de fondo: un vals original de cajita de música, sintetizada con Web Audio
-// (sin archivos ni licencias). Los navegadores no dejan sonar audio hasta que la persona
+// Musiquita de fondo con sonido de cajita de música, sintetizada con Web Audio (sin archivos ni
+// licencias). Por defecto suena un vals original (la invitación); la portada le pasa la sonata
+// de Mozart (sonata.ts). Los navegadores no dejan sonar audio hasta que la persona
 // toca la página, así que arranca con el primer toque o tecla. El botón la silencia y la
 // preferencia queda guardada en el navegador.
 
@@ -40,15 +42,7 @@ const PATTERN: [number, number[]][] = [
   [4, [2, 3]],
 ];
 
-type Voice = "melody" | "bass" | "chord";
-type Note = { at: number; midi: number; voice: Voice };
-
-const SEMITONES: Record<string, number> = { C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11 };
-// "Bb3" → 58 (número MIDI). La alteración es opcional.
-const midi = (name: string) =>
-  12 * (Number(name.slice(-1)) + 1) + SEMITONES[name[0]] + (name[1] === "b" ? -1 : name[1] === "#" ? 1 : 0);
-
-function buildSong() {
+function buildWaltz(): Song {
   const notes: Note[] = [];
   let at = 0;
   for (const token of MELODY.split(/[\s|]+/).filter(Boolean)) {
@@ -63,8 +57,10 @@ function buildSong() {
       ),
     ),
   );
-  return { notes: notes.sort((a, b) => a.at - b.at), length: CHORDS.length * BAR };
+  return { notes: notes.sort((a, b) => a.at - b.at), length: CHORDS.length * BAR, bar: BAR, step: 60 / TEMPO / 2 };
 }
+
+const WALTZ = buildWaltz();
 
 // Sonido de cajita: senos con un parcial inarmónico (campanita) que se apagan rápido.
 const VOICES: Record<Voice, { peak: number; decay: number; partials: [number, number][] }> = {
@@ -117,7 +113,7 @@ function savePreference(on: boolean) {
   } catch {}
 }
 
-export function BackgroundMusic() {
+export function BackgroundMusic({ song = WALTZ }: { song?: Song }) {
   const [state, setState] = useState<"off" | "waiting" | "on">("off");
   const toggleRef = useRef<() => void>(() => {});
 
@@ -154,8 +150,7 @@ export function BackgroundMusic() {
       };
       if (audio.state === "running") fadeIn();
 
-      const song = buildSong();
-      const step = 60 / TEMPO / 2;
+      const { step } = song;
       let index = 0;
       let loopStart = audio.currentTime + 0.1;
       // Programa las notas de los próximos 0,4 s (con el contexto en pausa, el reloj no avanza).
@@ -168,11 +163,11 @@ export function BackgroundMusic() {
             playNote(audio, bus, note, time);
             // El bajo marca el tiempo fuerte de cada compás: se anuncia con el momento en que se
             // oirá (sumando la latencia de la salida de audio).
-            if (note.voice === "bass" && note.at % BAR === 0) {
+            if (note.voice === "bass" && note.at % song.bar === 0) {
               const latency = audio.outputLatency || audio.baseLatency || 0;
               const detail: BarDetail = {
                 at: performance.now() + (time - audio.currentTime + latency) * 1000,
-                bar: BAR * step * 1000,
+                bar: song.bar * step * 1000,
               };
               window.dispatchEvent(new CustomEvent(BAR_EVENT, { detail }));
             }
@@ -220,7 +215,7 @@ export function BackgroundMusic() {
       document.removeEventListener("visibilitychange", onVisibility);
       ctx?.close();
     };
-  }, []);
+  }, [song]);
 
   const on = state === "on";
   return (

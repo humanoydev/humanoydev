@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import { DaysUntil } from "@/components/DaysUntil";
+import { BackgroundMusic } from "@/components/jeanpaulandre/BackgroundMusic";
 import { Star } from "@/components/jeanpaulandre/Doodles";
 import { Reveal } from "@/components/jeanpaulandre/Reveal";
+import { SONATA } from "@/components/jeanpaulandre/sonata";
 import { UltrasoundVideo } from "@/components/jeanpaulandre/UltrasoundVideo";
 import { BABY_NAME, chapters, letter, ogImage, ultrasound } from "@/content/jeanpaulandre";
 import { JEANPAULANDRE_URL, SITE_URL } from "@/content/site";
@@ -165,6 +167,8 @@ export default function JeanPaulAndrePage() {
         <p>Hecha con amor por papá y mamá, 2026</p>
         <a href={SITE_URL}>humanoydev.com</a>
       </footer>
+
+      <BackgroundMusic song={SONATA} />
     </div>
   );
 }

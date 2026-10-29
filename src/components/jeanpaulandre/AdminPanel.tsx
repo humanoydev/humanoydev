@@ -384,6 +384,18 @@ export function AdminPanel() {
     }
   }
 
+  // Para quien avisó por WhatsApp o en persona que no irá.
+  async function markNotAttending(guest: Guest) {
+    if (!window.confirm(`¿Anotar que ${label(guest)} no irá? Si cambia de idea, puede responder en su invitación.`))
+      return;
+    try {
+      await api(`/guests/${guest.id}/rsvp`, { method: "PUT", body: JSON.stringify({ attending: false }) });
+      await load();
+    } catch (e) {
+      setError((e as Error).message);
+    }
+  }
+
   async function toggleVisits(guest: Guest) {
     if (openVisits === guest.id) return setOpenVisits(null);
     setOpenVisits(guest.id);
@@ -684,6 +696,11 @@ export function AdminPanel() {
                 <button type="button" className="jpa__chip" onClick={() => copy(guest)}>
                   {copied === guest.id ? "¡Copiado!" : "Copiar link"}
                 </button>
+                {guest.attending !== false && (
+                  <button type="button" className="jpa__chip" onClick={() => markNotAttending(guest)}>
+                    No irá
+                  </button>
+                )}
                 <button
                   type="button"
                   className="jpa__chip"

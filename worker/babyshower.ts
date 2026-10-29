@@ -10,6 +10,7 @@
  *   POST   /api/admin/guests  { guests: [{ name, phone?, alias?, side? }] } → agrega invitados con su token
  *   PATCH  /api/admin/guests/:id  { name, phone?, alias?, side? } → corrige sus datos (el link no cambia)
  *   POST   /api/admin/guests/:id/sent             → marca la invitación como enviada (guarda la primera vez)
+ *   PUT    /api/admin/guests/:id/rsvp  { attending } → anota la respuesta que dio por otro lado (sin correo)
  *   GET    /api/admin/guests/:id/visits           → cada visita: fecha, navegador, ciudad y país
  *   DELETE /api/admin/guests/:id                  → elimina un invitado (y sus visitas, respuesta y regalos)
  *
@@ -346,6 +347,21 @@ async function markSent(env: Env, id: string): Promise<Response> {
   return new Response(null, { status: 204, headers: NO_STORE });
 }
 
+// Respuesta que el invitado dio por WhatsApp o en persona. Si ya había dejado un mensaje, se queda.
+// Él puede cambiarla después desde su invitación.
+async function setRsvp(request: Request, env: Env, id: string): Promise<Response> {
+  const attending = (await readBody(request))?.attending;
+  if (typeof attending !== "boolean") return json({ error: "invalid" }, 400);
+  const { meta } = await env.DB.prepare(
+    `INSERT INTO rsvps (guest_id, attending, updated_at) SELECT id, ?, datetime('now') FROM guests WHERE id = ?
+     ON CONFLICT (guest_id) DO UPDATE SET attending = excluded.attending, updated_at = excluded.updated_at`,
+  )
+    .bind(attending ? 1 : 0, id)
+    .run();
+  if (!meta.changes) return json({ error: "not_found" }, 404);
+  return new Response(null, { status: 204, headers: NO_STORE });
+}
+
 async function listVisits(env: Env, id: string): Promise<Response> {
   const { results } = await env.DB.prepare(
     `SELECT visited_at AS visitedAt, user_agent AS userAgent, city, country,
@@ -372,9 +388,10 @@ async function handleAdmin(request: Request, env: Env, url: URL): Promise<Respon
   if (!(await isAdmin(request, env, url))) return json({ error: "forbidden" }, 403);
   if (url.pathname === "/api/admin/guests" && request.method === "GET") return listGuests(env);
   if (url.pathname === "/api/admin/guests" && request.method === "POST") return addGuests(request, env);
-  const match = /^\/api\/admin\/guests\/(\d+)(\/visits|\/sent)?$/.exec(url.pathname);
+  const match = /^\/api\/admin\/guests\/(\d+)(\/visits|\/sent|\/rsvp)?$/.exec(url.pathname);
   if (match?.[2] === "/visits" && request.method === "GET") return listVisits(env, match[1]);
   if (match?.[2] === "/sent" && request.method === "POST") return markSent(env, match[1]);
+  if (match?.[2] === "/rsvp" && request.method === "PUT") return setRsvp(request, env, match[1]);
   if (match && !match[2] && request.method === "PATCH") return updateGuest(request, env, match[1]);
   if (match && !match[2] && request.method === "DELETE") return deleteGuest(env, match[1]);
   return json({ error: "not_found" }, 404);

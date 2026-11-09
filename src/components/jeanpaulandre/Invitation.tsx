@@ -235,7 +235,6 @@ function RsvpForm({ token, name, initial }: { token: string; name: string; initi
   return (
     <div className="jpa__card jpa__card--mint">
       <h2 className="jpa__card-title">¿Nos acompañas?</h2>
-      <p className="jpa__card-text">Toca tu respuesta antes del {babyShower.rsvpByLabel}.</p>
       <fieldset className="jpa__choices" disabled={saving === "answer"}>
         <legend className="sr-only">Tu respuesta</legend>
         {/* Al elegir "Sí" el corazón late y suelta corazoncitos; al elegir "No", la nube llueve. */}
